@@ -13,7 +13,15 @@ export interface GitCommand {
   name: string;
   description: string;
   syntax: string;
-  category: "basics" | "branching" | "remote" | "info" | "undoing";
+category:
+  | "basics"
+  | "branching"
+  | "remote"
+  | "info"
+  | "undoing"
+  | "workflow"
+  | "stash"
+  | "merge-rebase";
   uses: string[];
   variations: CommandVariation[];
   examples: CommandExample[];
@@ -28,6 +36,10 @@ export const categoryLabels: Record<string, string> = {
   remote: "Remoto",
   info: "Informação",
   undoing: "Desfazer",
+
+  workflow: "Workflow",
+  stash: "Stash",
+  "merge-rebase": "Merge/Rebase",
 };
 
 export const commands: GitCommand[] = [
@@ -338,6 +350,409 @@ export const commands: GitCommand[] = [
     relatedCommands: ["commit", "checkout", "stash"],
     deepDive: "O git reset move o ponteiro HEAD para um commit anterior. --soft mantém tudo no staging, --mixed (padrão) mantém no working directory, --hard descarta tudo. CUIDADO com --hard, pois as alterações são perdidas permanentemente.",
   },
+  {
+  id: "fetch",
+  name: "git fetch",
+  description: "Baixa alterações do repositório remoto sem aplicar na sua branch atual.",
+  syntax: "git fetch [remoto]",
+  category: "remote",
+  uses: [
+    "Atualizar referências do remoto",
+    "Ver mudanças antes de integrar"
+  ],
+  variations: [
+    { command: "git fetch", description: "Busca do remoto padrão (origin)" },
+    { command: "git fetch origin", description: "Busca apenas do origin" },
+    { command: "git fetch --all", description: "Busca de todos os remotos" }
+  ],
+  examples: [
+    { code: "git fetch origin", description: "Atualiza refs do origin" }
+  ],
+  whenNotToUse: [
+    "Se você já quer integrar automaticamente (use git pull)"
+  ],
+  relatedCommands: ["pull", "remote", "log"]
+},
+{
+  id: "diff",
+  name: "git diff",
+  description: "Mostra as diferenças entre arquivos, commits ou branches.",
+  syntax: "git diff [opções]",
+  category: "info",
+  uses: [
+    "Revisar mudanças antes de commitar",
+    "Comparar branches ou commits"
+  ],
+  variations: [
+    { command: "git diff", description: "Diferenças não adicionadas (unstaged)" },
+    { command: "git diff --staged", description: "Diferenças já adicionadas (staged)" },
+    { command: "git diff main..feature", description: "Compara duas branches" }
+  ],
+  examples: [
+    { code: "git diff", description: "Ver mudanças locais" },
+    { code: "git diff --staged", description: "Ver o que será commitado" }
+  ],
+  whenNotToUse: [
+    "Se você quer ver histórico completo (use git log)"
+  ],
+  relatedCommands: ["status", "add", "log"]
+},
+{
+  id: "stash",
+  name: "git stash",
+  description: "Salva temporariamente mudanças locais sem fazer commit.",
+  syntax: "git stash [opções]",
+  category: "undoing",
+  uses: [
+    "Trocar de branch sem commitar mudanças",
+    "Guardar trabalho em progresso (WIP)"
+  ],
+  variations: [
+    { command: "git stash", description: "Salva mudanças atuais" },
+    { command: "git stash list", description: "Lista todos os stashes" },
+    { command: "git stash pop", description: "Aplica e remove o último stash" },
+    { command: "git stash apply", description: "Aplica sem remover do stash" }
+  ],
+  examples: [
+    { code: "git stash", description: "Guardar mudanças temporariamente" },
+    { code: "git stash pop", description: "Recuperar mudanças salvas" }
+  ],
+  whenNotToUse: [
+    "Se o código já está pronto para commit"
+  ],
+  relatedCommands: ["checkout", "reset", "clean"]
+},
+{
+  id: "rebase",
+  name: "git rebase",
+  description: "Reaplica commits em cima de outra base, reescrevendo o histórico.",
+  syntax: "git rebase [branch]",
+  category: "branching",
+  uses: [
+    "Manter histórico linear",
+    "Atualizar branch de feature com a main"
+  ],
+  variations: [
+    { command: "git rebase main", description: "Rebase da branch atual sobre main" },
+    { command: "git rebase -i HEAD~3", description: "Rebase interativo dos últimos 3 commits" },
+    { command: "git rebase --continue", description: "Continuar após resolver conflitos" },
+    { command: "git rebase --abort", description: "Cancelar o rebase" }
+  ],
+  examples: [
+    { code: "git fetch origin\ngit rebase origin/main", description: "Atualizar branch com main remota" }
+  ],
+  whenNotToUse: [
+    "Em commits já publicados e usados por outras pessoas"
+  ],
+  relatedCommands: ["merge", "log", "cherry-pick"]
+},
+{
+  id: "cherry-pick",
+  name: "git cherry-pick",
+  description: "Aplica um commit específico em outra branch.",
+  syntax: "git cherry-pick <commit>",
+  category: "branching",
+  uses: [
+    "Levar um fix específico para outra branch",
+    "Aplicar apenas um commit isolado"
+  ],
+  variations: [
+    { command: "git cherry-pick <sha>", description: "Aplica um commit específico" },
+    { command: "git cherry-pick <sha1> <sha2>", description: "Aplica múltiplos commits" },
+    { command: "git cherry-pick --continue", description: "Continuar após conflito" },
+    { command: "git cherry-pick --abort", description: "Cancelar operação" }
+  ],
+  examples: [
+    { code: "git cherry-pick a1b2c3d", description: "Aplicar commit específico" }
+  ],
+  whenNotToUse: [
+    "Se você quer integrar uma branch inteira (use merge ou rebase)"
+  ],
+  relatedCommands: ["merge", "rebase", "log"]
+},
+{
+  id: "revert",
+  name: "git revert",
+  description: "Cria um novo commit que desfaz as alterações de um commit anterior.",
+  syntax: "git revert <commit>",
+  category: "undoing",
+  uses: [
+    "Desfazer commits já publicados com segurança",
+    "Manter histórico claro sem reescrever commits"
+  ],
+  variations: [
+    { command: "git revert <sha>", description: "Reverte um commit específico" },
+    { command: "git revert HEAD", description: "Reverte o último commit" },
+    { command: "git revert --no-commit <sha>", description: "Reverte sem criar commit automático" }
+  ],
+  examples: [
+    { code: "git revert HEAD", description: "Desfazer o último commit com um novo commit de reversão" }
+  ],
+  whenNotToUse: [
+    "Se o commit ainda não foi publicado e você quer remover do histórico (use reset)"
+  ],
+  relatedCommands: ["reset", "reflog", "log"]
+},
+{
+  id: "tag",
+  name: "git tag",
+  description: "Cria e gerencia tags para marcar versões no histórico.",
+  syntax: "git tag [nome]",
+  category: "info",
+  uses: [
+    "Marcar releases (ex: v1.0.0)",
+    "Listar versões do projeto"
+  ],
+  variations: [
+    { command: "git tag", description: "Lista todas as tags" },
+    { command: "git tag v1.0.0", description: "Cria uma tag leve no commit atual" },
+    { command: "git tag -a v1.0.0 -m \"mensagem\"", description: "Cria tag anotada" },
+    { command: "git push origin --tags", description: "Envia tags para o remoto" }
+  ],
+  examples: [
+    { code: "git tag -a v2.0.0 -m \"Release 2.0\"", description: "Criar tag anotada" },
+    { code: "git push origin --tags", description: "Publicar tags no remoto" }
+  ],
+  whenNotToUse: [
+    "Se você precisa continuar desenvolvimento (use branch)"
+  ],
+  relatedCommands: ["show", "log", "push"]
+},
+{
+  id: "show",
+  name: "git show",
+  description: "Mostra detalhes completos de um commit, tag ou objeto.",
+  syntax: "git show [ref]",
+  category: "info",
+  uses: [
+    "Ver detalhes de um commit específico",
+    "Inspecionar alterações de uma tag"
+  ],
+  variations: [
+    { command: "git show HEAD", description: "Mostra o último commit" },
+    { command: "git show <sha>", description: "Mostra commit específico" },
+    { command: "git show v1.0.0", description: "Mostra detalhes de uma tag" }
+  ],
+  examples: [
+    { code: "git show HEAD", description: "Ver detalhes do último commit" }
+  ],
+  whenNotToUse: [
+    "Se você quer apenas listar commits (use git log)"
+  ],
+  relatedCommands: ["log", "diff", "tag"]
+},
+{
+  id: "reflog",
+  name: "git reflog",
+  description: "Mostra o histórico de movimentações do HEAD (útil para recuperar estados perdidos).",
+  syntax: "git reflog",
+  category: "undoing",
+  uses: [
+    "Recuperar commits após reset ou rebase",
+    "Encontrar estados anteriores do projeto"
+  ],
+  variations: [
+    { command: "git reflog", description: "Lista movimentações do HEAD" },
+    { command: "git reflog --date=relative", description: "Mostra datas relativas" }
+  ],
+  examples: [
+    { code: "git reflog", description: "Encontrar commit perdido" },
+    { code: "git reset --hard HEAD@{2}", description: "Voltar para estado anterior" }
+  ],
+  whenNotToUse: [
+    "Se você quer apenas ver histórico normal (use git log)"
+  ],
+  relatedCommands: ["reset", "rebase", "log"]
+},
+{
+  id: "blame",
+  name: "git blame",
+  description: "Mostra quem alterou cada linha de um arquivo e em qual commit.",
+  syntax: "git blame <arquivo>",
+  category: "info",
+  uses: [
+    "Descobrir quem modificou uma linha específica",
+    "Investigar quando uma alteração foi feita"
+  ],
+  variations: [
+    { command: "git blame arquivo.ts", description: "Mostra autoria por linha" },
+    { command: "git blame -L 10,40 arquivo.ts", description: "Limita intervalo de linhas" },
+    { command: "git blame -w arquivo.ts", description: "Ignora mudanças só de whitespace" }
+  ],
+  examples: [
+    { code: "git blame src/app.ts", description: "Ver autoria linha por linha" }
+  ],
+  whenNotToUse: [
+    "Se você quer ver mudanças agrupadas por commit (use git log -p)"
+  ],
+  relatedCommands: ["log", "show", "diff"]
+},
+{
+  id: "clean",
+  name: "git clean",
+  description: "Remove arquivos não rastreados (untracked) do diretório.",
+  syntax: "git clean -f",
+  category: "undoing",
+  uses: [
+    "Remover arquivos não versionados",
+    "Limpar arquivos gerados (build, cache)"
+  ],
+  variations: [
+    { command: "git clean -n", description: "Mostra o que seria removido (dry-run)" },
+    { command: "git clean -f", description: "Remove arquivos não rastreados" },
+    { command: "git clean -fd", description: "Remove arquivos e diretórios não rastreados" },
+    { command: "git clean -fx", description: "Remove inclusive arquivos ignorados (.gitignore)" }
+  ],
+  examples: [
+    { code: "git clean -n", description: "Ver o que será apagado" },
+    { code: "git clean -fd", description: "Limpar diretórios e arquivos untracked" }
+  ],
+  whenNotToUse: [
+    "Se você tem arquivos importantes não versionados",
+    "Sem rodar antes o -n para conferir"
+  ],
+  relatedCommands: ["status", "reset", "stash"]
+},
+{
+  id: "rm",
+  name: "git rm",
+  description: "Remove arquivos do repositório e do stage.",
+  syntax: "git rm <arquivo>",
+  category: "basics",
+  uses: [
+    "Remover arquivos versionados",
+    "Apagar arquivos do repositório corretamente"
+  ],
+  variations: [
+    { command: "git rm arquivo.txt", description: "Remove arquivo do repo e do disco" },
+    { command: "git rm --cached arquivo.txt", description: "Remove do repo mas mantém no disco" },
+    { command: "git rm -r pasta/", description: "Remove diretório recursivamente" }
+  ],
+  examples: [
+    { code: "git rm config.json", description: "Remover arquivo versionado" }
+  ],
+  whenNotToUse: [
+    "Se o arquivo ainda não foi adicionado ao Git"
+  ],
+  relatedCommands: ["add", "reset", "restore"]
+},
+
+{
+  id: "mv",
+  name: "git mv",
+  description: "Move ou renomeia arquivos rastreados pelo Git.",
+  syntax: "git mv <origem> <destino>",
+  category: "basics",
+  uses: [
+    "Renomear arquivos mantendo histórico",
+    "Mover arquivos entre pastas"
+  ],
+  variations: [
+    { command: "git mv antigo.txt novo.txt", description: "Renomeia arquivo" },
+    { command: "git mv arquivo.txt pasta/", description: "Move arquivo para pasta" }
+  ],
+  examples: [
+    { code: "git mv app.js src/app.js", description: "Mover arquivo para nova pasta" }
+  ],
+  whenNotToUse: [
+    "Se o arquivo não está sendo rastreado pelo Git"
+  ],
+  relatedCommands: ["add", "rm", "status"]
+},
+{
+  id: "restore",
+  name: "git restore",
+  description: "Restaura arquivos do stage ou de um commit específico.",
+  syntax: "git restore <arquivo>",
+  category: "undoing",
+  uses: [
+    "Desfazer mudanças locais",
+    "Remover arquivo do stage"
+  ],
+  variations: [
+    { command: "git restore arquivo.txt", description: "Descarta mudanças locais" },
+    { command: "git restore --staged arquivo.txt", description: "Remove do stage" },
+    { command: "git restore --source=HEAD~1 arquivo.txt", description: "Restaura versão de commit anterior" }
+  ],
+  examples: [
+    { code: "git restore --staged index.js", description: "Tirar arquivo do stage" }
+  ],
+  whenNotToUse: [
+    "Se você quer remover o commit inteiro (use reset ou revert)"
+  ],
+  relatedCommands: ["reset", "checkout", "revert"]
+},
+{
+  id: "bisect",
+  name: "git bisect",
+  description: "Ajuda a encontrar qual commit introduziu um bug usando busca binária.",
+  syntax: "git bisect [start|good|bad]",
+  category: "info",
+  uses: [
+    "Descobrir qual commit quebrou o projeto",
+    "Depuração eficiente em históricos grandes"
+  ],
+  variations: [
+    { command: "git bisect start", description: "Inicia processo de bisect" },
+    { command: "git bisect bad", description: "Marca commit atual como ruim" },
+    { command: "git bisect good <sha>", description: "Marca commit como bom" },
+    { command: "git bisect reset", description: "Finaliza o bisect" }
+  ],
+  examples: [
+    { code: "git bisect start\ngit bisect bad\ngit bisect good v1.0.0", description: "Iniciar investigação de bug" }
+  ],
+  whenNotToUse: [
+    "Se você já sabe exatamente qual commit causou o problema"
+  ],
+  relatedCommands: ["log", "revert", "checkout"]
+},
+{
+  id: "worktree",
+  name: "git worktree",
+  description: "Permite ter múltiplas branches abertas ao mesmo tempo em diretórios diferentes.",
+  syntax: "git worktree add <caminho> <branch>",
+  category: "branching",
+  uses: [
+    "Trabalhar em múltiplas branches simultaneamente",
+    "Evitar ficar trocando de branch no mesmo diretório"
+  ],
+  variations: [
+    { command: "git worktree add ../nova-feature feature-branch", description: "Criar novo diretório com branch" },
+    { command: "git worktree list", description: "Listar worktrees existentes" },
+    { command: "git worktree remove <caminho>", description: "Remover worktree" }
+  ],
+  examples: [
+    { code: "git worktree add ../hotfix hotfix-branch", description: "Abrir hotfix em outro diretório" }
+  ],
+  whenNotToUse: [
+    "Se você só precisa trocar de branch normalmente"
+  ],
+  relatedCommands: ["branch", "checkout", "switch"]
+},
+{
+  id: "submodule",
+  name: "git submodule",
+  description: "Gerencia repositórios dentro de outros repositórios.",
+  syntax: "git submodule [add|update|init]",
+  category: "remote",
+  uses: [
+    "Incluir dependências versionadas",
+    "Gerenciar projetos externos dentro do seu repo"
+  ],
+  variations: [
+    { command: "git submodule add <repo-url>", description: "Adicionar submódulo" },
+    { command: "git submodule update --init --recursive", description: "Inicializar e atualizar submódulos" },
+    { command: "git submodule foreach git pull", description: "Atualizar todos submódulos" }
+  ],
+  examples: [
+    { code: "git submodule add https://github.com/user/lib.git", description: "Adicionar biblioteca como submódulo" }
+  ],
+  whenNotToUse: [
+    "Se você pode usar gerenciador de pacotes (npm, pip, etc.)"
+  ],
+  relatedCommands: ["clone", "pull", "fetch"]
+},
+
 ];
 
 export function getCommandById(id: string): GitCommand | undefined {

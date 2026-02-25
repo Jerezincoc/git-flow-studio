@@ -1,73 +1,114 @@
-# Welcome to your Lovable project
+🚀 Git Flow Studio
+<p align="center"> <strong>Interactive Git Command Documentation</strong><br/> A modern, structured and practical reference for everyday Git usage. </p> <p align="center"> <img src="https://img.shields.io/badge/React-18-blue?logo=react" /> <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" /> <img src="https://img.shields.io/badge/Vite-Build-purple?logo=vite" /> <img src="https://img.shields.io/badge/Status-Active-success" /> <img src="https://img.shields.io/badge/License-MIT-green" /> </p>
+✨ About The Project
 
-## Project info
+Git Flow Studio is a modern, interactive Git documentation platform built to provide:
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+📘 Clear command explanations
 
-## How can I edit this code?
+🔎 Real-world usage examples
 
-There are several ways of editing your application.
+🧠 Practical “when not to use” guidance
 
-**Use Lovable**
+🏷 Organized categories for fast filtering
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+⚡ Instant search functionality
 
-Changes made via Lovable will be committed automatically to this repo.
+Designed to be both a learning tool and a professional day-to-day reference.
 
-**Use your preferred IDE**
+🖥️ Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Organized by categories (Basics, Branching, Remote, Info, Undoing)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Advanced commands included (rebase, bisect, worktree, submodule, etc.)
 
-Follow these steps:
+Syntax + examples + variations
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Related commands cross-linking
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Clean UI
 
-# Step 3: Install the necessary dependencies.
-npm i
+Fast search dialog
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+🛠 Tech Stack
+Technology	Purpose
+React	UI rendering
+TypeScript	Type safety
+Vite	Build tool
+TailwindCSS	Styling
+Component Architecture	Scalability
+📦 Installation
+Clone the repository
+git clone https://github.com/Jerezincoc/git-flow-studio.git
+cd git-flow-studio
+Install dependencies
+npm install
+Run development server
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+Open in browser:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+http://localhost:5173
+🏗 Production Build
+npm run build
+npm run preview
+📁 Project Structure
+src/
+ ├── components/       # Reusable UI components
+ ├── data/             # Git commands source file
+ ├── pages/            # Main application pages
+ ├── App.tsx
+ └── main.tsx
+➕ Adding New Commands
 
-**Use GitHub Codespaces**
+All commands are defined in:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+src/data/commands.ts
 
-## What technologies are used for this project?
+Simply add a new object inside the commands array:
 
-This project is built with:
+{
+  id: "example",
+  name: "git example",
+  description: "Description here",
+  syntax: "git example",
+  category: "basics",
+  uses: [],
+  variations: [],
+  examples: [],
+  whenNotToUse: [],
+  relatedCommands: []
+}
+🎯 Vision
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The goal is to evolve Git Flow Studio into:
 
-## How can I deploy this project?
+A complete Git reference hub
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+A learning companion for developers
 
-## Can I connect a custom domain to my Lovable project?
+A fast lookup tool for professionals
 
-Yes, you can!
+A structured Git knowledge base
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+🚀 Future Improvements
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Multi-tag system
+
+Difficulty levels (Beginner / Intermediate / Advanced)
+
+Command comparison mode
+
+Deployment pipeline
+
+Internationalization (EN / PT)
+
+📜 License
+
+MIT License — free to use, modify and distribute.
+
+👤 Author
+
+Developed by Jerezincoc
+
+If you like the project, consider ⭐ starring the repository.
