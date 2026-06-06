@@ -11,7 +11,7 @@ export default function Problems() {
         <p className="text-muted-foreground mb-8">Soluções passo a passo para situações reais do dia a dia com Git.</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl">
         {problems.map((p, i) => (
           <motion.div
             key={p.id}
