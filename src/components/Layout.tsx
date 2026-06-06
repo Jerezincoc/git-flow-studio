@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { GitBranch, Terminal, AlertTriangle, BookOpen, Menu, Home } from "lucide-react";
+import { GitBranch, Terminal, AlertTriangle, BookOpen, Menu } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const navItems = [
-  { label: "Início", path: "/", icon: Home },
+  { label: "Guia", path: "/guide", icon: BookOpen },
   { label: "Comandos", path: "/commands", icon: Terminal },
   { label: "Mapa Git", path: "/map", icon: GitBranch },
   { label: "Problemas", path: "/problems", icon: AlertTriangle },
-  { label: "Guia", path: "/guide", icon: BookOpen },
 ];
 
 export function Layout() {
@@ -52,6 +51,9 @@ export function Layout() {
             <Link to="/" className="flex items-center gap-2 font-bold text-lg">
               <GitBranch className="h-5 w-5 text-primary" />
               <span className="gradient-text">GitDoc</span>
+              <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded-md leading-none">
+                beta
+              </span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               <NavLinks />

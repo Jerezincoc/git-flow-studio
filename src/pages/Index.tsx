@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FolderPlus, Save, Upload, GitBranch, Undo, Wrench, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  FolderPlus, Save, Upload, GitBranch, Undo, Wrench,
+  ArrowRight, ChevronDown, ChevronUp, Terminal, AlertTriangle, BookOpen, Map,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GitFlowMap } from "@/components/GitFlowMap";
 import { CopyButton } from "@/components/CopyButton";
 import { useState } from "react";
 
@@ -75,6 +77,33 @@ const objectives: Objective[] = [
   },
 ];
 
+const features = [
+  {
+    icon: BookOpen,
+    label: "Guia",
+    description: "Aprenda Git do zero com um guia passo a passo",
+    path: "/guide",
+  },
+  {
+    icon: Terminal,
+    label: "Comandos",
+    description: "Referência completa de comandos com exemplos copiáveis",
+    path: "/commands",
+  },
+  {
+    icon: Map,
+    label: "Mapa Git",
+    description: "Visualize o fluxo Working Directory → Remote de forma interativa",
+    path: "/map",
+  },
+  {
+    icon: AlertTriangle,
+    label: "Problemas",
+    description: "Soluções prontas para os erros mais comuns do Git",
+    path: "/problems",
+  },
+];
+
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08 } },
@@ -96,13 +125,13 @@ export default function Index() {
             variants={fadeUp}
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4"
           >
-            <span className="gradient-text">Git Visual Doc</span>
+            <span className="gradient-text">Aprenda Git</span>
+            <br />
+            <span className="text-foreground">sem ler documentação</span>
           </motion.h1>
-          <motion.p variants={fadeUp} className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
-            Interactive Edition
-          </motion.p>
-          <motion.p variants={fadeUp} className="text-sm text-muted-foreground max-w-xl mx-auto mb-8">
-            Aprenda Git de forma visual e interativa — sem ler documentação chata.
+          <motion.p variants={fadeUp} className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto mb-8">
+            Guia visual e interativo — comandos explicados, mapa do fluxo, soluções para erros comuns.
+            Tudo num só lugar.
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
             <Button asChild className="btn-glow">
@@ -115,8 +144,38 @@ export default function Index() {
         </motion.div>
       </section>
 
-      {/* Objectives */}
+      {/* Feature highlights */}
       <section className="container px-4 pb-16">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto"
+        >
+          {features.map((f) => {
+            const Icon = f.icon;
+            return (
+              <motion.div key={f.path} variants={fadeUp}>
+                <Link
+                  to={f.path}
+                  className="glass-card flex flex-col gap-2 p-4 h-full hover:border-primary/40 transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-sm">{f.label}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-primary ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </section>
+
+      {/* Objectives */}
+      <section className="container px-4 pb-20">
         <motion.h2
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -148,7 +207,7 @@ export default function Index() {
                   </Link>
                 ) : (
                   <div
-                    className="objective-card"
+                    className="objective-card cursor-pointer"
                     onClick={() => setExpandedIdx(isExpanded ? null : i)}
                   >
                     <div className="flex items-start justify-between">
@@ -158,7 +217,9 @@ export default function Index() {
                         <p className="text-sm text-muted-foreground">{obj.description}</p>
                       </div>
                       {hasSteps && (
-                        isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground mt-1" /> : <ChevronDown className="h-4 w-4 text-muted-foreground mt-1" />
+                        isExpanded
+                          ? <ChevronUp className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                          : <ChevronDown className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
                       )}
                     </div>
                     {isExpanded && hasSteps && (
@@ -190,28 +251,6 @@ export default function Index() {
               </motion.div>
             );
           })}
-        </motion.div>
-      </section>
-
-      {/* Git Flow Map */}
-      <section className="container px-4 pb-20">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-2xl font-bold text-center mb-2"
-        >
-          Mapa Visual do Git
-        </motion.h2>
-        <p className="text-center text-sm text-muted-foreground mb-8">
-          Clique em cada etapa para saber mais
-        </p>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <GitFlowMap />
         </motion.div>
       </section>
     </div>
