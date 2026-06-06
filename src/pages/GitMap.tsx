@@ -35,7 +35,7 @@ export default function GitMap() {
         <p className="text-muted-foreground text-sm mb-6">
           Sequência completa para subir seu projeto do zero para o GitHub.
         </p>
-        <div className="flex flex-col gap-3 max-w-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl">
           {fullFlow.map((item, i) => (
             <motion.div
               key={item.step}

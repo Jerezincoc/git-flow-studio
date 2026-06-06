@@ -88,18 +88,11 @@ export default function Guide() {
   };
 
   return (
-    <div className="container px-4 py-12 max-w-3xl">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold mb-2">Guia para Iniciantes</h1>
-        <p className="text-muted-foreground mb-6">Aprenda Git do zero com este guia passo a passo.</p>
-
-        {/* Progress */}
-        <div className="glass-card p-4 mb-8">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Progresso</span>
-            <span className="font-semibold text-primary">{progress}%</span>
-          </div>
-          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+    <div className="relative">
+      {/* Progress bar sticky */}
+      <div className="sticky top-14 z-40 bg-background/90 backdrop-blur border-b border-border/50 px-4 py-2">
+        <div className="container max-w-3xl mx-auto flex items-center gap-3">
+          <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-primary"
               initial={{ width: 0 }}
@@ -107,8 +100,15 @@ export default function Guide() {
               transition={{ duration: 0.5 }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">{completed.length} de {guideSteps.length} etapas concluídas</p>
+          <span className="text-xs font-semibold text-primary shrink-0">{progress}% — {completed.length}/{guideSteps.length}</span>
         </div>
+      </div>
+
+      <div className="container px-4 py-12 max-w-3xl">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-3xl font-bold mb-2">Guia para Iniciantes</h1>
+        <p className="text-muted-foreground mb-8">Aprenda Git do zero com este guia passo a passo.</p>
+      </motion.div>
 
         {/* Steps */}
         <div className="space-y-4">
@@ -137,7 +137,7 @@ export default function Guide() {
                           <div key={ci}>
                             <p className="text-xs text-muted-foreground mb-1">{cmd.description}</p>
                             <div className="flex items-center gap-2">
-                              <pre className="code-block flex-1 whitespace-pre-wrap text-xs">{cmd.code}</pre>
+                              <pre className="code-block flex-1 whitespace-pre-wrap overflow-x-auto text-xs">{cmd.code}</pre>
                               <CopyButton text={cmd.code} />
                             </div>
                           </div>
@@ -171,6 +171,7 @@ export default function Guide() {
           </motion.div>
         )}
       </motion.div>
+    </div>
     </div>
   );
 }

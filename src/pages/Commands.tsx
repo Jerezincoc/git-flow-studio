@@ -5,6 +5,12 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
+const filterOptions = [
+  { value: "all", label: "Todos" },
+  { value: "favorites", label: "⭐ Favoritos" },
+  ...Object.entries(categoryLabels).map(([value, label]) => ({ value, label })),
+];
+
 const categories = Object.keys(categoryLabels);
 
 export default function Commands() {
@@ -26,7 +32,21 @@ export default function Commands() {
         <p className="text-muted-foreground mb-6">Documentação completa e interativa de cada comando.</p>
       </motion.div>
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      {/* Mobile: dropdown */}
+      <div className="sm:hidden mb-6">
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm font-medium bg-secondary text-secondary-foreground border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          {filterOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Desktop: botões */}
+      <div className="hidden sm:flex flex-wrap gap-2 mb-8">
         <button
           onClick={() => setFilter("all")}
           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}

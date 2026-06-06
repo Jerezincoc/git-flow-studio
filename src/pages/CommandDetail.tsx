@@ -93,7 +93,7 @@ export default function CommandDetail() {
               <div key={i}>
                 <p className="text-sm text-muted-foreground mb-1">{ex.description}</p>
                 <div className="flex items-start gap-2">
-                  <pre className="code-block flex-1 whitespace-pre-wrap">{ex.code}</pre>
+                  <pre className="code-block flex-1 whitespace-pre-wrap overflow-x-auto">{ex.code}</pre>
                   <CopyButton text={ex.code} />
                 </div>
               </div>
@@ -136,7 +136,7 @@ export default function CommandDetail() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mt-8">
+    <div className="mt-8 pt-8 border-t border-border/50">
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       {children}
     </div>

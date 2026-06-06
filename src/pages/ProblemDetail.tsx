@@ -52,7 +52,7 @@ export default function ProblemDetail() {
                   <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
                   {step.command && (
                     <div className="flex items-center gap-2">
-                      <pre className="code-block flex-1 whitespace-pre-wrap text-xs">{step.command}</pre>
+                      <pre className="code-block flex-1 whitespace-pre-wrap overflow-x-auto text-xs">{step.command}</pre>
                       <CopyButton text={step.command} />
                     </div>
                   )}
