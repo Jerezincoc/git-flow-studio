@@ -57,6 +57,24 @@ const guideSteps: GuideStep[] = [
       { code: "git push -u origin main", description: "Envie para o GitHub" },
     ],
   },
+  {
+    title: "Pull e colaboração",
+    content: "Quando outras pessoas (ou você em outra máquina) enviam código, você precisa baixar essas atualizações. git fetch apenas baixa sem integrar; git pull baixa e já integra automaticamente.",
+    commands: [
+      { code: "git fetch origin", description: "Baixa atualizações sem integrar" },
+      { code: "git pull origin main", description: "Baixa e integra na branch atual" },
+      { code: "git log --oneline origin/main", description: "Veja o que chegou antes de integrar" },
+    ],
+  },
+  {
+    title: "Ignorando arquivos com .gitignore",
+    content: "Nem todo arquivo deve ser rastreado pelo Git — dependências, variáveis de ambiente e builds gerados devem ficar fora. O arquivo .gitignore diz ao Git o que ignorar.",
+    commands: [
+      { code: "touch .gitignore", description: "Crie o arquivo .gitignore" },
+      { code: "echo 'node_modules/' >> .gitignore\necho '.env' >> .gitignore\necho 'dist/' >> .gitignore", description: "Adicione padrões comuns" },
+      { code: "git rm -r --cached node_modules/", description: "Remova do Git se já foi commitado" },
+    ],
+  },
 ];
 
 export default function Guide() {
