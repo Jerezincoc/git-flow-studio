@@ -121,257 +121,715 @@ export const commands: GitCommand[] = [
     relatedCommands: ["status", "commit", "reset"],
     deepDive: "O staging area (ou index) é uma área intermediária entre seu diretório de trabalho e o repositório. Ele permite que você selecione exatamente quais mudanças farão parte do próximo commit.",
   },
-  {
-    id: "commit",
-    name: "git commit",
-    description: "Salva as alterações do staging area no histórico do repositório.",
-    syntax: 'git commit -m "mensagem"',
-    category: "basics",
-    uses: [
-      "Salvar um ponto no histórico do projeto",
-      "Registrar alterações com uma descrição",
-    ],
-    variations: [
-      { command: 'git commit -m "msg"', description: "Commit com mensagem inline" },
-      { command: "git commit -am \"msg\"", description: "Add + commit de arquivos rastreados" },
-      { command: "git commit --amend", description: "Modificar o último commit" },
-      { command: "git commit --allow-empty -m \"msg\"", description: "Commit vazio" },
-    ],
-    examples: [
-      { code: 'git add .\ngit commit -m "feat: adiciona página de login"', description: "Fluxo típico de commit" },
-      { code: 'git commit --amend -m "nova mensagem"', description: "Corrigir mensagem do último commit" },
-    ],
-    whenNotToUse: [
-      "Se o staging area está vazio (nada foi adicionado com git add)",
-      "Se você ainda não terminou a alteração lógica",
-    ],
-    relatedCommands: ["add", "status", "log", "reset"],
+  
+    {
+  id: "commit",
+  name: "git commit",
+  description: "Registra as alterações adicionadas ao stage como um novo snapshot no histórico do repositório.",
+  syntax: "git commit -m \"mensagem\"",
+  category: "basics",
+
+  uses: [
+    "Salvar alterações versionadas no histórico",
+    "Criar checkpoints do desenvolvimento",
+    "Registrar progresso de features ou correções",
+    "Manter histórico rastreável e organizado"
+  ],
+
+  variations: [
+    {
+      command: "git commit -m \"mensagem\"",
+      description: "Cria commit com mensagem direta (forma mais comum)"
+    },
+    {
+      command: "git commit",
+      description: "Abre editor padrão para escrever mensagem detalhada"
+    },
+    {
+      command: "git commit -am \"mensagem\"",
+      description: "Adiciona automaticamente arquivos já rastreados e faz commit"
+    },
+    {
+      command: "git commit --amend",
+      description: "Altera o último commit (mensagem ou conteúdo)"
+    },
+    {
+      command: "git commit --amend --no-edit",
+      description: "Atualiza último commit sem alterar mensagem"
+    },
+    {
+      command: "git commit --allow-empty -m \"mensagem\"",
+      description: "Cria commit mesmo sem alterações (útil para pipelines)"
+    },
+    {
+      command: "git commit --author=\"Nome <email>\"",
+      description: "Define autor manualmente"
+    },
+    {
+      command: "git commit --no-verify",
+      description: "Ignora hooks (ex: pre-commit)"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git add .\ngit commit -m \"feat: implement login validation\"",
+      description: "Fluxo comum de adicionar e commitar alterações"
+    },
+    {
+      code: "git commit --amend -m \"fix: correct validation logic\"",
+      description: "Corrigir mensagem ou incluir alterações esquecidas"
+    },
+    {
+      code: "git commit -am \"fix: adjust button style\"",
+      description: "Commit rápido de arquivos já rastreados"
+    }
+  ],
+
+  whenNotToUse: [
+    "Quando você ainda não adicionou arquivos ao stage (use git add primeiro)",
+    "Para desfazer commits publicados (use git revert)",
+    "Se quiser apagar commit do histórico (use git reset com cuidado)"
+  ],
+
+  relatedCommands: [
+    "add",
+    "status",
+    "reset",
+    "revert",
+    "log"
+  ],
+
+  deepDive:
+    "O commit cria um snapshot imutável identificado por um SHA. Ele registra o estado do stage, não do working directory. Alterações não adicionadas (unstaged) não entram no commit. O uso excessivo de --amend em commits já publicados pode causar conflitos ao forçar push."
   },
-  {
-    id: "status",
-    name: "git status",
-    description: "Mostra o estado atual do repositório e dos arquivos.",
-    syntax: "git status",
-    category: "info",
-    uses: [
-      "Verificar quais arquivos foram modificados",
-      "Ver o que está no staging area",
-      "Saber em qual branch você está",
-    ],
-    variations: [
-      { command: "git status", description: "Status completo" },
-      { command: "git status -s", description: "Status resumido (short)" },
-      { command: "git status --branch", description: "Inclui info da branch" },
-    ],
-    examples: [
-      { code: "git status", description: "Ver estado atual" },
-      { code: "git status -s", description: "Ver estado resumido" },
-    ],
-    whenNotToUse: ["Não há contraindicação — use sempre que quiser"],
-    relatedCommands: ["add", "diff", "log"],
-  },
-  {
-    id: "push",
-    name: "git push",
-    description: "Envia commits locais para o repositório remoto.",
-    syntax: "git push [remote] [branch]",
-    category: "remote",
-    uses: [
-      "Enviar suas alterações para o GitHub",
-      "Compartilhar seu trabalho com a equipe",
-      "Fazer backup remoto do código",
-    ],
-    variations: [
-      { command: "git push", description: "Push para o remote/branch padrão" },
-      { command: "git push origin main", description: "Push explícito" },
-      { command: "git push -u origin main", description: "Push e configura upstream" },
-      { command: "git push --force", description: "Força o push (CUIDADO!)" },
-    ],
-    examples: [
-      { code: "git push -u origin main", description: "Primeiro push de uma branch" },
-      { code: "git push", description: "Pushes subsequentes" },
-    ],
-    whenNotToUse: [
-      "Se você tem commits que não deveriam ir para o remoto",
-      "Evite --force em branches compartilhadas",
-    ],
-    relatedCommands: ["pull", "remote", "commit"],
-  },
-  {
-    id: "pull",
-    name: "git pull",
-    description: "Baixa e integra alterações do repositório remoto.",
-    syntax: "git pull [remote] [branch]",
-    category: "remote",
-    uses: [
-      "Atualizar seu código com as mudanças da equipe",
-      "Sincronizar o repositório local com o remoto",
-    ],
-    variations: [
-      { command: "git pull", description: "Pull padrão (fetch + merge)" },
-      { command: "git pull --rebase", description: "Pull com rebase (histórico linear)" },
-      { command: "git pull origin main", description: "Pull explícito de branch" },
-    ],
-    examples: [
-      { code: "git pull origin main", description: "Atualizar da branch main" },
-      { code: "git pull --rebase", description: "Pull mantendo histórico linear" },
-    ],
-    whenNotToUse: [
-      "Se você tem alterações não commitadas (faça commit ou stash antes)",
-      "Se você não quer integrar automaticamente (use git fetch)",
-    ],
-    relatedCommands: ["push", "merge", "stash"],
-  },
-  {
-    id: "branch",
-    name: "git branch",
-    description: "Lista, cria ou deleta branches.",
-    syntax: "git branch [nome]",
-    category: "branching",
-    uses: [
-      "Criar uma nova linha de desenvolvimento",
-      "Listar branches existentes",
-      "Deletar branches que não são mais necessárias",
-    ],
-    variations: [
-      { command: "git branch", description: "Lista branches locais" },
-      { command: "git branch nova-feature", description: "Cria nova branch" },
-      { command: "git branch -d nome", description: "Deleta branch (se merged)" },
-      { command: "git branch -a", description: "Lista todas (locais + remotas)" },
-    ],
-    examples: [
-      { code: "git branch feature/login", description: "Criar branch para feature" },
-      { code: "git branch -d feature/login", description: "Deletar branch após merge" },
-    ],
-    whenNotToUse: [
-      "Se quer criar E mudar para a branch (use git checkout -b)",
-    ],
-    relatedCommands: ["checkout", "merge"],
-  },
-  {
-    id: "checkout",
-    name: "git checkout",
-    description: "Troca de branch ou restaura arquivos.",
-    syntax: "git checkout <branch|arquivo>",
-    category: "branching",
-    uses: [
-      "Mudar para outra branch",
-      "Criar e mudar para nova branch",
-      "Restaurar arquivo para última versão commitada",
-    ],
-    variations: [
-      { command: "git checkout main", description: "Mudar para branch main" },
-      { command: "git checkout -b nova", description: "Criar e mudar para nova branch" },
-      { command: "git checkout -- arquivo.txt", description: "Descartar mudanças em arquivo" },
-    ],
-    examples: [
-      { code: "git checkout -b feature/api", description: "Criar branch e começar a trabalhar" },
-      { code: "git checkout main", description: "Voltar para a branch principal" },
-    ],
-    whenNotToUse: [
-      "Se você tem mudanças não salvas que conflitam com a branch destino",
-    ],
-    relatedCommands: ["branch", "merge", "stash"],
-  },
-  {
-    id: "merge",
-    name: "git merge",
-    description: "Integra alterações de uma branch em outra.",
-    syntax: "git merge <branch>",
-    category: "branching",
-    uses: [
-      "Juntar o trabalho de uma feature branch na main",
-      "Integrar alterações de outra pessoa",
-    ],
-    variations: [
-      { command: "git merge feature", description: "Merge padrão" },
-      { command: "git merge --no-ff feature", description: "Merge sem fast-forward" },
-      { command: "git merge --abort", description: "Cancelar merge em andamento" },
-    ],
-    examples: [
-      { code: "git checkout main\ngit merge feature/login", description: "Merge de feature na main" },
-      { code: "git merge --abort", description: "Cancelar em caso de conflito" },
-    ],
-    whenNotToUse: [
-      "Se a branch tem conflitos conhecidos que você não está pronto para resolver",
-      "Se quer manter histórico linear (use rebase)",
-    ],
-    relatedCommands: ["branch", "checkout", "pull"],
-  },
-  {
-    id: "log",
-    name: "git log",
-    description: "Mostra o histórico de commits do repositório.",
-    syntax: "git log [opções]",
-    category: "info",
-    uses: [
-      "Ver histórico de alterações",
-      "Encontrar um commit específico",
-      "Entender a evolução do projeto",
-    ],
-    variations: [
-      { command: "git log", description: "Log completo" },
-      { command: "git log --oneline", description: "Uma linha por commit" },
-      { command: "git log --graph", description: "Visualização em grafo" },
-      { command: "git log -5", description: "Últimos 5 commits" },
-    ],
-    examples: [
-      { code: "git log --oneline --graph --all", description: "Visualizar todo o histórico" },
-      { code: "git log --author=\"João\"", description: "Filtrar por autor" },
-    ],
-    whenNotToUse: ["Não há contraindicação"],
-    relatedCommands: ["status", "diff"],
-  },
-  {
-    id: "reset",
-    name: "git reset",
-    description: "Desfaz commits ou remove arquivos do staging area.",
-    syntax: "git reset [modo] [commit]",
-    category: "undoing",
-    uses: [
-      "Desfazer o último commit mantendo as alterações",
-      "Remover arquivos do staging area",
-      "Voltar o repositório para um estado anterior",
-    ],
-    variations: [
-      { command: "git reset HEAD arquivo", description: "Remove do staging" },
-      { command: "git reset --soft HEAD~1", description: "Desfaz commit, mantém staging" },
-      { command: "git reset --mixed HEAD~1", description: "Desfaz commit e staging" },
-      { command: "git reset --hard HEAD~1", description: "Desfaz tudo (PERIGOSO!)" },
-    ],
-    examples: [
-      { code: "git reset --soft HEAD~1", description: "Desfazer último commit (manter alterações)" },
-      { code: "git reset HEAD .", description: "Remover tudo do staging" },
-    ],
-    whenNotToUse: [
-      "Em commits já enviados com push (pode causar problemas para outros)",
-      "Se não tem certeza, prefira git revert",
-    ],
-    relatedCommands: ["commit", "checkout", "stash"],
-    deepDive: "O git reset move o ponteiro HEAD para um commit anterior. --soft mantém tudo no staging, --mixed (padrão) mantém no working directory, --hard descarta tudo. CUIDADO com --hard, pois as alterações são perdidas permanentemente.",
-  },
+ {
+  id: "push",
+  name: "git push",
+  description: "Envia commits locais para um repositório remoto (ex: origin) atualizando branches e/ou tags.",
+  syntax: "git push [remoto] [branch]",
+  category: "remote",
+
+  uses: [
+    "Publicar commits no remoto",
+    "Atualizar uma branch remota com seu trabalho",
+    "Enviar tags (releases) para o remoto",
+    "Configurar upstream para push/pull mais simples"
+  ],
+
+  variations: [
+    {
+      command: "git push",
+      description: "Faz push da branch atual para o upstream configurado"
+    },
+    {
+      command: "git push origin main",
+      description: "Envia a branch local main para o remoto origin"
+    },
+    {
+      command: "git push -u origin feature/login",
+      description: "Envia a branch e define upstream (depois disso, 'git push' sozinho funciona)"
+    },
+    {
+      command: "git push --force-with-lease",
+      description: "Força push de forma mais segura (falha se o remoto mudou desde seu último fetch)"
+    },
+    {
+      command: "git push --force",
+      description: "Força push ignorando mudanças no remoto (perigoso: pode sobrescrever trabalho de outros)"
+    },
+    {
+      command: "git push origin --delete feature/login",
+      description: "Apaga uma branch no remoto"
+    },
+    {
+      command: "git push origin --tags",
+      description: "Envia todas as tags locais para o remoto"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git push -u origin feature/login",
+      description: "Primeiro push de uma branch nova (configura upstream)"
+    },
+    {
+      code: "git fetch origin\ngit rebase origin/main\ngit push --force-with-lease",
+      description: "Após rebase (reescreve histórico), fazer push com segurança"
+    },
+    {
+      code: "git push origin --delete feature/login",
+      description: "Excluir branch remota depois que PR foi mergeado"
+    }
+  ],
+
+  whenNotToUse: [
+    "Evite usar --force em branches compartilhadas",
+    "Não force push em main/develop (a menos que a política do time permita e você saiba o impacto)",
+    "Se você não fez fetch recentemente e pretende usar --force-with-lease"
+  ],
+
+  relatedCommands: [
+    "pull",
+    "fetch",
+    "rebase",
+    "tag",
+    "remote"
+  ],
+
+  deepDive:
+    "Push atualiza refs remotas. O flag -u cria o vínculo upstream entre sua branch local e a remota (facilita push/pull sem argumentos). Se você reescreveu histórico (rebase/amend), o remoto vai divergir e você pode precisar de --force-with-lease, que é mais seguro porque impede sobrescrever mudanças remotas que você não viu."
+},
+  
+   {
+  id: "pull",
+  name: "git pull",
+  description: "Baixa mudanças do remoto e integra na branch atual (equivale a: git fetch + merge, ou fetch + rebase).",
+  syntax: "git pull [remoto] [branch]",
+  category: "remote",
+
+  uses: [
+    "Atualizar sua branch local com mudanças do remoto",
+    "Integrar rapidamente o que chegou na main/develop",
+    "Sincronizar antes de abrir PR ou continuar trabalho"
+  ],
+
+  variations: [
+    {
+      command: "git pull",
+      description: "Puxa do upstream configurado e faz merge (comportamento padrão em muitos setups)"
+    },
+    {
+      command: "git pull origin main",
+      description: "Puxa explicitamente do origin/main e integra na branch atual"
+    },
+    {
+      command: "git pull --rebase",
+      description: "Puxa e faz rebase em vez de merge (histórico mais linear)"
+    },
+    {
+      command: "git pull --ff-only",
+      description: "Só atualiza se for fast-forward (evita merge commit inesperado)"
+    },
+    {
+      command: "git pull --autostash",
+      description: "Cria stash automático antes de rebase/merge e reaplica ao final"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git pull",
+      description: "Atualizar sua branch usando upstream"
+    },
+    {
+      code: "git pull --rebase",
+      description: "Atualizar mantendo histórico linear (muito usado em feature branches)"
+    },
+    {
+      code: "git pull --ff-only",
+      description: "Atualizar sem risco de criar merge commit local"
+    }
+  ],
+
+  whenNotToUse: [
+    "Se você quer controlar o processo em 2 etapas (prefira git fetch + git log + merge/rebase)",
+    "Se você tem mudanças locais não commitadas e não quer risco de conflito (faça commit ou stash primeiro)",
+    "Quando você precisa revisar o que chegou antes de integrar"
+  ],
+
+  relatedCommands: [
+    "fetch",
+    "merge",
+    "rebase",
+    "push",
+    "status",
+    "stash"
+  ],
+
+  deepDive:
+    "Por baixo, pull faz 'fetch' e depois integra. A integração pode ser merge (cria merge commit se necessário) ou rebase (reaplica seus commits sobre a base nova). Para evitar merges locais indesejados, use --ff-only. Se sua equipe padroniza rebase em branches de feature, use --rebase (ou configure pull.rebase=true)."
+},
+
+{
+  id: "merge",
+  name: "git merge",
+  description: "Integra mudanças de outra branch na branch atual, criando (ou não) um merge commit.",
+  syntax: "git merge <branch>",
+  category: "branching",
+
+  uses: [
+    "Integrar uma feature na main/develop",
+    "Atualizar sua branch com mudanças de outra branch",
+    "Unir históricos preservando contexto de ramificações"
+  ],
+
+  variations: [
+    {
+      command: "git merge feature/login",
+      description: "Faz merge da branch feature/login na branch atual"
+    },
+    {
+      command: "git merge --no-ff feature/login",
+      description: "Força criação de merge commit mesmo que seja possível fast-forward (mantém o 'nó' da feature no histórico)"
+    },
+    {
+      command: "git merge --ff-only feature/login",
+      description: "Só permite merge se for fast-forward (falha se precisar de merge commit)"
+    },
+    {
+      command: "git merge --abort",
+      description: "Cancela o merge em andamento (após conflito) e retorna ao estado anterior"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git checkout main\ngit pull\ngit merge feature/login",
+      description: "Integrar uma feature na main (merge normal)"
+    },
+    {
+      code: "git checkout develop\ngit merge --no-ff feature/login",
+      description: "Manter histórico de feature com merge commit (muito comum em Git Flow)"
+    },
+    {
+      code: "git merge --ff-only hotfix/patch-1",
+      description: "Garantir que não será criado merge commit"
+    }
+  ],
+
+  whenNotToUse: [
+    "Se você quer histórico linear e a equipe prefere rebase (use git rebase antes do PR)",
+    "Se você está no meio de mudanças locais não commitadas (faça commit/stash antes)",
+    "Se a branch foi reescrita e está divergente do remoto (confira com fetch/log antes)"
+  ],
+
+  relatedCommands: [
+    "rebase",
+    "branch",
+    "log",
+    "status",
+    "revert"
+  ],
+
+  deepDive:
+    "Merge pode acontecer de duas formas: fast-forward (sem merge commit) quando a branch atual está atrás e basta avançar o ponteiro, ou merge commit quando há divergência e o Git precisa criar um commit de integração. Em conflitos, resolva arquivos manualmente, rode 'git add' nos resolvidos e finalize com 'git commit' (ou use 'git merge --abort' para cancelar)."
+},
+{
+  id: "branch",
+  name: "git branch",
+  description: "Cria, lista, renomeia e remove branches. Uma branch é apenas um ponteiro móvel para um commit.",
+  syntax: "git branch [opções] [nome]",
+  category: "branching",
+
+  uses: [
+    "Criar branches de feature, hotfix ou release",
+    "Isolar desenvolvimento sem afetar main/develop",
+    "Visualizar branches locais e remotas",
+    "Limpar branches já integradas",
+    "Renomear ou reorganizar fluxo de trabalho"
+  ],
+
+  variations: [
+    {
+      command: "git branch",
+      description: "Lista branches locais (a atual é marcada com *)"
+    },
+    {
+      command: "git branch -v",
+      description: "Lista branches mostrando o último commit de cada uma"
+    },
+    {
+      command: "git branch -a",
+      description: "Lista branches locais e remotas"
+    },
+    {
+      command: "git branch -r",
+      description: "Lista apenas branches remotas"
+    },
+    {
+      command: "git branch feature/login",
+      description: "Cria nova branch a partir do commit atual (não troca para ela)"
+    },
+    {
+      command: "git branch feature/login origin/main",
+      description: "Cria branch baseada explicitamente em outra branch"
+    },
+    {
+      command: "git branch -d feature/login",
+      description: "Remove branch local se já estiver mergeada (modo seguro)"
+    },
+    {
+      command: "git branch -D feature/login",
+      description: "Remove branch local forçando (mesmo sem merge)"
+    },
+    {
+      command: "git branch --merged",
+      description: "Lista branches já mergeadas na branch atual"
+    },
+    {
+      command: "git branch --no-merged",
+      description: "Lista branches ainda não mergeadas"
+    },
+    {
+      command: "git branch -m antigo novo",
+      description: "Renomeia branch local"
+    },
+    {
+      command: "git branch --set-upstream-to=origin/main",
+      description: "Define manualmente a branch remota rastreada (upstream)"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git branch feature/auth",
+      description: "Criar branch de feature"
+    },
+    {
+      code: "git branch --merged\n# depois:\ngit branch -d feature/antiga",
+      description: "Fluxo comum para limpar branches já integradas"
+    },
+    {
+      code: "git branch -m main master",
+      description: "Renomear branch principal (exemplo histórico)"
+    },
+    {
+      code: "git push -u origin feature/auth",
+      description: "Publicar branch e definir upstream"
+    },
+    {
+      code: "git push origin --delete feature/antiga",
+      description: "Remover branch no remoto após merge"
+    }
+  ],
+
+  whenNotToUse: [
+    "Para trocar de branch (use git switch)",
+    "Para integrar branches (use git merge ou rebase)",
+    "Para desfazer commits (use reset ou revert)"
+  ],
+
+  relatedCommands: [
+    "switch",
+    "merge",
+    "rebase",
+    "push",
+    "fetch",
+    "log"
+  ],
+
+  deepDive:
+    "Uma branch no Git é apenas um ponteiro leve para um commit. Criar branch é instantâneo e barato. O flag -d protege contra apagar branch que ainda não foi mergeada; -D ignora essa proteção. Branches remotas não são apagadas com git branch -d, e sim com 'git push origin --delete nome'. Para manter repositório limpo, combine 'git fetch --prune' com 'git branch --merged'. Em fluxos profissionais (Git Flow, Trunk Based), branches são efêmeras e devem ser removidas após integração."
+},
+{
+  id: "switch",
+  name: "git switch",
+  description: "Troca de branch de forma clara e segura. É a alternativa moderna ao uso de 'git checkout' para navegação entre branches.",
+  syntax: "git switch [opções] <branch>",
+  category: "branching",
+
+  uses: [
+    "Trocar de branch",
+    "Criar branch nova e já entrar nela",
+    "Recuperar branch remota localmente",
+    "Sair de detached HEAD criando uma branch"
+  ],
+
+  variations: [
+    {
+      command: "git switch main",
+      description: "Troca para a branch main"
+    },
+    {
+      command: "git switch -c feature/login",
+      description: "Cria branch nova e já muda para ela"
+    },
+    {
+      command: "git switch -c feature/login origin/feature/login",
+      description: "Cria branch local rastreando branch remota e já entra nela"
+    },
+    {
+      command: "git switch -d <sha>",
+      description: "Vai para um commit específico (detached HEAD)"
+    },
+    {
+      command: "git switch -",
+      description: "Volta para a branch anterior"
+    },
+    {
+      command: "git switch --detach <sha>",
+      description: "Entra explicitamente em modo detached HEAD"
+    },
+    {
+      command: "git switch --discard-changes main",
+      description: "Troca de branch descartando alterações locais"
+    },
+    {
+      command: "git switch --merge main",
+      description: "Tenta trocar preservando mudanças locais (faz merge automático se possível)"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git switch main",
+      description: "Trocar para main"
+    },
+    {
+      code: "git switch -c feature/auth",
+      description: "Criar nova branch e começar a trabalhar"
+    },
+    {
+      code: "git switch -",
+      description: "Alternar rapidamente entre duas branches (muito usado)"
+    },
+    {
+      code: "git switch --detach a1b2c3d",
+      description: "Explorar commit antigo sem estar em uma branch"
+    }
+  ],
+
+  whenNotToUse: [
+    "Para restaurar arquivos (use git restore)",
+    "Para navegar e alterar arquivos de commits antigos (use git restore ou git show)",
+    "Evite permanecer em detached HEAD se pretende continuar desenvolvendo"
+  ],
+
+  relatedCommands: [
+    "branch",
+    "restore",
+    "merge",
+    "rebase",
+    "status"
+  ],
+
+  deepDive:
+    "git switch foi introduzido para separar responsabilidades do antigo git checkout. Ele lida apenas com troca de branches, tornando o fluxo mais seguro e previsível. Em detached HEAD, commits feitos não pertencem a nenhuma branch até que você crie uma nova com 'git switch -c nome'. A flag '-' é extremamente útil para alternar rapidamente entre duas branches."
+},
+{
+  id: "log",
+  name: "git log",
+  description: "Exibe o histórico de commits do repositório com diversas opções de visualização e filtro.",
+  syntax: "git log [opções]",
+  category: "info",
+
+  uses: [
+    "Visualizar histórico de commits",
+    "Analisar mudanças recentes",
+    "Investigar bugs ou regressões",
+    "Entender fluxo de branches"
+  ],
+
+  variations: [
+    {
+      command: "git log",
+      description: "Lista commits detalhados (autor, data, mensagem)"
+    },
+    {
+      command: "git log --oneline",
+      description: "Mostra histórico resumido (1 linha por commit)"
+    },
+    {
+      command: "git log --oneline --graph --decorate --all",
+      description: "Visualização gráfica das branches (modo profissional)"
+    },
+    {
+      command: "git log -p",
+      description: "Mostra o diff completo de cada commit"
+    },
+    {
+      command: "git log --stat",
+      description: "Mostra resumo de arquivos alterados por commit"
+    },
+    {
+      command: "git log -n 5",
+      description: "Limita aos últimos 5 commits"
+    },
+    {
+      command: "git log --author=\"Nome\"",
+      description: "Filtra commits por autor"
+    },
+    {
+      command: "git log --since=\"2 days ago\"",
+      description: "Filtra commits por data"
+    },
+    {
+      command: "git log branchA..branchB",
+      description: "Mostra commits que estão em branchB e não em branchA"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git log --oneline --graph --decorate --all",
+      description: "Visualizar histórico completo com gráfico de branches"
+    },
+    {
+      code: "git log -p -n 3",
+      description: "Ver detalhes dos últimos 3 commits"
+    },
+    {
+      code: "git log --author=\"João\" --since=\"1 week ago\"",
+      description: "Filtrar commits de um autor recente"
+    }
+  ],
+
+  whenNotToUse: [
+    "Se você quer apenas ver alterações de um arquivo específico (use git blame ou git diff)",
+    "Se precisa ver movimentação do HEAD após reset/rebase (use git reflog)"
+  ],
+
+  relatedCommands: [
+    "show",
+    "diff",
+    "reflog",
+    "blame",
+    "branch"
+  ],
+
+  deepDive:
+    "git log é extremamente poderoso. A combinação --oneline --graph --decorate --all oferece uma visualização clara do fluxo de branches. Filtros como --since, --author e ranges (A..B) ajudam a investigar mudanças específicas. Para análise profunda, combine com -p ou --stat."
+},
+{
+  id: "reset",
+  name: "git reset",
+  description: "Move o ponteiro do HEAD para outro commit, podendo alterar o stage e o working directory.",
+  syntax: "git reset [--soft | --mixed | --hard] <commit>",
+  category: "undoing",
+
+  uses: [
+    "Desfazer commits locais",
+    "Remover arquivos do stage",
+    "Voltar o projeto para um estado anterior",
+    "Reorganizar commits antes de publicar"
+  ],
+
+  variations: [
+    {
+      command: "git reset --soft HEAD~1",
+      description: "Volta um commit mantendo alterações no stage"
+    },
+    {
+      command: "git reset --mixed HEAD~1",
+      description: "Volta um commit removendo do stage mas mantendo alterações no working directory (padrão)"
+    },
+    {
+      command: "git reset --hard HEAD~1",
+      description: "Volta um commit apagando alterações do stage e do working directory"
+    },
+    {
+      command: "git reset <arquivo>",
+      description: "Remove arquivo do stage (equivalente a restore --staged)"
+    },
+    {
+      command: "git reset --hard <sha>",
+      description: "Volta totalmente para um commit específico"
+    }
+  ],
+
+  examples: [
+    {
+      code: "git reset --soft HEAD~1",
+      description: "Desfazer último commit mantendo arquivos prontos para novo commit"
+    },
+    {
+      code: "git reset --hard a1b2c3d",
+      description: "Voltar completamente para um commit específico"
+    },
+    {
+      code: "git reset index.js",
+      description: "Remover arquivo do stage"
+    }
+  ],
+
+  whenNotToUse: [
+    "Em commits já publicados (use git revert em vez disso)",
+    "Sem verificar antes com git log ou git reflog",
+    "Sem entender que --hard apaga alterações permanentemente"
+  ],
+
+  relatedCommands: [
+    "revert",
+    "reflog",
+    "restore",
+    "log"
+  ],
+
+  deepDive:
+    "O reset altera onde o HEAD aponta. --soft move apenas o ponteiro, --mixed altera também o stage (padrão), e --hard altera stage e working directory apagando mudanças locais. Caso algo seja apagado por engano, muitas vezes é possível recuperar usando git reflog."
+},
   {
   id: "fetch",
   name: "git fetch",
-  description: "Baixa alterações do repositório remoto sem aplicar na sua branch atual.",
-  syntax: "git fetch [remoto]",
+  description: "Baixa commits, branches e tags do remoto sem integrar automaticamente na sua branch atual.",
+  syntax: "git fetch [remoto] [branch]",
   category: "remote",
+
   uses: [
-    "Atualizar referências do remoto",
-    "Ver mudanças antes de integrar"
+    "Atualizar referências remotas antes de integrar",
+    "Analisar mudanças do remoto sem alterar sua branch",
+    "Sincronizar refs antes de rebase ou merge",
+    "Evitar surpresas ao usar pull diretamente"
   ],
+
   variations: [
-    { command: "git fetch", description: "Busca do remoto padrão (origin)" },
-    { command: "git fetch origin", description: "Busca apenas do origin" },
-    { command: "git fetch --all", description: "Busca de todos os remotos" }
+    {
+      command: "git fetch",
+      description: "Busca do remoto padrão (origin)"
+    },
+    {
+      command: "git fetch origin",
+      description: "Busca explicitamente do remoto origin"
+    },
+    {
+      command: "git fetch origin main",
+      description: "Busca apenas a branch main do remoto"
+    },
+    {
+      command: "git fetch --all",
+      description: "Busca de todos os remotos configurados"
+    },
+    {
+      command: "git fetch --prune",
+      description: "Remove referências locais de branches remotas que já foram apagadas"
+    },
+    {
+      command: "git fetch --tags",
+      description: "Atualiza todas as tags do remoto"
+    }
   ],
+
   examples: [
-    { code: "git fetch origin", description: "Atualiza refs do origin" }
+    {
+      code: "git fetch origin\ngit log HEAD..origin/main --oneline",
+      description: "Ver commits que chegaram na main antes de integrar"
+    },
+    {
+      code: "git fetch --prune",
+      description: "Limpar branches remotas que não existem mais"
+    },
+    {
+      code: "git fetch origin\ngit rebase origin/main",
+      description: "Fluxo seguro antes de rebase"
+    }
   ],
+
   whenNotToUse: [
-    "Se você já quer integrar automaticamente (use git pull)"
+    "Se você quer integrar automaticamente (use git pull)",
+    "Se você já sabe que precisa aplicar as mudanças imediatamente"
   ],
-  relatedCommands: ["pull", "remote", "log"]
+
+  relatedCommands: [
+    "pull",
+    "merge",
+    "rebase",
+    "log",
+    "remote"
+  ],
+
+  deepDive:
+    "git fetch atualiza apenas as referências remotas (ex: origin/main) sem tocar no seu working directory. É a forma mais segura de se atualizar antes de integrar mudanças. A flag --prune mantém seu ambiente limpo removendo branches remotas que foram deletadas no servidor."
 },
 {
   id: "diff",
@@ -400,51 +858,162 @@ export const commands: GitCommand[] = [
 {
   id: "stash",
   name: "git stash",
-  description: "Salva temporariamente mudanças locais sem fazer commit.",
-  syntax: "git stash [opções]",
+  description: "Guarda mudanças locais (working tree e/ou stage) temporariamente para voltar depois, sem precisar commitar.",
+  syntax: "git stash [push|pop|apply|list|show|drop|clear] ...",
   category: "undoing",
+
   uses: [
-    "Trocar de branch sem commitar mudanças",
-    "Guardar trabalho em progresso (WIP)"
+    "Trocar de branch sem commitar trabalho incompleto",
+    "Guardar mudanças rápidas antes de puxar/mesclar/rebasear",
+    "Salvar experimentos locais temporários"
   ],
+
   variations: [
-    { command: "git stash", description: "Salva mudanças atuais" },
-    { command: "git stash list", description: "Lista todos os stashes" },
-    { command: "git stash pop", description: "Aplica e remove o último stash" },
-    { command: "git stash apply", description: "Aplica sem remover do stash" }
+    {
+      command: "git stash push -m \"msg\"",
+      description: "Cria stash com mensagem (recomendado para não virar bagunça)"
+    },
+    {
+      command: "git stash -u",
+      description: "Inclui arquivos não rastreados (untracked) no stash"
+    },
+    {
+      command: "git stash -a",
+      description: "Inclui untracked + ignored (bem perigoso, use com cautela)"
+    },
+    {
+      command: "git stash list",
+      description: "Lista todos os stashes (stash@{0}, stash@{1}...)"
+    },
+    {
+      command: "git stash show -p",
+      description: "Mostra o diff completo do stash"
+    },
+    {
+      command: "git stash apply",
+      description: "Aplica o stash e MANTÉM ele na lista"
+    },
+    {
+      command: "git stash pop",
+      description: "Aplica o stash e REMOVE ele da lista"
+    },
+    {
+      command: "git stash apply stash@{2}",
+      description: "Aplica um stash específico"
+    },
+    {
+      command: "git stash drop stash@{2}",
+      description: "Remove um stash específico"
+    },
+    {
+      command: "git stash clear",
+      description: "Apaga TODOS os stashes (irreversível na prática)"
+    }
   ],
+
   examples: [
-    { code: "git stash", description: "Guardar mudanças temporariamente" },
-    { code: "git stash pop", description: "Recuperar mudanças salvas" }
+    {
+      code: "git stash push -m \"wip: ajustes no layout\"",
+      description: "Guardar trabalho incompleto com uma descrição"
+    },
+    {
+      code: "git stash list\ngit stash show -p stash@{0}",
+      description: "Listar e inspecionar conteúdo do stash antes de aplicar"
+    },
+    {
+      code: "git stash pop",
+      description: "Aplicar o último stash e remover da lista"
+    },
+    {
+      code: "git stash -u\n# troca de branch / puxa mudanças\n\ngit stash pop",
+      description: "Fluxo comum: stash incluindo untracked, atualizar branch e recuperar mudanças"
+    }
   ],
+
   whenNotToUse: [
-    "Se o código já está pronto para commit"
+    "Se a mudança já está pronta e deve ser compartilhada (faça commit em uma branch)",
+    "Como armazenamento de longo prazo (stash não é backlog; prefira branch + commit)",
+    "Evite stash clear sem ter certeza (perda total)"
   ],
-  relatedCommands: ["checkout", "reset", "clean"]
+
+  relatedCommands: [
+    "status",
+    "switch",
+    "checkout",
+    "pull",
+    "rebase",
+    "clean"
+  ],
+
+  deepDive:
+    "Stash salva seu estado local e volta o working directory para um estado limpo. 'apply' reaplica sem remover da lista; 'pop' reaplica e remove. Use mensagens (-m) e sempre confira com 'stash show -p' quando estiver lidando com múltiplos stashes. Em casos de conflito ao aplicar, resolva como um merge normal e faça commit se necessário."
 },
 {
   id: "rebase",
   name: "git rebase",
-  description: "Reaplica commits em cima de outra base, reescrevendo o histórico.",
-  syntax: "git rebase [branch]",
+  description: "Reaplica commits de uma branch sobre outra base, reescrevendo o histórico para manter uma linha linear.",
+  syntax: "git rebase <base-branch>",
   category: "branching",
+
   uses: [
-    "Manter histórico linear",
-    "Atualizar branch de feature com a main"
+    "Atualizar uma branch de feature com a main",
+    "Manter histórico linear (sem merge commit)",
+    "Organizar commits antes de subir (squash, reorder, edit)"
   ],
+
   variations: [
-    { command: "git rebase main", description: "Rebase da branch atual sobre main" },
-    { command: "git rebase -i HEAD~3", description: "Rebase interativo dos últimos 3 commits" },
-    { command: "git rebase --continue", description: "Continuar após resolver conflitos" },
-    { command: "git rebase --abort", description: "Cancelar o rebase" }
+    {
+      command: "git rebase main",
+      description: "Reaplica commits da branch atual sobre a main"
+    },
+    {
+      command: "git rebase origin/main",
+      description: "Rebase usando referência remota atualizada"
+    },
+    {
+      command: "git rebase -i HEAD~3",
+      description: "Rebase interativo dos últimos 3 commits (editar, squash, reorder)"
+    },
+    {
+      command: "git rebase --continue",
+      description: "Continua rebase após resolver conflito"
+    },
+    {
+      command: "git rebase --abort",
+      description: "Cancela o rebase e volta ao estado anterior"
+    },
+    {
+      command: "git rebase --onto nova-base antiga-base",
+      description: "Move uma sequência de commits para outra base específica"
+    }
   ],
+
   examples: [
-    { code: "git fetch origin\ngit rebase origin/main", description: "Atualizar branch com main remota" }
+    {
+      code: "git checkout feature/login\ngit fetch origin\ngit rebase origin/main",
+      description: "Atualizar branch de feature antes de abrir PR"
+    },
+    {
+      code: "git rebase -i HEAD~5",
+      description: "Reorganizar últimos 5 commits (squash ou editar mensagens)"
+    }
   ],
+
   whenNotToUse: [
-    "Em commits já publicados e usados por outras pessoas"
+    "Quando os commits já foram publicados e outras pessoas dependem deles",
+    "Em branches compartilhadas por múltiplos desenvolvedores",
+    "Sem entender que o SHA dos commits será alterado"
   ],
-  relatedCommands: ["merge", "log", "cherry-pick"]
+
+  relatedCommands: [
+    "merge",
+    "log",
+    "cherry-pick",
+    "reflog"
+  ],
+
+  deepDive:
+    "O rebase reescreve o histórico criando novos commits com novos SHAs. Diferente do merge, ele não cria um merge commit, mantendo o histórico linear. Caso já tenha feito push da branch, será necessário usar 'git push --force-with-lease' (com cuidado). Em caso de conflito, o Git pausa o processo até que os arquivos sejam corrigidos manualmente."
 },
 {
   id: "cherry-pick",
