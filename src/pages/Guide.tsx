@@ -105,12 +105,11 @@ export default function Guide() {
       </div>
 
       <div className="container px-4 py-12 max-w-3xl">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold mb-2">Guia para Iniciantes</h1>
-        <p className="text-muted-foreground mb-8">Aprenda Git do zero com este guia passo a passo.</p>
-      </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl font-bold mb-2">Guia para Iniciantes</h1>
+          <p className="text-muted-foreground mb-8">Aprenda Git do zero com este guia passo a passo.</p>
+        </motion.div>
 
-        {/* Steps */}
         <div className="space-y-4">
           {guideSteps.map((step, i) => {
             const isDone = completed.includes(i);
@@ -170,8 +169,7 @@ export default function Guide() {
             <p className="text-muted-foreground text-sm">Você completou o guia para iniciantes. Agora explore os comandos e pratique!</p>
           </motion.div>
         )}
-      </motion.div>
-    </div>
+      </div>
     </div>
   );
 }
