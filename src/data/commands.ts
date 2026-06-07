@@ -8,6 +8,13 @@ export interface CommandExample {
   description: string;
 }
 
+export interface GitFlag {
+  flag: string;
+  description: string;
+  example?: string;
+  danger?: boolean;
+}
+
 export interface GitCommand {
   id: string;
   name: string;
@@ -28,6 +35,8 @@ category:
   whenNotToUse: string[];
   relatedCommands: string[];
   deepDive?: string;
+  flags?: GitFlag[];
+  curiosities?: string[];
 }
 
 export const categoryLabels: Record<string, string> = {
@@ -68,6 +77,16 @@ export const commands: GitCommand[] = [
     ],
     relatedCommands: ["clone", "remote"],
     deepDive: "O git init cria uma pasta oculta .git que contém toda a estrutura do repositório: objetos, referências, HEAD e configurações. Sem essa pasta, o Git não reconhece o diretório como repositório.",
+    flags: [
+      { flag: "--bare", description: "Cria repositório sem working directory — usado em servidores Git" },
+      { flag: "-b / --initial-branch", description: "Define o nome da branch inicial (ex: -b main)" },
+      { flag: "--quiet / -q", description: "Suprime mensagens de saída" },
+      { flag: "--shared", description: "Configura permissões para repositório compartilhado entre grupos de usuários" },
+    ],
+    curiosities: [
+      "O git init cria apenas uma pasta .git com ~9 arquivos/pastas. Tudo que o Git precisa para controle de versão cabe em menos de 1KB inicialmente.",
+      "Diferente de outros sistemas de versão (SVN, CVS), o Git não precisa de servidor central. Um repositório é completamente autocontido e funcional offline.",
+    ],
   },
   {
     id: "clone",
@@ -96,6 +115,19 @@ export const commands: GitCommand[] = [
       "Se você só precisa de um arquivo específico",
     ],
     relatedCommands: ["init", "remote", "pull"],
+    flags: [
+      { flag: "--depth <n>", description: "Limita o histórico ao número n de commits (clone raso — mais rápido e leve)" },
+      { flag: "-b / --branch <nome>", description: "Clona e já faz checkout da branch especificada em vez da padrão" },
+      { flag: "--single-branch", description: "Baixa apenas a branch clonada, sem baixar as demais" },
+      { flag: "--recurse-submodules", description: "Inicializa e clona submódulos automaticamente" },
+      { flag: "--no-tags", description: "Não baixa as tags do remoto" },
+      { flag: "--mirror", description: "Cria clone espelho completo (bare + todas as refs) — usado para backup de repositórios" },
+      { flag: "-q / --quiet", description: "Suprime saída de progresso" },
+    ],
+    curiosities: [
+      "git clone é tão eficiente que transfere apenas os objetos únicos — se dois commits compartilham 99% dos arquivos, apenas o 1% diferente é transferido.",
+      "O nome 'origin' dado ao remoto após clone é apenas uma convenção do Git. Você pode renomeá-lo livremente com git remote rename sem efeito no funcionamento.",
+    ],
   },
   {
     id: "add",
@@ -123,6 +155,18 @@ export const commands: GitCommand[] = [
     ],
     relatedCommands: ["status", "commit", "reset"],
     deepDive: "O staging area (ou index) é uma área intermediária entre seu diretório de trabalho e o repositório. Ele permite que você selecione exatamente quais mudanças farão parte do próximo commit.",
+    flags: [
+      { flag: "-A / --all", description: "Adiciona todas as mudanças: modificados, novos e deletados" },
+      { flag: "-p / --patch", description: "Modo interativo: escolhe hunks individualmente para ter controle preciso sobre o que entra no commit" },
+      { flag: "-u / --update", description: "Adiciona apenas arquivos já rastreados (ignora arquivos novos)" },
+      { flag: "-n / --dry-run", description: "Simula o add sem realmente adicionar — útil para verificar o que seria incluído" },
+      { flag: "-f / --force", description: "Força adicionar arquivo ignorado pelo .gitignore", danger: true },
+      { flag: "-e / --edit", description: "Abre editor para revisar e editar o patch antes de aplicar ao stage" },
+    ],
+    curiosities: [
+      "git add -p (patch mode) é uma das features mais poderosas e subestimadas do Git — permite commitar apenas parte de um arquivo, separando alterações em commits distintos sem editar o arquivo.",
+      "O staging area foi chamado por Linus Torvalds de 'cache' nos primórdios do Git, por isso ainda aparece como --cached em vários outros comandos como diff e rm.",
+    ],
   },
   {
     id: "status",
@@ -155,6 +199,17 @@ export const commands: GitCommand[] = [
     relatedCommands: ["add", "commit", "diff", "restore"],
     deepDive:
       "Na saída compacta (-s), a primeira coluna indica o estado no stage e a segunda no working directory. Letras comuns: M (modified), A (added), D (deleted), ? (untracked), ! (ignored). É um dos comandos mais usados no Git — rodar status antes de qualquer operação é uma boa prática.",
+    flags: [
+      { flag: "-s / --short", description: "Saída compacta: duas colunas indicando estado no stage e no working dir" },
+      { flag: "-b / --branch", description: "Mostra info da branch mesmo no modo compacto (-s)" },
+      { flag: "-u / --untracked-files", description: "Controla exibição de untracked: -uno omite, -uall expande subdiretórios" },
+      { flag: "--ignored", description: "Mostra também arquivos ignorados pelo .gitignore" },
+      { flag: "--porcelain", description: "Saída estável para scripts — garante formato consistente entre versões do Git" },
+    ],
+    curiosities: [
+      "git status é somente leitura — nunca altera nada no repositório. É sempre seguro de executar em qualquer situação.",
+      "Na saída compacta (-s), a combinação '??' significa arquivo novo não rastreado. 'M ' (com espaço) significa modificado no stage; ' M' (espaço à esquerda) modificado no working dir.",
+    ],
   },
     {
   id: "commit",
@@ -235,7 +290,24 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "O commit cria um snapshot imutável identificado por um SHA. Ele registra o estado do stage, não do working directory. Alterações não adicionadas (unstaged) não entram no commit. O uso excessivo de --amend em commits já publicados pode causar conflitos ao forçar push."
+    "O commit cria um snapshot imutável identificado por um SHA. Ele registra o estado do stage, não do working directory. Alterações não adicionadas (unstaged) não entram no commit. O uso excessivo de --amend em commits já publicados pode causar conflitos ao forçar push.",
+  flags: [
+    { flag: "-m", description: "Define a mensagem do commit diretamente na linha de comando sem abrir editor" },
+    { flag: "-a / --all", description: "Adiciona automaticamente ao stage arquivos rastreados modificados antes de commitar" },
+    { flag: "--amend", description: "Reescreve o último commit — altera mensagem e/ou conteúdo. Não usar em commits já publicados", danger: true },
+    { flag: "--no-edit", description: "Usa a mesma mensagem do commit anterior ao fazer --amend" },
+    { flag: "-v / --verbose", description: "Mostra o diff no editor ao escrever a mensagem (contexto do que está sendo commitado)" },
+    { flag: "--no-verify", description: "Ignora hooks pre-commit e commit-msg (ex: linters, testes)", danger: true },
+    { flag: "--author", description: "Define o autor manualmente no formato \"Nome <email>\"" },
+    { flag: "--allow-empty", description: "Permite criar commit mesmo sem alterações no stage (útil para acionar pipelines de CI)" },
+    { flag: "--date", description: "Define data e hora do commit manualmente" },
+    { flag: "--squash", description: "Prepara um commit de squash para uso posterior com rebase interativo" },
+  ],
+  curiosities: [
+    "O SHA de cada commit é calculado com base no conteúdo, no SHA do commit pai, no autor e no timestamp. Alterar qualquer detalhe — até um espaço na mensagem — gera um SHA completamente diferente.",
+    "O Git não armazena 'diffs' entre versões — ele armazena snapshots completos de cada arquivo. A eficiência de espaço vem da deduplicação de objetos idênticos (blobs), não de deltas.",
+    "A mensagem de commit de Linus Torvalds no primeiro commit do kernel Linux tem apenas 6 palavras: 'Initial git repository build'.",
+  ],
   },
  {
   id: "push",
@@ -312,7 +384,21 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "Push atualiza refs remotas. O flag -u cria o vínculo upstream entre sua branch local e a remota (facilita push/pull sem argumentos). Se você reescreveu histórico (rebase/amend), o remoto vai divergir e você pode precisar de --force-with-lease, que é mais seguro porque impede sobrescrever mudanças remotas que você não viu."
+    "Push atualiza refs remotas. O flag -u cria o vínculo upstream entre sua branch local e a remota (facilita push/pull sem argumentos). Se você reescreveu histórico (rebase/amend), o remoto vai divergir e você pode precisar de --force-with-lease, que é mais seguro porque impede sobrescrever mudanças remotas que você não viu.",
+  flags: [
+    { flag: "-u / --set-upstream", description: "Define o upstream da branch — depois 'git push' funciona sem argumentos" },
+    { flag: "--force-with-lease", description: "Força push apenas se o remoto não mudou desde seu último fetch — mais seguro que --force", danger: true },
+    { flag: "--force / -f", description: "Sobrescreve o histórico remoto ignorando divergências — pode apagar trabalho de outros", danger: true },
+    { flag: "--tags", description: "Envia todas as tags locais para o remoto" },
+    { flag: "--delete", description: "Apaga uma branch ou tag no remoto" },
+    { flag: "-n / --dry-run", description: "Simula o push sem executar — útil para conferir o que seria enviado" },
+    { flag: "--no-verify", description: "Ignora hooks pre-push", danger: true },
+    { flag: "--all", description: "Envia todas as branches locais para o remoto" },
+  ],
+  curiosities: [
+    "--force-with-lease verifica internamente se o SHA remoto bate com sua última referência conhecida. É uma proteção contra 'pisar no trabalho de outro' sem perceber.",
+    "Fazer git push --force em branches compartilhadas é considerado uma das piores práticas do Git — equivale a reescrever um capítulo publicado de um livro que outros já leram e referenciaram.",
+  ],
 },
   
    {
@@ -382,7 +468,19 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "Por baixo, pull faz 'fetch' e depois integra. A integração pode ser merge (cria merge commit se necessário) ou rebase (reaplica seus commits sobre a base nova). Para evitar merges locais indesejados, use --ff-only. Se sua equipe padroniza rebase em branches de feature, use --rebase (ou configure pull.rebase=true)."
+    "Por baixo, pull faz 'fetch' e depois integra. A integração pode ser merge (cria merge commit se necessário) ou rebase (reaplica seus commits sobre a base nova). Para evitar merges locais indesejados, use --ff-only. Se sua equipe padroniza rebase em branches de feature, use --rebase (ou configure pull.rebase=true).",
+  flags: [
+    { flag: "--rebase", description: "Aplica seus commits sobre a base atualizada em vez de criar merge commit — mantém histórico linear" },
+    { flag: "--ff-only", description: "Só atualiza se for fast-forward — falha ao invés de criar merge commit acidental" },
+    { flag: "--autostash", description: "Faz stash automático antes de integrar e reaplicar ao final" },
+    { flag: "--no-commit", description: "Integra as mudanças mas não cria commit automaticamente" },
+    { flag: "--squash", description: "Comprime todos os commits recebidos em um único conjunto de mudanças" },
+    { flag: "--depth <n>", description: "Aprofunda um clone raso baixando mais histórico" },
+  ],
+  curiosities: [
+    "git pull é literalmente um atalho para dois comandos: git fetch + git merge (ou rebase). Separar em dois passos dá mais controle — você pode revisar o que chegou antes de integrar.",
+    "A opção pull.rebase=true nas configs faz todo git pull usar rebase automaticamente — é a configuração preferida de times que prezam por histórico linear.",
+  ],
 },
 
 {
@@ -451,7 +549,20 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "Merge pode acontecer de duas formas: fast-forward (sem merge commit) quando a branch atual está atrás e basta avançar o ponteiro, ou merge commit quando há divergência e o Git precisa criar um commit de integração. Em conflitos, resolva arquivos manualmente, rode 'git add' nos resolvidos e finalize com 'git commit' (ou use 'git merge --abort' para cancelar)."
+    "Merge pode acontecer de duas formas: fast-forward (sem merge commit) quando a branch atual está atrás e basta avançar o ponteiro, ou merge commit quando há divergência e o Git precisa criar um commit de integração. Em conflitos, resolva arquivos manualmente, rode 'git add' nos resolvidos e finalize com 'git commit' (ou use 'git merge --abort' para cancelar).",
+  flags: [
+    { flag: "--no-ff", description: "Força criação de merge commit mesmo em fast-forward — preserva o contexto da branch no histórico" },
+    { flag: "--ff-only", description: "Só permite merge se for fast-forward — falha se precisar de merge commit" },
+    { flag: "--squash", description: "Comprime todos os commits da branch em um único conjunto de mudanças no stage — você faz o commit manualmente" },
+    { flag: "--abort", description: "Cancela merge em andamento e volta ao estado anterior" },
+    { flag: "--no-commit", description: "Faz o merge mas não cria o commit automaticamente" },
+    { flag: "-m", description: "Define a mensagem do merge commit" },
+    { flag: "-s / --strategy", description: "Define a estratégia de merge (ex: ort, recursive, ours, theirs)" },
+  ],
+  curiosities: [
+    "Fast-forward merge não cria nenhum commit novo — apenas move o ponteiro da branch para frente. É o merge mais simples e não deixa rastro de 'houve uma branch aqui'.",
+    "A estratégia 'ort' (Ostensibly Recursive's Twin) substituiu 'recursive' como padrão no Git 2.33. É mais rápida e produz menos conflitos em merges complexos.",
+  ],
 },
 {
   id: "branch",
@@ -558,7 +669,22 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "Uma branch no Git é apenas um ponteiro leve para um commit. Criar branch é instantâneo e barato. O flag -d protege contra apagar branch que ainda não foi mergeada; -D ignora essa proteção. Branches remotas não são apagadas com git branch -d, e sim com 'git push origin --delete nome'. Para manter repositório limpo, combine 'git fetch --prune' com 'git branch --merged'. Em fluxos profissionais (Git Flow, Trunk Based), branches são efêmeras e devem ser removidas após integração."
+    "Uma branch no Git é apenas um ponteiro leve para um commit. Criar branch é instantâneo e barato. O flag -d protege contra apagar branch que ainda não foi mergeada; -D ignora essa proteção. Branches remotas não são apagadas com git branch -d, e sim com 'git push origin --delete nome'. Para manter repositório limpo, combine 'git fetch --prune' com 'git branch --merged'. Em fluxos profissionais (Git Flow, Trunk Based), branches são efêmeras e devem ser removidas após integração.",
+  flags: [
+    { flag: "-v / --verbose", description: "Mostra o último commit de cada branch na listagem" },
+    { flag: "-a / --all", description: "Lista branches locais e remotas" },
+    { flag: "-r / --remotes", description: "Lista apenas branches remotas" },
+    { flag: "-d / --delete", description: "Remove branch local (modo seguro — falha se não foi mergeada)" },
+    { flag: "-D", description: "Remove branch local forçando, mesmo sem merge", danger: true },
+    { flag: "-m / --move", description: "Renomeia branch local" },
+    { flag: "--merged", description: "Lista branches já mergeadas na branch atual (candidatas a deleção)" },
+    { flag: "--no-merged", description: "Lista branches ainda não mergeadas" },
+    { flag: "--set-upstream-to", description: "Define manualmente a branch remota rastreada (upstream)" },
+  ],
+  curiosities: [
+    "Uma branch no Git é literalmente um arquivo de texto com 41 bytes: o SHA do commit para onde aponta + quebra de linha. Criar branch é instantâneo e tem custo de armazenamento quase zero.",
+    "Ao contrário de outros sistemas como SVN, branches no Git não têm custo de criação ou armazenamento. A filosofia 'branch early, branch often' é uma consequência direta disso.",
+  ],
 },
 {
   id: "switch",
@@ -643,7 +769,19 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "git switch foi introduzido para separar responsabilidades do antigo git checkout. Ele lida apenas com troca de branches, tornando o fluxo mais seguro e previsível. Em detached HEAD, commits feitos não pertencem a nenhuma branch até que você crie uma nova com 'git switch -c nome'. A flag '-' é extremamente útil para alternar rapidamente entre duas branches."
+    "git switch foi introduzido para separar responsabilidades do antigo git checkout. Ele lida apenas com troca de branches, tornando o fluxo mais seguro e previsível. Em detached HEAD, commits feitos não pertencem a nenhuma branch até que você crie uma nova com 'git switch -c nome'. A flag '-' é extremamente útil para alternar rapidamente entre duas branches.",
+  flags: [
+    { flag: "-c / --create", description: "Cria branch nova e já entra nela" },
+    { flag: "-d / --detach", description: "Entra em modo detached HEAD em um commit específico" },
+    { flag: "--discard-changes", description: "Descarta alterações locais ao trocar de branch", danger: true },
+    { flag: "--merge", description: "Tenta preservar mudanças locais fazendo merge automático ao trocar de branch" },
+    { flag: "-", description: "Atalho para voltar à branch anterior — alternância rápida entre duas branches" },
+    { flag: "-q / --quiet", description: "Suprime mensagens de saída" },
+  ],
+  curiosities: [
+    "git switch foi introduzido no Git 2.23 (2019) para separar as três responsabilidades que o sobrecarregado git checkout acumulou ao longo dos anos.",
+    "Detached HEAD não é um estado de erro — é um modo legítimo para explorar commits antigos. O perigo é fazer novos commits nesse estado sem criar uma branch para não perdê-los.",
+  ],
 },
 {
   id: "log",
@@ -727,7 +865,26 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "git log é extremamente poderoso. A combinação --oneline --graph --decorate --all oferece uma visualização clara do fluxo de branches. Filtros como --since, --author e ranges (A..B) ajudam a investigar mudanças específicas. Para análise profunda, combine com -p ou --stat."
+    "git log é extremamente poderoso. A combinação --oneline --graph --decorate --all oferece uma visualização clara do fluxo de branches. Filtros como --since, --author e ranges (A..B) ajudam a investigar mudanças específicas. Para análise profunda, combine com -p ou --stat.",
+  flags: [
+    { flag: "--oneline", description: "Uma linha por commit: SHA curto + mensagem" },
+    { flag: "--graph", description: "Desenha gráfico ASCII das branches no histórico" },
+    { flag: "--decorate", description: "Mostra onde estão HEAD, branches e tags no histórico" },
+    { flag: "--all", description: "Inclui histórico de todas as branches e tags" },
+    { flag: "-p / --patch", description: "Mostra o diff completo de cada commit" },
+    { flag: "--stat", description: "Resumo de arquivos e linhas alteradas por commit" },
+    { flag: "-n <número>", description: "Limita o número de commits exibidos (ex: -n 10)" },
+    { flag: "--author", description: "Filtra por nome ou e-mail do autor" },
+    { flag: "--since / --after", description: "Filtra commits após uma data (ex: --since=\"2 days ago\")" },
+    { flag: "--until / --before", description: "Filtra commits antes de uma data" },
+    { flag: "--follow", description: "Segue histórico de um arquivo mesmo após rename" },
+    { flag: "--format / --pretty", description: "Controla formato de saída (oneline, short, full, format:...)" },
+    { flag: "--no-merges", description: "Omite merge commits do histórico" },
+  ],
+  curiosities: [
+    "git log --oneline --graph --decorate --all é tão usado que muitos times criam um alias 'git lg' nas configurações globais do Git.",
+    "O Git armazena dois tipos de autoria: author (quem escreveu o código) e committer (quem criou o commit). Em open source com patches por e-mail, esses podem ser pessoas diferentes.",
+  ],
 },
 {
   id: "reset",
@@ -795,7 +952,19 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "O reset altera onde o HEAD aponta. --soft move apenas o ponteiro, --mixed altera também o stage (padrão), e --hard altera stage e working directory apagando mudanças locais. Caso algo seja apagado por engano, muitas vezes é possível recuperar usando git reflog."
+    "O reset altera onde o HEAD aponta. --soft move apenas o ponteiro, --mixed altera também o stage (padrão), e --hard altera stage e working directory apagando mudanças locais. Caso algo seja apagado por engano, muitas vezes é possível recuperar usando git reflog.",
+  flags: [
+    { flag: "--soft", description: "Move o HEAD mas mantém alterações no stage — útil para refazer o commit" },
+    { flag: "--mixed", description: "Move o HEAD e limpa o stage, mas mantém as mudanças no working directory (padrão)" },
+    { flag: "--hard", description: "Move o HEAD e APAGA tudo: stage e working directory", danger: true },
+    { flag: "--merge", description: "Volta HEAD mas preserva diferenças não commitadas quando possível" },
+    { flag: "--keep", description: "Similar ao --merge mas falha se houver mudanças conflitantes com os commits resetados" },
+    { flag: "HEAD~n", description: "Referência relativa: volta n commits (ex: HEAD~1 = commit anterior)" },
+  ],
+  curiosities: [
+    "git reset --hard apaga alterações permanentemente do working directory — mas os commits removidos ficam no reflog por 30 dias por padrão, permitindo recuperação com git reflog + git reset.",
+    "A diferença entre --soft, --mixed e --hard é o que acontece com stage e working directory. O ponteiro HEAD sempre se move nos três modos.",
+  ],
 },
   {
   id: "fetch",
@@ -867,7 +1036,20 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "git fetch atualiza apenas as referências remotas (ex: origin/main) sem tocar no seu working directory. É a forma mais segura de se atualizar antes de integrar mudanças. A flag --prune mantém seu ambiente limpo removendo branches remotas que foram deletadas no servidor."
+    "git fetch atualiza apenas as referências remotas (ex: origin/main) sem tocar no seu working directory. É a forma mais segura de se atualizar antes de integrar mudanças. A flag --prune mantém seu ambiente limpo removendo branches remotas que foram deletadas no servidor.",
+  flags: [
+    { flag: "--all", description: "Busca de todos os remotos configurados" },
+    { flag: "-p / --prune", description: "Remove refs locais de branches remotas que já foram deletadas" },
+    { flag: "--tags", description: "Busca todas as tags do remoto" },
+    { flag: "--depth <n>", description: "Limita o histórico baixado — útil para aprofundar clone raso" },
+    { flag: "--dry-run", description: "Mostra o que seria buscado sem executar" },
+    { flag: "-q / --quiet", description: "Suprime mensagens de progresso" },
+    { flag: "--no-tags", description: "Não baixa tags automaticamente" },
+  ],
+  curiosities: [
+    "git fetch é completamente seguro de executar a qualquer momento — nunca altera seu working directory ou branches locais. Só atualiza as referências remotas (origin/main etc.).",
+    "Após um fetch, origin/main e sua branch main local são ponteiros independentes. Você pode comparar com git log HEAD..origin/main antes de decidir como integrar.",
+  ],
 },
 {
   id: "remote",
@@ -904,6 +1086,19 @@ export const commands: GitCommand[] = [
   relatedCommands: ["fetch", "push", "pull", "clone"],
   deepDive:
     "O nome 'origin' é apenas uma convenção — pode ser qualquer nome. Em forks, é comum ter 'origin' apontando para seu fork e 'upstream' para o repo original. O comando 'git remote show' é especialmente útil para entender quais branches locais rastreiam quais remotas e se estão desatualizadas.",
+  flags: [
+    { flag: "-v / --verbose", description: "Lista remotos com URLs de fetch e push" },
+    { flag: "add <nome> <url>", description: "Adiciona novo remoto com o nome especificado" },
+    { flag: "remove / rm <nome>", description: "Remove um remoto e suas referências locais" },
+    { flag: "rename <antigo> <novo>", description: "Renomeia um remoto" },
+    { flag: "set-url <nome> <url>", description: "Altera a URL de um remoto existente (ex: HTTPS → SSH)" },
+    { flag: "show <nome>", description: "Exibe informações detalhadas: branches rastreadas, status de sincronização" },
+    { flag: "prune <nome>", description: "Remove refs locais de branches remotas já deletadas no servidor" },
+  ],
+  curiosities: [
+    "O nome 'origin' dado ao remoto após clone é apenas uma convenção do Git. Em forks, é comum ter 'origin' (seu fork) e 'upstream' (repo original) — dois remotos para o mesmo projeto.",
+    "git remote -v mostra URLs separadas para fetch e push. Você pode configurá-las diferente — útil em repositórios mirror ou setups especiais de CI/CD.",
+  ],
 },
 {
   id: "diff",
@@ -937,7 +1132,22 @@ export const commands: GitCommand[] = [
     "Se você quer ver histórico completo (use git log)",
     "Se quer ver o diff de um commit específico (use git show <sha>)",
   ],
-  relatedCommands: ["status", "add", "log", "show"]
+  relatedCommands: ["status", "add", "log", "show"],
+  flags: [
+    { flag: "--staged / --cached", description: "Mostra diferenças no stage (o que entrará no próximo commit)" },
+    { flag: "--name-only", description: "Mostra apenas os nomes dos arquivos alterados, sem o diff" },
+    { flag: "--name-status", description: "Mostra nomes e tipo de mudança (M=modified, A=added, D=deleted)" },
+    { flag: "--stat", description: "Resumo: quantas linhas adicionadas/removidas por arquivo" },
+    { flag: "--word-diff", description: "Diff por palavra em vez de linha — útil para textos e mensagens" },
+    { flag: "-w / --ignore-all-space", description: "Ignora mudanças de espaço e indentação" },
+    { flag: "--color-words", description: "Realça apenas as palavras alteradas com cor" },
+    { flag: "-U <n>", description: "Define quantas linhas de contexto exibir ao redor das mudanças" },
+    { flag: "--diff-filter", description: "Filtra por tipo de mudança (ex: --diff-filter=M mostra só modificados)" },
+  ],
+  curiosities: [
+    "git diff sem argumentos mostra unstaged, git diff --staged mostra staged, e git diff HEAD mostra tudo. Confundir os três é um dos erros mais comuns no dia a dia.",
+    "O formato de saída do diff (prefixo + e - nas linhas) é o 'unified diff' — um padrão criado nos anos 80 que ainda é amplamente usado em patches e code reviews.",
+  ]
 },
 {
   id: "stash",
@@ -1030,7 +1240,22 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "Stash salva seu estado local e volta o working directory para um estado limpo. 'apply' reaplica sem remover da lista; 'pop' reaplica e remove. Use mensagens (-m) e sempre confira com 'stash show -p' quando estiver lidando com múltiplos stashes. Em casos de conflito ao aplicar, resolva como um merge normal e faça commit se necessário."
+    "Stash salva seu estado local e volta o working directory para um estado limpo. 'apply' reaplica sem remover da lista; 'pop' reaplica e remove. Use mensagens (-m) e sempre confira com 'stash show -p' quando estiver lidando com múltiplos stashes. Em casos de conflito ao aplicar, resolva como um merge normal e faça commit se necessário.",
+  flags: [
+    { flag: "-m / --message", description: "Adiciona descrição ao stash — muito recomendado para não perder contexto" },
+    { flag: "-u / --include-untracked", description: "Inclui arquivos não rastreados no stash" },
+    { flag: "-a / --all", description: "Inclui untracked + arquivos ignorados pelo .gitignore", danger: true },
+    { flag: "-p / --patch", description: "Modo interativo: escolhe quais mudanças guardar no stash" },
+    { flag: "--keep-index", description: "Guarda o working directory mas mantém o stage intacto" },
+    { flag: "pop", description: "Reaplica o último stash e o remove da lista" },
+    { flag: "apply", description: "Reaplica um stash sem removê-lo da lista (útil para aplicar em várias branches)" },
+    { flag: "drop", description: "Remove um stash específico da lista" },
+    { flag: "clear", description: "Apaga TODOS os stashes — irreversível", danger: true },
+  ],
+  curiosities: [
+    "Stash internamente cria 2 ou 3 commits especiais referenciados por refs/stash. Eles não aparecem em git log mas estão fisicamente no repositório.",
+    "git stash é efêmero por design — não foi feito para armazenamento de longo prazo. Para guardar trabalho por mais tempo, uma branch de WIP (work in progress) é mais adequada.",
+  ],
 },
 {
   id: "rebase",
@@ -1097,7 +1322,21 @@ export const commands: GitCommand[] = [
   ],
 
   deepDive:
-    "O rebase reescreve o histórico criando novos commits com novos SHAs. Diferente do merge, ele não cria um merge commit, mantendo o histórico linear. Caso já tenha feito push da branch, será necessário usar 'git push --force-with-lease' (com cuidado). Em caso de conflito, o Git pausa o processo até que os arquivos sejam corrigidos manualmente."
+    "O rebase reescreve o histórico criando novos commits com novos SHAs. Diferente do merge, ele não cria um merge commit, mantendo o histórico linear. Caso já tenha feito push da branch, será necessário usar 'git push --force-with-lease' (com cuidado). Em caso de conflito, o Git pausa o processo até que os arquivos sejam corrigidos manualmente.",
+  flags: [
+    { flag: "-i / --interactive", description: "Modo interativo: reordena, edita, squash ou apaga commits antes de publicar" },
+    { flag: "--onto <nova-base>", description: "Move commits para uma base completamente diferente" },
+    { flag: "--autostash", description: "Faz stash automático antes do rebase e reaplicar ao final" },
+    { flag: "--continue", description: "Continua após resolver conflito" },
+    { flag: "--abort", description: "Cancela rebase e volta ao estado anterior" },
+    { flag: "--skip", description: "Pula o commit atual com conflito e continua" },
+    { flag: "--no-verify", description: "Ignora hooks durante o rebase", danger: true },
+    { flag: "--autosquash", description: "Reorganiza automaticamente commits marcados como fixup! ou squash!" },
+  ],
+  curiosities: [
+    "Rebase nunca 'move' commits — ele cria commits novos com o mesmo diff e depois apaga os originais. Por isso os SHAs sempre mudam após um rebase.",
+    "git rebase -i é uma máquina do tempo: permite reordenar, editar, juntar ou apagar qualquer commit do histórico local antes de publicar.",
+  ],
 },
 {
   id: "cherry-pick",
@@ -1130,7 +1369,20 @@ export const commands: GitCommand[] = [
     "Se você quer integrar uma branch inteira (use merge ou rebase)",
     "Se os commits têm dependências entre si — cherry-pick individual pode quebrar contexto",
   ],
-  relatedCommands: ["merge", "rebase", "log", "show"]
+  relatedCommands: ["merge", "rebase", "log", "show"],
+  flags: [
+    { flag: "-n / --no-commit", description: "Aplica as mudanças no stage sem criar commit automaticamente — útil para combinar múltiplos cherry-picks em um commit" },
+    { flag: "-e / --edit", description: "Abre editor para editar a mensagem antes de commitar" },
+    { flag: "-x", description: "Adiciona referência ao commit original na mensagem ('cherry picked from...')" },
+    { flag: "--continue", description: "Continua após resolver conflito" },
+    { flag: "--abort", description: "Cancela e volta ao estado anterior" },
+    { flag: "--skip", description: "Pula o commit atual com conflito e continua o range" },
+    { flag: "-m <número>", description: "Em merge commits, define qual branch pai usar como base (1 ou 2)" },
+  ],
+  curiosities: [
+    "cherry-pick cria um commit completamente novo — o SHA será diferente do original mesmo que o diff seja idêntico. Dois commits com o mesmo diff mas SHAs distintos coexistem no histórico.",
+    "O termo 'cherry-pick' vem da metáfora de escolher cerejas específicas de uma árvore em vez de colher tudo de uma vez.",
+  ]
 },
 {
   id: "revert",
@@ -1158,7 +1410,18 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se o commit ainda não foi publicado e você quer remover do histórico (use reset)"
   ],
-  relatedCommands: ["reset", "reflog", "log"]
+  relatedCommands: ["reset", "reflog", "log"],
+  flags: [
+    { flag: "--no-edit", description: "Aceita a mensagem padrão de reversão sem abrir editor" },
+    { flag: "-n / --no-commit", description: "Aplica a reversão no stage sem criar commit — útil para combinar múltiplos reverts em um único commit" },
+    { flag: "--continue", description: "Continua após resolver conflito de reversão" },
+    { flag: "--abort", description: "Cancela o revert em andamento" },
+    { flag: "-m <número>", description: "Em merge commits, define qual branch pai é o 'mainline' (1 ou 2) — obrigatório ao reverter um merge" },
+  ],
+  curiosities: [
+    "git revert é a forma correta de desfazer em histórico público: cria um novo commit que inverte o efeito de outro, sem reescrever o histórico.",
+    "Reverter um merge commit é especialmente delicado: se você reverter e depois tentar re-mergear a branch, o Git vai ignorar os commits já revertidos. É necessário reverter o próprio revert antes de re-mergear.",
+  ],
 },
 {
   id: "tag",
@@ -1189,7 +1452,20 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você precisa continuar desenvolvimento (use branch)"
   ],
-  relatedCommands: ["show", "log", "push"]
+  relatedCommands: ["show", "log", "push"],
+  flags: [
+    { flag: "-a / --annotate", description: "Cria tag anotada com autor, data e mensagem — recomendada para releases" },
+    { flag: "-m / --message", description: "Define a mensagem da tag anotada" },
+    { flag: "-d / --delete", description: "Deleta tag local" },
+    { flag: "-l / --list", description: "Lista tags com suporte a filtro por padrão (ex: -l \"v1.*\")" },
+    { flag: "-f / --force", description: "Força criação de tag mesmo se já existe com esse nome", danger: true },
+    { flag: "-s / --sign", description: "Cria tag assinada com GPG" },
+    { flag: "-v / --verify", description: "Verifica assinatura GPG de uma tag" },
+  ],
+  curiosities: [
+    "Existem dois tipos de tags: leves (apenas um ponteiro para um commit) e anotadas (um objeto completo com autor, data, mensagem e opcionalmente assinatura GPG). Para releases, sempre use tags anotadas.",
+    "Tags não se movem — ao contrário de branches. Uma vez criada, v1.0.0 sempre apontará para o mesmo commit, a menos que você a delete e recrie.",
+  ],
 },
 {
   id: "show",
@@ -1212,7 +1488,17 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você quer apenas listar commits (use git log)"
   ],
-  relatedCommands: ["log", "diff", "tag"]
+  relatedCommands: ["log", "diff", "tag"],
+  flags: [
+    { flag: "--stat", description: "Mostra resumo de arquivos alterados no commit" },
+    { flag: "--name-only", description: "Mostra apenas nomes dos arquivos alterados" },
+    { flag: "-p / --patch", description: "Mostra o diff completo (padrão para commits)" },
+    { flag: "--format / --pretty", description: "Controla formato de saída (oneline, short, full, format:...)" },
+    { flag: "--no-patch / -s", description: "Suprime o diff — mostra apenas o cabeçalho do commit" },
+  ],
+  curiosities: [
+    "git show funciona com qualquer objeto Git: commits, tags, trees e blobs. 'git show HEAD:arquivo.ts' mostra o conteúdo de um arquivo em um commit específico sem fazer checkout.",
+  ],
 },
 {
   id: "reflog",
@@ -1235,7 +1521,18 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você quer apenas ver histórico normal (use git log)"
   ],
-  relatedCommands: ["reset", "rebase", "log"]
+  relatedCommands: ["reset", "rebase", "log"],
+  flags: [
+    { flag: "--date=relative", description: "Mostra datas relativas ('2 hours ago', '3 days ago')" },
+    { flag: "--all", description: "Mostra reflog de todas as refs (branches, stash, etc.)" },
+    { flag: "-n <número>", description: "Limita o número de entradas exibidas" },
+    { flag: "--expire", description: "Define o prazo de expiração das entradas" },
+    { flag: "show <branch>", description: "Mostra o reflog de uma branch específica" },
+  ],
+  curiosities: [
+    "O reflog é local — não é enviado ao remoto com git push. Cada máquina tem seu próprio reflog independente.",
+    "Por padrão, o reflog mantém entradas por 90 dias (30 dias para entradas não acessíveis por nenhuma branch). Configurável com gc.reflogExpire.",
+  ],
 },
 {
   id: "blame",
@@ -1258,7 +1555,20 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você quer ver mudanças agrupadas por commit (use git log -p)"
   ],
-  relatedCommands: ["log", "show", "diff"]
+  relatedCommands: ["log", "show", "diff"],
+  flags: [
+    { flag: "-L <início>,<fim>", description: "Limita análise a um intervalo de linhas específico" },
+    { flag: "-w", description: "Ignora mudanças apenas de whitespace — não atribui culpa por ajuste de indentação" },
+    { flag: "-e / --show-email", description: "Mostra e-mail do autor em vez do nome" },
+    { flag: "--since", description: "Ignora commits antes da data especificada" },
+    { flag: "-M", description: "Detecta linhas movidas dentro do mesmo arquivo" },
+    { flag: "-C", description: "Detecta linhas copiadas de outros arquivos" },
+    { flag: "--ignore-rev <sha>", description: "Ignora um commit específico (ex: commit de formatação automática)" },
+  ],
+  curiosities: [
+    "git blame mostra o último commit que alterou cada linha, não necessariamente quem a escreveu. Reformatações e refactors podem 'culpar' a pessoa errada.",
+    "Combinando blame com git log -p é possível fazer arqueologia de código: rastrear a evolução de uma linha ao longo de toda a história do projeto.",
+  ],
 },
 {
   id: "clean",
@@ -1284,7 +1594,18 @@ export const commands: GitCommand[] = [
     "Se você tem arquivos importantes não versionados",
     "Sem rodar antes o -n para conferir"
   ],
-  relatedCommands: ["status", "reset", "stash"]
+  relatedCommands: ["status", "reset", "stash"],
+  flags: [
+    { flag: "-n / --dry-run", description: "Mostra o que seria removido sem executar — sempre use antes de -f" },
+    { flag: "-f / --force", description: "Executa a remoção de arquivos não rastreados" },
+    { flag: "-d", description: "Remove também diretórios não rastreados" },
+    { flag: "-x", description: "Remove também arquivos ignorados pelo .gitignore", danger: true },
+    { flag: "-X", description: "Remove APENAS arquivos ignorados (mantém untracked não ignorados)" },
+    { flag: "-i / --interactive", description: "Modo interativo para escolher quais arquivos remover" },
+  ],
+  curiosities: [
+    "git clean é irreversível — diferente de reset, não há reflog para arquivos untracked. Uma vez removidos, não há como recuperar. Por isso -n (dry-run) é essencial antes de -f.",
+  ],
 },
 {
   id: "rm",
@@ -1307,7 +1628,16 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se o arquivo ainda não foi adicionado ao Git"
   ],
-  relatedCommands: ["add", "reset", "restore"]
+  relatedCommands: ["add", "reset", "restore"],
+  flags: [
+    { flag: "--cached", description: "Remove do tracking do Git mas mantém o arquivo no disco — útil quando você quer adicionar algo ao .gitignore que já foi commitado" },
+    { flag: "-r", description: "Remove recursivamente — necessário para diretórios" },
+    { flag: "-f / --force", description: "Força remoção mesmo com mudanças locais não commitadas", danger: true },
+    { flag: "-n / --dry-run", description: "Mostra o que seria removido sem executar" },
+  ],
+  curiosities: [
+    "git rm --cached é um dos comandos mais úteis quando você acidentalmente commita um arquivo que deveria estar no .gitignore. Remove do tracking sem apagar do disco.",
+  ],
 },
 
 {
@@ -1330,7 +1660,15 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se o arquivo não está sendo rastreado pelo Git"
   ],
-  relatedCommands: ["add", "rm", "status"]
+  relatedCommands: ["add", "rm", "status"],
+  flags: [
+    { flag: "-f / --force", description: "Força a operação mesmo se o destino já existe", danger: true },
+    { flag: "-n / --dry-run", description: "Mostra o que seria feito sem executar" },
+    { flag: "-v / --verbose", description: "Mostra os arquivos sendo movidos/renomeados" },
+  ],
+  curiosities: [
+    "O Git não rastreia renomeações de arquivos explicitamente — ele detecta por similaridade de conteúdo após o fato. git mv é um atalho para 'mv + git rm + git add', garantindo que a detecção funcione corretamente.",
+  ],
 },
 {
   id: "config",
@@ -1369,6 +1707,20 @@ export const commands: GitCommand[] = [
   relatedCommands: ["init", "remote", "commit"],
   deepDive:
     "O Git possui três níveis de configuração: --system (toda a máquina), --global (seu usuário) e --local (repositório atual). O nível mais específico sempre sobrescreve o mais geral. Aliases são uma das features mais subestimadas do config — transformar 'log --oneline --graph --decorate --all' em 'git lg' muda o fluxo de trabalho.",
+  flags: [
+    { flag: "--global", description: "Aplica configuração a todos os repos do usuário atual (~/.gitconfig)" },
+    { flag: "--local", description: "Aplica configuração apenas ao repo atual (.git/config) — sobrescreve global" },
+    { flag: "--system", description: "Aplica configuração a todos os usuários da máquina (/etc/gitconfig)" },
+    { flag: "--list / -l", description: "Lista todas as configurações ativas" },
+    { flag: "--show-origin", description: "Mostra de qual arquivo vem cada configuração — útil para depurar conflitos" },
+    { flag: "--unset", description: "Remove uma configuração específica" },
+    { flag: "--edit / -e", description: "Abre o arquivo de configuração no editor padrão" },
+    { flag: "--get", description: "Retorna o valor de uma chave específica" },
+  ],
+  curiosities: [
+    "O Git tem três níveis de configuração: --system (toda a máquina), --global (seu usuário) e --local (repositório). O mais específico sempre vence — você pode ter um e-mail diferente por projeto.",
+    "Aliases no git config são uma das features mais subestimadas: 'git config --global alias.lg \"log --oneline --graph --decorate --all\"' e 'git lg' passa a funcionar em qualquer repo.",
+  ],
 },
 {
   id: "restore",
@@ -1391,7 +1743,16 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você quer remover o commit inteiro (use reset ou revert)"
   ],
-  relatedCommands: ["reset", "checkout", "revert"]
+  relatedCommands: ["reset", "checkout", "revert"],
+  flags: [
+    { flag: "--staged", description: "Remove arquivo do stage sem descartar as mudanças no working directory" },
+    { flag: "--source=<ref>", description: "Restaura versão de um commit, branch ou tag específica" },
+    { flag: "--worktree", description: "Descarta mudanças no working directory (comportamento padrão)" },
+    { flag: "-p / --patch", description: "Modo interativo: escolhe quais hunks restaurar" },
+  ],
+  curiosities: [
+    "git restore foi introduzido no Git 2.23 junto com git switch para separar as responsabilidades do git checkout. Restore lida com arquivos; switch lida com branches.",
+  ],
 },
 {
   id: "bisect",
@@ -1415,7 +1776,19 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você já sabe exatamente qual commit causou o problema"
   ],
-  relatedCommands: ["log", "revert", "checkout"]
+  relatedCommands: ["log", "revert", "checkout"],
+  flags: [
+    { flag: "start", description: "Inicia o processo de bisect" },
+    { flag: "bad", description: "Marca o commit atual como ruim (contém o bug)" },
+    { flag: "good <sha>", description: "Marca um commit como bom (sem o bug)" },
+    { flag: "reset", description: "Finaliza o bisect e volta ao estado original" },
+    { flag: "run <script>", description: "Automatiza o bisect — executa script para testar cada commit (0=bom, não-zero=ruim)" },
+    { flag: "skip", description: "Pula um commit (ex: quando não compila ou não é testável)" },
+  ],
+  curiosities: [
+    "git bisect usa busca binária — em um histórico de 1000 commits, encontra o commit problemático em no máximo 10 tentativas. Sem bisect, você testaria até 1000.",
+    "git bisect run <script> automatiza completamente o processo: o script retorna 0 para 'bom' e não-zero para 'ruim'. O Git navega pelo histórico sozinho até encontrar o commit culpado.",
+  ],
 },
 {
   id: "worktree",
@@ -1438,7 +1811,18 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você só precisa trocar de branch normalmente"
   ],
-  relatedCommands: ["branch", "checkout", "switch"]
+  relatedCommands: ["branch", "checkout", "switch"],
+  flags: [
+    { flag: "add <caminho> <branch>", description: "Cria novo diretório de trabalho com a branch especificada" },
+    { flag: "list", description: "Lista todos os worktrees ativos com seus caminhos e branches" },
+    { flag: "remove <caminho>", description: "Remove um worktree" },
+    { flag: "--force", description: "Força a operação mesmo com mudanças não commitadas", danger: true },
+    { flag: "prune", description: "Remove worktrees inválidos ou deletados manualmente" },
+    { flag: "lock", description: "Protege um worktree de ser removido por prune" },
+  ],
+  curiosities: [
+    "git worktree permite ter múltiplos checkouts do mesmo repositório em diretórios diferentes — útil para trabalhar em hotfix enquanto uma feature está em andamento, sem stash ou commit parcial.",
+  ],
 },
 {
   id: "submodule",
@@ -1461,7 +1845,20 @@ export const commands: GitCommand[] = [
   whenNotToUse: [
     "Se você pode usar gerenciador de pacotes (npm, pip, etc.)"
   ],
-  relatedCommands: ["clone", "pull", "fetch"]
+  relatedCommands: ["clone", "pull", "fetch"],
+  flags: [
+    { flag: "add <url>", description: "Adiciona repositório externo como submódulo" },
+    { flag: "init", description: "Inicializa submódulos definidos no .gitmodules" },
+    { flag: "update --init --recursive", description: "Inicializa e atualiza todos os submódulos recursivamente" },
+    { flag: "foreach <comando>", description: "Executa um comando em cada submódulo" },
+    { flag: "status", description: "Mostra estado atual de cada submódulo" },
+    { flag: "--recursive", description: "Aplica a operação em submódulos aninhados" },
+    { flag: "deinit", description: "Desregistra um submódulo (remove do .gitmodules e apaga seu conteúdo local)" },
+  ],
+  curiosities: [
+    "Submodules fixam um commit específico de outro repositório — não uma branch. Atualizar o submódulo significa criar um novo commit no repo pai com o ponteiro novo.",
+    "A maioria dos times modernos prefere gerenciadores de pacotes (npm, pip, cargo) a submodules para dependências externas. Submodules fazem mais sentido quando você precisa modificar o código da dependência.",
+  ],
 },
 
 ];

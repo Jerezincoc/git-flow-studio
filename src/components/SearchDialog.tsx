@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Clock } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -8,13 +8,17 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
-import { commands } from "@/data/commands";
+import { commands, categoryLabels } from "@/data/commands";
 import { problems } from "@/data/problems";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export function SearchDialog() {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const [history] = useLocalStorage<string[]>("git-doc-history", []);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -29,8 +33,32 @@ export function SearchDialog() {
 
   const go = (path: string) => {
     setOpen(false);
+    setQuery("");
     navigate(path);
   };
+
+  const recentCommands = history
+    .slice(0, 5)
+    .map((id) => commands.find((c) => c.id === id))
+    .filter(Boolean) as typeof commands;
+
+  const matchesQuery = (cmd: (typeof commands)[0]) => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return (
+      cmd.name.toLowerCase().includes(q) ||
+      cmd.description.toLowerCase().includes(q) ||
+      cmd.variations.some((v) => v.command.toLowerCase().includes(q) || v.description.toLowerCase().includes(q)) ||
+      (cmd.flags ?? []).some((f) => f.flag.toLowerCase().includes(q) || f.description.toLowerCase().includes(q))
+    );
+  };
+
+  const filteredCommands = commands.filter(matchesQuery);
+  const filteredProblems = problems.filter((p) => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return p.title.toLowerCase().includes(q);
+  });
 
   return (
     <>
@@ -45,26 +73,58 @@ export function SearchDialog() {
         </kbd>
       </button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Buscar comandos, problemas..." />
+      <CommandDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery(""); }}>
+        <CommandInput
+          placeholder="Buscar comandos, flags, problemas..."
+          value={query}
+          onValueChange={setQuery}
+        />
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-          <CommandGroup heading="Comandos">
-            {commands.map((cmd) => (
-              <CommandItem key={cmd.id} onSelect={() => go(`/commands/${cmd.id}`)}>
-                <span className="font-mono text-primary">{cmd.name}</span>
-                <span className="ml-2 text-muted-foreground text-sm">{cmd.description}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-          <CommandGroup heading="Problemas">
-            {problems.map((p) => (
-              <CommandItem key={p.id} onSelect={() => go(`/problems/${p.id}`)}>
-                <span className="mr-2">{p.emoji}</span>
-                <span>{p.title}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
+
+          {/* Recentes — só aparece quando não há query */}
+          {!query && recentCommands.length > 0 && (
+            <>
+              <CommandGroup heading="Vistos recentemente">
+                {recentCommands.map((cmd) => (
+                  <CommandItem key={cmd.id} value={`recent-${cmd.id}`} onSelect={() => go(`/commands/${cmd.id}`)}>
+                    <Clock className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
+                    <span className="font-mono text-primary">{cmd.name}</span>
+                    <span className="ml-auto text-xs text-muted-foreground">{categoryLabels[cmd.category]}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
+
+          {/* Comandos */}
+          {filteredCommands.length > 0 && (
+            <CommandGroup heading="Comandos">
+              {filteredCommands.map((cmd) => (
+                <CommandItem key={cmd.id} value={`cmd-${cmd.id}-${cmd.name}-${cmd.description}`} onSelect={() => go(`/commands/${cmd.id}`)}>
+                  <span className="font-mono text-primary">{cmd.name}</span>
+                  <span className="ml-2 text-muted-foreground text-sm truncate">{cmd.description}</span>
+                  <span className="ml-auto text-xs text-muted-foreground shrink-0 pl-2">{categoryLabels[cmd.category]}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {/* Problemas */}
+          {filteredProblems.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Problemas">
+                {filteredProblems.map((p) => (
+                  <CommandItem key={p.id} value={`prob-${p.id}-${p.title}`} onSelect={() => go(`/problems/${p.id}`)}>
+                    <span className="mr-2">{p.emoji}</span>
+                    <span>{p.title}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
         </CommandList>
       </CommandDialog>
     </>
