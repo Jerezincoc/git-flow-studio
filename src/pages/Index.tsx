@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   FolderPlus, Save, Upload, GitBranch, Undo, Wrench,
   ArrowRight, ChevronDown, ChevronUp, Terminal, AlertTriangle, BookOpen, Map,
+  LayoutList, FileCode2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/CopyButton";
@@ -87,8 +88,20 @@ const features = [
   {
     icon: Terminal,
     label: "Comandos",
-    description: "Referência completa de comandos com exemplos copiáveis",
+    description: "Referência completa de comandos com flags, exemplos e curiosidades",
     path: "/commands",
+  },
+  {
+    icon: LayoutList,
+    label: "Cheat Sheet",
+    description: "Todos os comandos em uma página. Filtre por categoria ou imprima.",
+    path: "/cheatsheet",
+  },
+  {
+    icon: FileCode2,
+    label: "Convenções",
+    description: "Guia de Conventional Commits com tipos, exemplos e ferramentas",
+    path: "/conventions",
   },
   {
     icon: Map,
@@ -151,7 +164,7 @@ export default function Index() {
           whileInView="show"
           viewport={{ once: true }}
           variants={stagger}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto"
         >
           {features.map((f) => {
             const Icon = f.icon;

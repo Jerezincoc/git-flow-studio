@@ -11,6 +11,8 @@ import Problems from "./pages/Problems";
 import ProblemDetail from "./pages/ProblemDetail";
 import Guide from "./pages/Guide";
 import GitMap from "./pages/GitMap";
+import CheatSheet from "./pages/CheatSheet";
+import Conventions from "./pages/Conventions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/problems/:id" element={<ProblemDetail />} />
             <Route path="/guide" element={<Guide />} />
             <Route path="/map" element={<GitMap />} />
+            <Route path="/cheatsheet" element={<CheatSheet />} />
+            <Route path="/conventions" element={<Conventions />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

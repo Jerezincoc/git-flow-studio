@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { GitBranch, Terminal, AlertTriangle, BookOpen, Menu } from "lucide-react";
+import { GitBranch, Terminal, AlertTriangle, BookOpen, Menu, LayoutList, FileCode2 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,6 +9,8 @@ import { useState } from "react";
 const navItems = [
   { label: "Guia", path: "/guide", icon: BookOpen },
   { label: "Comandos", path: "/commands", icon: Terminal },
+  { label: "Cheat Sheet", path: "/cheatsheet", icon: LayoutList },
+  { label: "Convenções", path: "/conventions", icon: FileCode2 },
   { label: "Mapa Git", path: "/map", icon: GitBranch },
   { label: "Problemas", path: "/problems", icon: AlertTriangle },
 ];

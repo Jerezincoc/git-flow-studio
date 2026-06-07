@@ -176,6 +176,89 @@ export const problems: GitProblem[] = [
   },
 ];
 
+  {
+    id: "commit-directly-to-main",
+    title: "Commitei direto na main por engano",
+    description: "Você fez commits direto na main e precisava estar em uma branch de feature. Como mover esses commits para uma branch nova sem perder o trabalho.",
+    emoji: "😬",
+    steps: [
+      { title: "Crie a branch nova a partir do estado atual da main", command: "git branch feature/minha-feature", description: "Cria a branch no mesmo ponto onde a main está agora — com seus commits incluídos." },
+      { title: "Volte a main local para onde estava antes dos commits", command: "git reset --hard origin/main", description: "Reseta a main local para o estado do remoto, removendo os commits que você fez." },
+      { title: "Mude para a branch nova", command: "git switch feature/minha-feature", description: "Agora seus commits estão apenas nessa branch." },
+      { title: "Confirme que os commits estão lá", command: "git log --oneline", description: "Verifique se todos os commits aparecem na branch correta." },
+      { title: "Envie a branch para o remoto", command: "git push -u origin feature/minha-feature", description: "Publica a branch com seus commits." },
+    ],
+    expectedResult: "Seus commits saem da main e ficam na branch correta. A main local volta ao estado limpo do remoto.",
+  },
+  {
+    id: "split-commit",
+    title: "Quero dividir um commit em dois",
+    description: "Você fez um commit grande misturando mudanças diferentes e quer separar em commits menores e mais específicos.",
+    emoji: "✂️",
+    steps: [
+      { title: "Desfaça o último commit mantendo as alterações", command: "git reset HEAD~1", description: "Remove o commit mas mantém todos os arquivos modificados no working directory. Use HEAD~2 para voltar 2 commits." },
+      { title: "Verifique o que está disponível", command: "git status", description: "Todos os arquivos do commit desfeito estarão unstaged." },
+      { title: "Adicione apenas o que vai no primeiro commit", command: "git add arquivo1.ts arquivo2.ts", description: "Selecione só o que faz sentido para o primeiro commit. Use 'git add -p' para dividir por hunks dentro de um mesmo arquivo." },
+      { title: "Faça o primeiro commit", command: 'git commit -m "feat: primeiro assunto"', description: "Commit focado e específico." },
+      { title: "Adicione o restante e faça o segundo commit", command: 'git add .\ngit commit -m "fix: segundo assunto"', description: "O que sobrou vai para o segundo commit." },
+    ],
+    expectedResult: "Um commit grande é dividido em dois (ou mais) commits menores, cada um com propósito claro.",
+  },
+  {
+    id: "clean-old-branches",
+    title: "Limpar branches antigas locais e remotas",
+    description: "Ao longo do tempo, o repositório acumulou branches de features já mergeadas. Como fazer uma limpeza segura.",
+    emoji: "🧹",
+    steps: [
+      { title: "Atualize as referências e remova branches remotas deletadas", command: "git fetch --prune", description: "Remove referências locais de branches que já foram deletadas no remoto." },
+      { title: "Liste branches locais já mergeadas na main", command: "git branch --merged main", description: "Mostra branches que podem ser deletadas com segurança (já integradas na main)." },
+      { title: "Delete as branches locais mergeadas", command: "git branch -d feature/branch-antiga feature/outra", description: "O -d é seguro: falha se a branch não foi mergeada." },
+      { title: "Liste branches remotas antigas mergeadas", command: "git branch -r --merged main", description: "Mostra branches remotas já integradas." },
+      { title: "Delete as branches no remoto", command: "git push origin --delete feature/branch-antiga", description: "Remove a branch do servidor remoto. Repita para cada branch." },
+    ],
+    expectedResult: "O repositório fica limpo, com apenas branches ativas e relevantes.",
+  },
+  {
+    id: "sync-fork",
+    title: "Sincronizar fork com o repositório original",
+    description: "Seu fork no GitHub ficou desatualizado e precisa receber os commits mais recentes do repositório original.",
+    emoji: "🔄",
+    steps: [
+      { title: "Adicione o remote do repositório original (só na primeira vez)", command: "git remote add upstream https://github.com/original/repo.git", description: "Aponta para o repo original. Confirme com 'git remote -v'." },
+      { title: "Baixe os commits do original", command: "git fetch upstream", description: "Busca as mudanças sem integrar ainda." },
+      { title: "Vá para a branch principal", command: "git switch main", description: "Certifique-se de estar na main local." },
+      { title: "Integre os commits do original", command: "git rebase upstream/main", description: "Reaplica seus commits sobre a main atualizada. Alternativa: git merge upstream/main." },
+      { title: "Atualize seu fork no GitHub", command: "git push origin main", description: "Envia a main sincronizada para seu fork." },
+    ],
+    expectedResult: "Seu fork fica atualizado com todos os commits do repositório original.",
+  },
+  {
+    id: "undo-merge",
+    title: "Desfazer um merge que foi para a main",
+    description: "Um merge foi feito na main por engano ou trouxe bugs. Como desfazê-lo de forma segura.",
+    emoji: "🔁",
+    steps: [
+      { title: "Identifique o commit do merge", command: "git log --oneline --merges -5", description: "Mostra os últimos merge commits. Copie o SHA do merge que quer desfazer." },
+      { title: "Opção A (segura — para histórico público): revert do merge", command: "git revert -m 1 <sha-do-merge>", description: "O -m 1 define a main como 'mainline'. Cria um commit de reversão sem reescrever histórico. Recomendado quando outros já puxaram o merge." },
+      { title: "Opção B (apenas se ninguém puxou ainda): reset", command: "git reset --hard <sha-antes-do-merge>", description: "Volta a main para antes do merge. Use git log para encontrar o SHA correto. DESTRUTIVO." },
+      { title: "Se usou reset, force push com cuidado", command: "git push --force-with-lease origin main", description: "Avise toda a equipe — todos precisarão re-sincronizar com git fetch + git reset." },
+    ],
+    expectedResult: "O merge é desfeito. Para histórico público, prefira sempre o revert.",
+  },
+  {
+    id: "recover-lost-stash",
+    title: "Perdi alterações do stash",
+    description: "Você fez git stash drop ou git stash clear por engano e perdeu suas alterações.",
+    emoji: "🔍",
+    steps: [
+      { title: "Procure objetos 'perdidos' no repositório", command: "git fsck --unreachable | grep commit", description: "Lista commits que não estão referenciados por nenhuma branch ou tag — inclui stashes descartados." },
+      { title: "Inspecione os hashes suspeitos", command: "git show <hash>", description: "Veja o conteúdo de cada hash para identificar qual era seu stash perdido." },
+      { title: "Aplique as mudanças recuperadas", command: "git stash apply <hash>", description: "Aplica o stash recuperado diretamente. Alternativa: git cherry-pick <hash>." },
+    ],
+    expectedResult: "As alterações do stash são recuperadas. Isso só funciona enquanto o garbage collector do Git não rodou (por padrão, objetos ficam acessíveis por 30 dias).",
+  },
+];
+
 export function getProblemById(id: string): GitProblem | undefined {
   return problems.find((p) => p.id === id);
 }

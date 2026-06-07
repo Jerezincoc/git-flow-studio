@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Clock } from "lucide-react";
+import { Search, Clock, LayoutList, FileCode2 } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,6 +13,11 @@ import {
 import { commands, categoryLabels } from "@/data/commands";
 import { problems } from "@/data/problems";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+
+const pages = [
+  { id: "cheatsheet", label: "Cheat Sheet", description: "Todos os comandos em uma página, filtrável por categoria", path: "/cheatsheet", Icon: LayoutList },
+  { id: "conventions", label: "Convenções de Commit", description: "Guia de Conventional Commits: tipos, exemplos, ferramentas", path: "/conventions", Icon: FileCode2 },
+];
 
 export function SearchDialog() {
   const [open, setOpen] = useState(false);
@@ -58,6 +63,12 @@ export function SearchDialog() {
     if (!query) return true;
     const q = query.toLowerCase();
     return p.title.toLowerCase().includes(q);
+  });
+
+  const filteredPages = pages.filter((p) => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    return p.label.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
   });
 
   return (
@@ -109,6 +120,25 @@ export function SearchDialog() {
                 </CommandItem>
               ))}
             </CommandGroup>
+          )}
+
+          {/* Páginas */}
+          {filteredPages.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Páginas">
+                {filteredPages.map((p) => {
+                  const Icon = p.Icon;
+                  return (
+                    <CommandItem key={p.id} value={`page-${p.id}-${p.label}`} onSelect={() => go(p.path)}>
+                      <Icon className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
+                      <span className="font-medium">{p.label}</span>
+                      <span className="ml-2 text-muted-foreground text-sm truncate">{p.description}</span>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </>
           )}
 
           {/* Problemas */}
