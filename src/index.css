@@ -81,6 +81,24 @@
   }
 }
 
+/* ShellDoc theme — blue PowerShell palette */
+.dark [data-theme="shell"] {
+  --primary: 210 100% 56%;
+  --primary-foreground: 225 30% 5%;
+  --accent: 195 100% 45%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 210 100% 56%;
+  --glow: 210 100% 56%;
+}
+:root [data-theme="shell"] {
+  --primary: 210 100% 42%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 195 100% 35%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 210 100% 42%;
+  --glow: 210 100% 42%;
+}
+
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;

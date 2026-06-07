@@ -1,26 +1,22 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { GitBranch, Terminal, AlertTriangle, BookOpen, Menu, LayoutList, FileCode2, ChevronLeft } from "lucide-react";
+import { Terminal, LayoutList, AlertTriangle, BookOpen, Menu, ChevronLeft } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import { SearchDialog } from "./SearchDialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const navItems = [
-  { label: "Guia", path: "/guide", icon: BookOpen },
-  { label: "Comandos", path: "/commands", icon: Terminal },
-  { label: "Cheat Sheet", path: "/cheatsheet", icon: LayoutList },
-  { label: "Convenções", path: "/conventions", icon: FileCode2 },
-  { label: "Mapa Git", path: "/map", icon: GitBranch },
-  { label: "Problemas", path: "/problems", icon: AlertTriangle },
+  { label: "Guia", path: "/shell/guide", icon: BookOpen },
+  { label: "Cmdlets", path: "/shell/commands", icon: Terminal },
+  { label: "Cheat Sheet", path: "/shell/cheatsheet", icon: LayoutList },
+  { label: "Problemas", path: "/shell/problems", icon: AlertTriangle },
 ];
 
-export function Layout() {
+export function ShellLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isActive = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+  const isActive = (path: string) => location.pathname.startsWith(path);
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
@@ -46,7 +42,7 @@ export function Layout() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div data-theme="shell" className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-6">
@@ -60,9 +56,9 @@ export function Layout() {
                 DevDocs
               </Link>
               <span className="text-border/80 text-sm">/</span>
-              <Link to="/git" className="flex items-center gap-2 font-bold text-lg">
-                <GitBranch className="h-5 w-5 text-primary" />
-                <span className="gradient-text">GitDoc</span>
+              <Link to="/shell" className="flex items-center gap-2 font-bold text-lg">
+                <Terminal className="h-5 w-5 text-primary" />
+                <span className="gradient-text">ShellDoc</span>
               </Link>
             </div>
             <nav className="hidden lg:flex items-center gap-1">
@@ -70,7 +66,6 @@ export function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <SearchDialog />
             <ThemeToggle />
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
@@ -92,7 +87,7 @@ export function Layout() {
       </main>
       <footer className="border-t border-border/50 py-6">
         <div className="container px-4 text-center text-xs text-muted-foreground">
-          Git Visual Doc — Interactive Edition • Feito para aprender Git de forma visual
+          ShellDoc — Referência visual de PowerShell e comandos Windows
         </div>
       </footer>
     </div>

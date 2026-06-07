@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "@/components/Layout";
+import { ShellLayout } from "@/components/ShellLayout";
+import Hub from "./pages/Hub";
 import Index from "./pages/Index";
 import Commands from "./pages/Commands";
 import CommandDetail from "./pages/CommandDetail";
@@ -14,6 +16,8 @@ import Guide from "./pages/Guide";
 import GitMap from "./pages/GitMap";
 import CheatSheet from "./pages/CheatSheet";
 import Conventions from "./pages/Conventions";
+import ShellHome from "./pages/ShellHome";
+import ShellComingSoon from "./pages/shell/ShellComingSoon";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,8 +30,12 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Hub */}
+          <Route path="/" element={<Hub />} />
+
+          {/* GitDoc — rotas existentes mantidas + /git como alias da home */}
           <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
+            <Route path="/git" element={<Index />} />
             <Route path="/commands" element={<Commands />} />
             <Route path="/commands/:id" element={<CommandDetail />} />
             <Route path="/problems" element={<Problems />} />
@@ -37,6 +45,17 @@ const App = () => (
             <Route path="/cheatsheet" element={<CheatSheet />} />
             <Route path="/conventions" element={<Conventions />} />
           </Route>
+
+          {/* ShellDoc */}
+          <Route element={<ShellLayout />}>
+            <Route path="/shell" element={<ShellHome />} />
+            <Route path="/shell/commands" element={<ShellComingSoon />} />
+            <Route path="/shell/commands/:id" element={<ShellComingSoon />} />
+            <Route path="/shell/guide" element={<ShellComingSoon />} />
+            <Route path="/shell/cheatsheet" element={<ShellComingSoon />} />
+            <Route path="/shell/problems" element={<ShellComingSoon />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
