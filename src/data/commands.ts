@@ -25,10 +25,7 @@ category:
   | "branching"
   | "remote"
   | "info"
-  | "undoing"
-  | "workflow"
-  | "stash"
-  | "merge-rebase";
+  | "undoing";
   uses: string[];
   variations: CommandVariation[];
   examples: CommandExample[];
@@ -45,10 +42,6 @@ export const categoryLabels: Record<string, string> = {
   remote: "Remoto",
   info: "Informação",
   undoing: "Desfazer",
-
-  workflow: "Workflow",
-  stash: "Stash",
-  "merge-rebase": "Merge/Rebase",
 };
 
 export const commands: GitCommand[] = [
