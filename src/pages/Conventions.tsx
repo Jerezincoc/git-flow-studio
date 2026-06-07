@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { SEO } from "@/components/SEO";
 import { CopyButton } from "@/components/CopyButton";
 import { CheckCircle, XCircle, AlertTriangle, Wrench } from "lucide-react";
 
@@ -44,6 +45,7 @@ export default function Conventions() {
   return (
     <div className="container px-4 py-12 max-w-3xl">
       <motion.div initial="hidden" animate="show" variants={stagger}>
+        <SEO title="Conventional Commits — Convenções de Commit" description="Guia completo de Conventional Commits: tipos (feat, fix, docs, chore...), breaking changes, exemplos bons e ruins, regras de ouro e ferramentas para automatizar." path="/conventions" />
         {/* Header */}
         <motion.div variants={fadeUp} className="mb-10">
           <h1 className="text-3xl font-bold mb-2">Convenções de Commit</h1>

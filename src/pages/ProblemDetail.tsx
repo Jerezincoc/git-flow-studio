@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle } from "lucide-react";
 import { getProblemById } from "@/data/problems";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
+import { SEO } from "@/components/SEO";
 
 export default function ProblemDetail() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,11 @@ export default function ProblemDetail() {
 
   return (
     <div className="container px-4 py-10 max-w-3xl">
+      <SEO
+        title={`${problem.title} — Como resolver`}
+        description={`${problem.description} Veja o passo a passo completo para resolver esse problema no Git.`}
+        path={`/problems/${problem.id}`}
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Link to="/problems" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" /> Voltar aos problemas

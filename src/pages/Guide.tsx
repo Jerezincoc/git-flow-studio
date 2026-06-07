@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { SEO } from "@/components/SEO";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { CopyButton } from "@/components/CopyButton";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
@@ -119,6 +120,7 @@ export default function Guide() {
 
   return (
     <div className="relative">
+      <SEO title="Guia para Iniciantes" description="Aprenda Git do zero com um guia passo a passo: instalação, primeiro commit, branches, push para GitHub, pull e .gitignore. Interativo e progressivo." path="/guide" />
       {/* Progress bar sticky */}
       <div className="sticky top-14 z-40 bg-background/90 backdrop-blur border-b border-border/50 px-4 py-2">
         <div className="container max-w-2xl mx-auto flex items-center gap-3">

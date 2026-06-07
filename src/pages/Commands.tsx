@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 import { commands, categoryLabels } from "@/data/commands";
 import { useState } from "react";
 import { Star } from "lucide-react";
@@ -27,6 +28,7 @@ export default function Commands() {
 
   return (
     <div className="container px-4 py-12">
+      <SEO title="Comandos Git" description="Referência completa de 31 comandos Git com flags, variações, exemplos práticos e curiosidades. Filtre por categoria e copie direto da página." path="/commands" />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold mb-2">Comandos Git</h1>
         <p className="text-muted-foreground mb-6">Documentação completa e interativa de cada comando.</p>

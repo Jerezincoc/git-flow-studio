@@ -57,7 +57,7 @@ export function Layout() {
                 beta
               </span>
             </Link>
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-1">
               <NavLinks />
             </nav>
           </div>
@@ -66,7 +66,7 @@ export function Layout() {
             <ThemeToggle />
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
                   <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>

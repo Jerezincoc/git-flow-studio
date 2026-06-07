@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { SEO, DEFAULT_DESCRIPTION } from "@/components/SEO";
 import {
   FolderPlus, Save, Upload, GitBranch, Undo, Wrench,
   ArrowRight, ChevronDown, ChevronUp, Terminal, AlertTriangle, BookOpen, Map,
@@ -129,8 +131,23 @@ const fadeUp = {
 export default function Index() {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "GitDoc",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "inLanguage": "pt-BR",
+    "description": DEFAULT_DESCRIPTION,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+  };
+
   return (
     <div className="hero-gradient bg-grid">
+      <SEO path="/" />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       {/* Hero */}
       <section className="container px-4 pt-20 pb-16 text-center">
         <motion.div initial="hidden" animate="show" variants={stagger}>

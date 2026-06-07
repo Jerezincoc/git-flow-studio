@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { GitFlowMap } from "@/components/GitFlowMap";
 import { CopyButton } from "@/components/CopyButton";
+import { SEO } from "@/components/SEO";
 
 const fullFlow = [
   { step: 1, cmd: "git init", description: "Inicializa um repositório Git na pasta atual" },
@@ -13,6 +14,7 @@ const fullFlow = [
 export default function GitMap() {
   return (
     <div className="container px-4 py-12">
+      <SEO title="Mapa Visual do Git" description="Visualize de forma interativa o fluxo completo do Git: Working Directory → Stage → Local Repo → Remote. Entenda cada etapa com comandos e exemplos." path="/map" />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold mb-2">Mapa Visual do Git</h1>
         <p className="text-muted-foreground mb-8">

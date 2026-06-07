@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Star, AlertTriangle, Lightbulb } from "lucide-react";
 import { getCommandById, categoryLabels } from "@/data/commands";
+import { SEO } from "@/components/SEO";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +39,11 @@ export default function CommandDetail() {
 
   return (
     <div className="container px-4 py-10 max-w-3xl">
+      <SEO
+        title={`${cmd.name} — Como usar, flags e exemplos`}
+        description={`${cmd.description} Veja sintaxe, variações, flags detalhadas e exemplos práticos de ${cmd.name}.`}
+        path={`/commands/${cmd.id}`}
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Link to="/commands" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="h-4 w-4" /> Voltar aos comandos
@@ -64,7 +70,8 @@ export default function CommandDetail() {
         {/* Tabs */}
         <div className="mt-8">
           <Tabs defaultValue="geral">
-            <TabsList className="w-full flex flex-wrap h-auto gap-1 justify-start">
+            <div className="overflow-x-auto -mx-1 px-1 pb-1">
+            <TabsList className="flex h-auto gap-1 justify-start w-max min-w-full">
               <TabsTrigger value="geral">Geral</TabsTrigger>
               <TabsTrigger value="variacoes">Variações</TabsTrigger>
               {cmd.flags && cmd.flags.length > 0 && (
@@ -75,6 +82,7 @@ export default function CommandDetail() {
                 <TabsTrigger value="curiosidades">Curiosidades</TabsTrigger>
               )}
             </TabsList>
+            </div>
 
             {/* Geral */}
             <TabsContent value="geral" className="mt-6 space-y-8">

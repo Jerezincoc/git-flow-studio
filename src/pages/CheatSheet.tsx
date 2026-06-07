@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 import { commands, categoryLabels } from "@/data/commands";
 import { CopyButton } from "@/components/CopyButton";
 import { Printer, ExternalLink } from "lucide-react";
@@ -41,8 +42,11 @@ export default function CheatSheet() {
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-wrap gap-2 mb-8 print:hidden">
+        <SEO title="Git Cheat Sheet" description="Referência rápida de todos os 31 comandos Git organizados por categoria. Filtre, copie a sintaxe ou imprima como PDF." path="/cheatsheet" />
+
+        {/* Filtros — scroll horizontal no mobile */}
+        <div className="overflow-x-auto -mx-4 px-4 pb-1 print:hidden">
+        <div className="flex gap-2 mb-8 w-max min-w-full">
           {filterOptions.map((opt) => (
             <button
               key={opt.value}
@@ -56,6 +60,7 @@ export default function CheatSheet() {
               {opt.label}
             </button>
           ))}
+        </div>
         </div>
 
         {/* Tabela por categoria */}
