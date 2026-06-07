@@ -80,9 +80,12 @@ export const commands: GitCommand[] = [
       "Criar uma cópia local de um repositório remoto",
     ],
     variations: [
-      { command: "git clone <url>", description: "Clone padrão" },
-      { command: "git clone <url> meu-nome", description: "Clone com nome personalizado" },
-      { command: "git clone --depth 1 <url>", description: "Clone raso (apenas último commit)" },
+      { command: "git clone <url>", description: "Clone padrão (todas as branches e histórico)" },
+      { command: "git clone <url> meu-nome", description: "Clone para diretório com nome personalizado" },
+      { command: "git clone --depth 1 <url>", description: "Clone raso: apenas o commit mais recente (mais rápido, menor)" },
+      { command: "git clone --branch develop <url>", description: "Clona e já entra na branch especificada" },
+      { command: "git clone --single-branch --branch main <url>", description: "Clona apenas uma branch (sem baixar as outras)" },
+      { command: "git clone --recurse-submodules <url>", description: "Clona e inicializa submódulos automaticamente" },
     ],
     examples: [
       { code: "git clone https://github.com/user/repo.git", description: "Clonar via HTTPS" },
@@ -121,7 +124,38 @@ export const commands: GitCommand[] = [
     relatedCommands: ["status", "commit", "reset"],
     deepDive: "O staging area (ou index) é uma área intermediária entre seu diretório de trabalho e o repositório. Ele permite que você selecione exatamente quais mudanças farão parte do próximo commit.",
   },
-  
+  {
+    id: "status",
+    name: "git status",
+    description: "Mostra o estado atual do working directory e do staging area: arquivos modificados, novos, deletados e o que está no stage.",
+    syntax: "git status [opções]",
+    category: "basics",
+    uses: [
+      "Verificar o que mudou antes de commitar",
+      "Ver quais arquivos estão no stage",
+      "Conferir se há conflitos de merge",
+      "Entender o estado do repositório em qualquer momento",
+    ],
+    variations: [
+      { command: "git status", description: "Saída completa e legível (padrão)" },
+      { command: "git status -s", description: "Saída compacta (short): duas colunas — stage | working dir" },
+      { command: "git status -b", description: "Inclui info da branch no formato compacto" },
+      { command: "git status -sb", description: "Compacto + branch (combinação mais usada no dia a dia)" },
+      { command: "git status -u", description: "Controla exibição de untracked: -uno omite, -uall expande subdiretórios" },
+      { command: "git status --ignored", description: "Mostra também arquivos ignorados (.gitignore)" },
+    ],
+    examples: [
+      { code: "git status", description: "Ver estado atual completo antes de commitar" },
+      { code: "git status -sb", description: "Visão rápida: branch + mudanças compactas" },
+      { code: "git add .\ngit status -s", description: "Verificar o que entrou no stage após git add" },
+    ],
+    whenNotToUse: [
+      "Não existe caso onde status seja prejudicial — é sempre seguro e não altera nada",
+    ],
+    relatedCommands: ["add", "commit", "diff", "restore"],
+    deepDive:
+      "Na saída compacta (-s), a primeira coluna indica o estado no stage e a segunda no working directory. Letras comuns: M (modified), A (added), D (deleted), ? (untracked), ! (ignored). É um dos comandos mais usados no Git — rodar status antes de qualquer operação é uma boa prática.",
+  },
     {
   id: "commit",
   name: "git commit",
@@ -376,6 +410,10 @@ export const commands: GitCommand[] = [
     {
       command: "git merge --ff-only feature/login",
       description: "Só permite merge se for fast-forward (falha se precisar de merge commit)"
+    },
+    {
+      command: "git merge --squash feature/login",
+      description: "Comprime todos os commits da branch em um único conjunto de mudanças no stage (você faz o commit manualmente)"
     },
     {
       command: "git merge --abort",
@@ -832,6 +870,42 @@ export const commands: GitCommand[] = [
     "git fetch atualiza apenas as referências remotas (ex: origin/main) sem tocar no seu working directory. É a forma mais segura de se atualizar antes de integrar mudanças. A flag --prune mantém seu ambiente limpo removendo branches remotas que foram deletadas no servidor."
 },
 {
+  id: "remote",
+  name: "git remote",
+  description: "Gerencia conexões com repositórios remotos: adiciona, lista, renomeia, remove e inspeciona.",
+  syntax: "git remote [opções]",
+  category: "remote",
+  uses: [
+    "Adicionar origem remota a um repositório local",
+    "Listar remotos configurados",
+    "Trocar a URL do remoto (ex: de HTTPS para SSH)",
+    "Remover ou renomear remotos",
+  ],
+  variations: [
+    { command: "git remote -v", description: "Lista remotos com suas URLs (fetch e push)" },
+    { command: "git remote add origin <url>", description: "Adiciona remoto chamado 'origin'" },
+    { command: "git remote add upstream <url>", description: "Adiciona segundo remoto (comum em forks)" },
+    { command: "git remote remove origin", description: "Remove um remoto" },
+    { command: "git remote rename origin novo-nome", description: "Renomeia um remoto" },
+    { command: "git remote set-url origin <nova-url>", description: "Altera a URL de um remoto (ex: HTTPS → SSH)" },
+    { command: "git remote show origin", description: "Exibe detalhes completos do remoto: branches rastreadas, status" },
+    { command: "git remote prune origin", description: "Remove referências locais de branches remotas deletadas" },
+  ],
+  examples: [
+    { code: "git remote add origin git@github.com:user/repo.git", description: "Conectar repo local ao GitHub via SSH" },
+    { code: "git remote -v", description: "Confirmar URL configurada (útil após troca de HTTPS para SSH)" },
+    { code: "git remote set-url origin git@github.com:user/repo.git", description: "Trocar URL de HTTPS para SSH sem reconfigurar tudo" },
+    { code: "git remote show origin", description: "Ver quais branches remotas estão sendo rastreadas" },
+  ],
+  whenNotToUse: [
+    "Se você clonou o repo (origin já é configurado automaticamente)",
+    "Para navegar entre branches remotas (use fetch + switch)",
+  ],
+  relatedCommands: ["fetch", "push", "pull", "clone"],
+  deepDive:
+    "O nome 'origin' é apenas uma convenção — pode ser qualquer nome. Em forks, é comum ter 'origin' apontando para seu fork e 'upstream' para o repo original. O comando 'git remote show' é especialmente útil para entender quais branches locais rastreiam quais remotas e se estão desatualizadas.",
+},
+{
   id: "diff",
   name: "git diff",
   description: "Mostra as diferenças entre arquivos, commits ou branches.",
@@ -842,18 +916,28 @@ export const commands: GitCommand[] = [
     "Comparar branches ou commits"
   ],
   variations: [
-    { command: "git diff", description: "Diferenças não adicionadas (unstaged)" },
-    { command: "git diff --staged", description: "Diferenças já adicionadas (staged)" },
-    { command: "git diff main..feature", description: "Compara duas branches" }
+    { command: "git diff", description: "Diferenças não adicionadas ao stage (unstaged)" },
+    { command: "git diff --staged", description: "Diferenças já adicionadas ao stage (o que entrará no commit)" },
+    { command: "git diff HEAD", description: "Tudo que mudou desde o último commit (staged + unstaged)" },
+    { command: "git diff main..feature", description: "Compara duas branches" },
+    { command: "git diff <sha1> <sha2>", description: "Compara dois commits específicos" },
+    { command: "git diff --name-only", description: "Mostra apenas os nomes dos arquivos alterados" },
+    { command: "git diff --stat", description: "Resumo de arquivos alterados com contagem de linhas" },
+    { command: "git diff --word-diff", description: "Diff por palavra em vez de linha (útil em textos e mensagens)" },
+    { command: "git diff -- arquivo.ts", description: "Diff de um arquivo específico" },
+    { command: "git diff --ignore-all-space", description: "Ignora diferenças de espaço/indentação" },
   ],
   examples: [
-    { code: "git diff", description: "Ver mudanças locais" },
-    { code: "git diff --staged", description: "Ver o que será commitado" }
+    { code: "git diff", description: "Ver mudanças locais antes de adicionar ao stage" },
+    { code: "git diff --staged", description: "Revisar exatamente o que vai entrar no commit" },
+    { code: "git diff --stat main..feature", description: "Resumo rápido do que uma branch muda em relação à main" },
+    { code: "git diff --name-only HEAD~3 HEAD", description: "Quais arquivos mudaram nos últimos 3 commits" },
   ],
   whenNotToUse: [
-    "Se você quer ver histórico completo (use git log)"
+    "Se você quer ver histórico completo (use git log)",
+    "Se quer ver o diff de um commit específico (use git show <sha>)",
   ],
-  relatedCommands: ["status", "add", "log"]
+  relatedCommands: ["status", "add", "log", "show"]
 },
 {
   id: "stash",
@@ -1026,18 +1110,27 @@ export const commands: GitCommand[] = [
     "Aplicar apenas um commit isolado"
   ],
   variations: [
-    { command: "git cherry-pick <sha>", description: "Aplica um commit específico" },
-    { command: "git cherry-pick <sha1> <sha2>", description: "Aplica múltiplos commits" },
-    { command: "git cherry-pick --continue", description: "Continuar após conflito" },
-    { command: "git cherry-pick --abort", description: "Cancelar operação" }
+    { command: "git cherry-pick <sha>", description: "Aplica um commit específico na branch atual" },
+    { command: "git cherry-pick <sha1> <sha2>", description: "Aplica múltiplos commits (na ordem informada)" },
+    { command: "git cherry-pick <sha1>..<sha2>", description: "Aplica range de commits (exclui sha1, inclui sha2)" },
+    { command: "git cherry-pick <sha1>^..<sha2>", description: "Aplica range incluindo o primeiro commit (sha1)" },
+    { command: "git cherry-pick -n <sha>", description: "Aplica as mudanças no stage SEM criar commit automaticamente" },
+    { command: "git cherry-pick -e <sha>", description: "Abre editor para editar a mensagem antes de commitar" },
+    { command: "git cherry-pick -x <sha>", description: "Adiciona referência ao commit original na mensagem ('cherry picked from...')" },
+    { command: "git cherry-pick --continue", description: "Continua após resolver conflito" },
+    { command: "git cherry-pick --abort", description: "Cancela e volta ao estado anterior" },
+    { command: "git cherry-pick --skip", description: "Pula o commit atual com conflito e continua o range" },
   ],
   examples: [
-    { code: "git cherry-pick a1b2c3d", description: "Aplicar commit específico" }
+    { code: "git cherry-pick a1b2c3d", description: "Levar um fix específico para outra branch" },
+    { code: "git cherry-pick -n a1b2c3d\ngit diff --staged\ngit commit -m \"feat: port login fix\"", description: "Aplicar mudanças sem commit automático para revisar antes" },
+    { code: "git cherry-pick abc123^..def456", description: "Aplicar sequência completa de commits entre dois SHAs" },
   ],
   whenNotToUse: [
-    "Se você quer integrar uma branch inteira (use merge ou rebase)"
+    "Se você quer integrar uma branch inteira (use merge ou rebase)",
+    "Se os commits têm dependências entre si — cherry-pick individual pode quebrar contexto",
   ],
-  relatedCommands: ["merge", "rebase", "log"]
+  relatedCommands: ["merge", "rebase", "log", "show"]
 },
 {
   id: "revert",
@@ -1050,12 +1143,17 @@ export const commands: GitCommand[] = [
     "Manter histórico claro sem reescrever commits"
   ],
   variations: [
-    { command: "git revert <sha>", description: "Reverte um commit específico" },
+    { command: "git revert <sha>", description: "Cria commit que reverte as mudanças de um commit específico" },
     { command: "git revert HEAD", description: "Reverte o último commit" },
-    { command: "git revert --no-commit <sha>", description: "Reverte sem criar commit automático" }
+    { command: "git revert HEAD~3..HEAD", description: "Reverte os últimos 3 commits (cria um commit por reversão)" },
+    { command: "git revert -n <sha>", description: "Aplica a reversão no stage sem criar commit automaticamente" },
+    { command: "git revert --no-edit <sha>", description: "Reverte sem abrir editor para editar mensagem (aceita mensagem padrão)" },
+    { command: "git revert --continue", description: "Continua após resolver conflito de reversão" },
+    { command: "git revert --abort", description: "Cancela o revert em andamento" },
   ],
   examples: [
-    { code: "git revert HEAD", description: "Desfazer o último commit com um novo commit de reversão" }
+    { code: "git revert HEAD --no-edit", description: "Reverter último commit rápido sem editar mensagem" },
+    { code: "git revert -n a1b2c3d\ngit revert -n b2c3d4e\ngit commit -m \"revert: remove feature X\"", description: "Reverter múltiplos commits em um único commit de reversão" },
   ],
   whenNotToUse: [
     "Se o commit ainda não foi publicado e você quer remover do histórico (use reset)"
@@ -1074,13 +1172,19 @@ export const commands: GitCommand[] = [
   ],
   variations: [
     { command: "git tag", description: "Lista todas as tags" },
-    { command: "git tag v1.0.0", description: "Cria uma tag leve no commit atual" },
-    { command: "git tag -a v1.0.0 -m \"mensagem\"", description: "Cria tag anotada" },
-    { command: "git push origin --tags", description: "Envia tags para o remoto" }
+    { command: "git tag -l \"v1.*\"", description: "Lista tags com filtro por padrão" },
+    { command: "git tag v1.0.0", description: "Cria tag leve no commit atual (sem metadados extras)" },
+    { command: "git tag -a v1.0.0 -m \"mensagem\"", description: "Cria tag anotada (recomendada para releases — inclui autor, data e mensagem)" },
+    { command: "git tag -a v1.0.0 <sha>", description: "Cria tag em um commit anterior específico" },
+    { command: "git tag -d v1.0.0", description: "Deleta uma tag local" },
+    { command: "git push origin --tags", description: "Envia todas as tags para o remoto" },
+    { command: "git push origin v1.0.0", description: "Envia uma tag específica para o remoto" },
+    { command: "git push origin --delete v1.0.0", description: "Deleta uma tag no remoto" },
   ],
   examples: [
-    { code: "git tag -a v2.0.0 -m \"Release 2.0\"", description: "Criar tag anotada" },
-    { code: "git push origin --tags", description: "Publicar tags no remoto" }
+    { code: "git tag -a v2.0.0 -m \"Release 2.0\"", description: "Criar tag anotada para release" },
+    { code: "git push origin v2.0.0", description: "Publicar tag específica no remoto" },
+    { code: "git tag -d v2.0.0\ngit push origin --delete v2.0.0", description: "Deletar tag local e remota" },
   ],
   whenNotToUse: [
     "Se você precisa continuar desenvolvimento (use branch)"
@@ -1227,6 +1331,44 @@ export const commands: GitCommand[] = [
     "Se o arquivo não está sendo rastreado pelo Git"
   ],
   relatedCommands: ["add", "rm", "status"]
+},
+{
+  id: "config",
+  name: "git config",
+  description: "Lê e define configurações do Git: identidade, editor, aliases, comportamentos padrão e muito mais.",
+  syntax: "git config [--global | --local | --system] <chave> <valor>",
+  category: "basics",
+  uses: [
+    "Configurar nome e e-mail do usuário (obrigatório no primeiro uso)",
+    "Definir editor padrão (VS Code, Vim, etc.)",
+    "Criar aliases para comandos longos",
+    "Ajustar comportamentos padrão (pull.rebase, push.default, etc.)",
+    "Inspecionar todas as configurações ativas",
+  ],
+  variations: [
+    { command: "git config --global user.name \"Seu Nome\"", description: "Define nome do autor (global)" },
+    { command: "git config --global user.email \"email@exemplo.com\"", description: "Define e-mail do autor (global)" },
+    { command: "git config --list", description: "Lista todas as configurações ativas (global + local)" },
+    { command: "git config --list --show-origin", description: "Lista configurações mostrando de qual arquivo vêm" },
+    { command: "git config --global core.editor \"code --wait\"", description: "Define VS Code como editor padrão" },
+    { command: "git config --global pull.rebase true", description: "Faz pull usar rebase por padrão em vez de merge" },
+    { command: "git config --global alias.st status", description: "Cria alias: 'git st' vira 'git status'" },
+    { command: "git config --global alias.lg \"log --oneline --graph --decorate --all\"", description: "Alias para log visual com grafo" },
+    { command: "git config --local user.email \"trabalho@empresa.com\"", description: "Define e-mail só para o repo atual (sobrescreve o global)" },
+    { command: "git config --unset <chave>", description: "Remove uma configuração específica" },
+  ],
+  examples: [
+    { code: "git config --global user.name \"João Silva\"\ngit config --global user.email \"joao@email.com\"", description: "Setup inicial obrigatório (identidade do autor)" },
+    { code: "git config --global alias.lg \"log --oneline --graph --decorate --all\"\ngit lg", description: "Criar e usar alias para log visual" },
+    { code: "git config --list --show-origin", description: "Depurar qual arquivo está definindo qual configuração" },
+  ],
+  whenNotToUse: [
+    "Use --local quando a config for específica do projeto (ex: e-mail corporativo em um repo específico)",
+    "Evite usar --system a menos que queira afetar todos os usuários da máquina",
+  ],
+  relatedCommands: ["init", "remote", "commit"],
+  deepDive:
+    "O Git possui três níveis de configuração: --system (toda a máquina), --global (seu usuário) e --local (repositório atual). O nível mais específico sempre sobrescreve o mais geral. Aliases são uma das features mais subestimadas do config — transformar 'log --oneline --graph --decorate --all' em 'git lg' muda o fluxo de trabalho.",
 },
 {
   id: "restore",
