@@ -100,7 +100,7 @@ export function SearchDialog() {
                 {recentCommands.map((cmd) => (
                   <CommandItem key={cmd.id} value={`recent-${cmd.id}`} onSelect={() => go(`/commands/${cmd.id}`)}>
                     <Clock className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
-                    <span className="font-mono text-primary">{cmd.name}</span>
+                    <span className="font-mono font-semibold text-primary">{cmd.name}</span>
                     <span className="ml-auto text-xs text-muted-foreground">{categoryLabels[cmd.category]}</span>
                   </CommandItem>
                 ))}
@@ -114,8 +114,8 @@ export function SearchDialog() {
             <CommandGroup heading="Comandos">
               {filteredCommands.map((cmd) => (
                 <CommandItem key={cmd.id} value={`cmd-${cmd.id}-${cmd.name}-${cmd.description}`} onSelect={() => go(`/commands/${cmd.id}`)}>
-                  <span className="font-mono text-primary">{cmd.name}</span>
-                  <span className="ml-2 text-muted-foreground text-sm truncate">{cmd.description}</span>
+                  <span className="font-mono font-semibold text-primary shrink-0">{cmd.name}</span>
+                  <span className="ml-2 text-sm truncate text-foreground/60">{cmd.description}</span>
                   <span className="ml-auto text-xs text-muted-foreground shrink-0 pl-2">{categoryLabels[cmd.category]}</span>
                 </CommandItem>
               ))}
