@@ -174,8 +174,6 @@ export const problems: GitProblem[] = [
     ],
     expectedResult: "O segredo é removido do histórico do Git. Lembre-se: se foi enviado ao remoto, considere-o comprometido e gere novas credenciais.",
   },
-];
-
   {
     id: "commit-directly-to-main",
     title: "Commitei direto na main por engano",
