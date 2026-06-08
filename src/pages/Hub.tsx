@@ -2,8 +2,20 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { GitBranch, Terminal, ArrowRight, Clock, Circle, Cpu } from "lucide-react";
+import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
 import { GIT_LAST_PATH_KEY } from "@/components/Layout";
+
+function UbuntuIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="4.5" r="2" fill="currentColor" />
+      <circle cx="19.2" cy="16" r="2" fill="currentColor" />
+      <circle cx="4.8"  cy="16" r="2" fill="currentColor" />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
 
 /* ─── GitAnimation — branches contínuas sem lacuna ──────────────────── */
 
@@ -93,38 +105,6 @@ function GitAnimation() {
   );
 }
 
-/* ─── TerminalAnimation ──────────────────────────────────────────────── */
-
-function TerminalAnimation({ lines }: { lines: string[] }) {
-  const cycle = 7;
-  return (
-    <svg viewBox="0 0 320 180" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-      {[0, cycle * 0.55].map((waveOffset, wi) =>
-        lines.map((line, i) => (
-          <motion.text
-            key={`w${wi}-l${i}`}
-            x="16" y={28 + i * 24}
-            fontSize="10.5"
-            fontFamily="JetBrains Mono, monospace"
-            fill="currentColor"
-            initial={{ opacity: 0, x: -6 }}
-            animate={{ opacity: [0, 0.32, 0.32, 0], x: [-6, 0, 0, 0] }}
-            transition={{
-              duration: cycle * 0.55,
-              delay: waveOffset + i * 0.4,
-              repeat: Infinity,
-              repeatDelay: cycle * 0.45,
-              ease: "easeOut",
-            }}
-          >
-            {line}
-          </motion.text>
-        ))
-      )}
-    </svg>
-  );
-}
-
 /* ─── dados ──────────────────────────────────────────────────────────── */
 
 const stats = [
@@ -137,12 +117,6 @@ const smallPreviews: Record<string, string[]> = {
   shell:  ["Get-ChildItem", "Where-Object", "Select-Object", "Invoke-WebRequest"],
   ubuntu: ["sudo apt install", "chmod 755", "grep -r", "systemctl status"],
   win:    ["dir /s /b", "ipconfig /all", "tasklist /fi", "sfc /scannow"],
-};
-
-const terminalLines: Record<string, string[]> = {
-  shell:  ["PS> Get-ChildItem -Recurse", "| Where-Object { $_.Length -gt 0 }", "| Select-Object Name, Length", "| Sort-Object Length -Desc"],
-  ubuntu: ["$ ls -la ~/projects", "$ sudo apt install curl -y", "$ chmod +x deploy.sh", "$ grep -r 'error' ./logs"],
-  win:    ["C:\\> dir /s /b *.log", "C:\\> ipconfig /all", "C:\\> tasklist /fi \"STATUS eq running\"", "C:\\> sfc /scannow"],
 };
 
 const docs = [
@@ -165,7 +139,7 @@ const docs = [
     available: false,
   },
   {
-    id: "ubuntu", name: "UbuntuDoc", path: "/ubuntu", icon: Circle,
+    id: "ubuntu", name: "UbuntuDoc", path: "/ubuntu", icon: UbuntuIcon,
     description: "Terminal Linux, permissões, processos e scripts Bash num só lugar.",
     glow: "0 0 55px rgba(249,115,22,0.18)",
     border: "rgba(249,115,22,0.32)",
@@ -289,7 +263,6 @@ function FeaturedCard({ doc }: { doc: typeof docs[0] }) {
 function SmallCard({ doc }: { doc: typeof docs[0] }) {
   const [hovered, setHovered] = useState(false);
   const Icon = doc.icon;
-  const lines = terminalLines[doc.id];
   const previews = smallPreviews[doc.id] ?? [];
 
   return (
@@ -302,14 +275,6 @@ function SmallCard({ doc }: { doc: typeof docs[0] }) {
       className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-[hsl(225,25%,6%)]
         hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500 opacity-50 hover:opacity-85"
     >
-      {lines && (
-        <div className={`absolute inset-0 ${doc.symbolColor} pointer-events-none`}>
-          <TerminalAnimation lines={lines} />
-        </div>
-      )}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 100% 70% at 50% 110%, hsl(225,25%,6%) 20%, transparent 80%)" }}
-      />
 
       <div className="relative z-10 p-5 flex flex-col gap-3 min-h-[148px]">
         <div className="flex items-center justify-between">
