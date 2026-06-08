@@ -4,7 +4,9 @@ import { ThemeToggle } from "./ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const GIT_LAST_PATH_KEY = "devdocs-git-last-path";
 
 const navItems = [
   { label: "Guia", path: "/guide", icon: BookOpen },
@@ -15,9 +17,18 @@ const navItems = [
   { label: "Problemas", path: "/problems", icon: AlertTriangle },
 ];
 
+export { GIT_LAST_PATH_KEY };
+
 export function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // persiste o último caminho visitado no GitDoc
+  useEffect(() => {
+    if (location.pathname !== "/git") {
+      localStorage.setItem(GIT_LAST_PATH_KEY, location.pathname);
+    }
+  }, [location.pathname]);
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);

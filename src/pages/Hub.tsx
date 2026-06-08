@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GitBranch, Terminal, ArrowRight, Clock, Circle, Cpu } from "lucide-react";
+import { GIT_LAST_PATH_KEY } from "@/components/Layout";
 
 /* ─── GitAnimation — branches contínuas sem lacuna ──────────────────── */
 
@@ -339,7 +340,7 @@ function SmallCard({ doc }: { doc: typeof docs[0] }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
-              className="text-[11px] text-white/38 leading-relaxed"
+              className="text-[11px] text-white/[0.38] leading-relaxed"
             >
               {doc.description}
             </motion.p>
@@ -357,6 +358,7 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.11 } } };
 
 export default function Hub() {
   const [featured, ...rest] = docs;
+  const gitLastPath = localStorage.getItem(GIT_LAST_PATH_KEY) ?? featured.path;
 
   return (
     <div className="min-h-screen flex flex-col bg-[hsl(225,30%,4%)]">
@@ -391,13 +393,13 @@ export default function Hub() {
 
           {/* card principal */}
           <motion.div variants={fadeUp}>
-            <Link to={featured.path}>
+            <Link to={gitLastPath}>
               <FeaturedCard doc={featured} />
             </Link>
           </motion.div>
 
           {/* cards em breve */}
-          <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+          <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {rest.map((doc) => (
               <SmallCard key={doc.id} doc={doc} />
             ))}
