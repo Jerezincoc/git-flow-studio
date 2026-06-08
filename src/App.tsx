@@ -17,6 +17,9 @@ import GitMap from "./pages/GitMap";
 import CheatSheet from "./pages/CheatSheet";
 import Conventions from "./pages/Conventions";
 import ShellHome from "./pages/ShellHome";
+import ShellCommands from "./pages/shell/ShellCommands";
+import ShellCommandDetail from "./pages/shell/ShellCommandDetail";
+import ShellCheatSheet from "./pages/shell/ShellCheatSheet";
 import ShellComingSoon from "./pages/shell/ShellComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -49,10 +52,10 @@ const App = () => (
           {/* ShellDoc */}
           <Route element={<ShellLayout />}>
             <Route path="/shell" element={<ShellHome />} />
-            <Route path="/shell/commands" element={<ShellComingSoon />} />
-            <Route path="/shell/commands/:id" element={<ShellComingSoon />} />
+            <Route path="/shell/commands" element={<ShellCommands />} />
+            <Route path="/shell/commands/:id" element={<ShellCommandDetail />} />
+            <Route path="/shell/cheatsheet" element={<ShellCheatSheet />} />
             <Route path="/shell/guide" element={<ShellComingSoon />} />
-            <Route path="/shell/cheatsheet" element={<ShellComingSoon />} />
             <Route path="/shell/problems" element={<ShellComingSoon />} />
           </Route>
 
