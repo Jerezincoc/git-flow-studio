@@ -6,6 +6,8 @@ import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
 import { GIT_LAST_PATH_KEY } from "@/components/Layout";
 import { SHELL_LAST_PATH_KEY } from "@/components/ShellLayout";
 
+/* ─── Ícone Ubuntu ───────────────────────────────────────────────────── */
+
 function UbuntuIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
@@ -18,7 +20,7 @@ function UbuntuIcon({ className }: { className?: string }) {
   );
 }
 
-/* ─── GitAnimation — branches contínuas sem lacuna ──────────────────── */
+/* ─── GitAnimation ───────────────────────────────────────────────────── */
 
 const GRAPH = {
   nodes: [
@@ -40,81 +42,110 @@ const GRAPH = {
     { d: "M220,152 L300,138",wave:2 },
   ],
 };
-
-// 3 waves sobrepostas — quando uma apaga a próxima já está a meio caminho
-const WAVE_OFFSETS = [0, 2.5, 5]; // segundos de offset entre waves
-const CYCLE = 8; // duração total de um ciclo por wave
+const WAVE_OFFSETS = [0, 2.5, 5];
+const CYCLE = 8;
 
 function GitAnimation() {
   return (
-    <svg
-      viewBox="0 0 360 280"
-      className="absolute inset-0 w-full h-full"
-      preserveAspectRatio="xMidYMid slice"
-    >
-      {WAVE_OFFSETS.map((waveOffset, wi) =>
-        GRAPH.edges.map((e, i) => {
-          const delay = waveOffset + e.wave * 0.35 + i * 0.18;
-          return (
-            <motion.path
-              key={`w${wi}-e${i}`}
-              d={e.d}
-              stroke="currentColor"
-              strokeWidth="1.5"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{
-                pathLength: [0, 1, 1, 0],
-                opacity:    [0, 0.28, 0.28, 0],
-              }}
-              transition={{
-                duration: CYCLE * 0.7,
-                delay,
-                repeat: Infinity,
-                repeatDelay: CYCLE * 0.3,
-                ease: "easeInOut",
-              }}
-            />
-          );
-        })
+    <svg viewBox="0 0 360 280" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
+      {WAVE_OFFSETS.map((wo, wi) =>
+        GRAPH.edges.map((e, i) => (
+          <motion.path key={`w${wi}-e${i}`} d={e.d} stroke="currentColor" strokeWidth="1.5" fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: [0,1,1,0], opacity: [0,0.28,0.28,0] }}
+            transition={{ duration: CYCLE*0.7, delay: wo + e.wave*0.35 + i*0.18, repeat: Infinity, repeatDelay: CYCLE*0.3, ease:"easeInOut" }}
+          />
+        ))
       )}
-      {WAVE_OFFSETS.map((waveOffset, wi) =>
-        GRAPH.nodes.map((n, i) => {
-          const delay = waveOffset + i * 0.16 + 0.2;
-          return (
-            <motion.circle
-              key={`w${wi}-n${i}`}
-              cx={n.cx} cy={n.cy} r="3.5"
-              fill="none" stroke="currentColor" strokeWidth="1.5"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{
-                scale:   [0, 1, 1, 0],
-                opacity: [0, 0.45, 0.45, 0],
-              }}
-              transition={{
-                duration: CYCLE * 0.7,
-                delay,
-                repeat: Infinity,
-                repeatDelay: CYCLE * 0.3,
-                ease: "backOut",
-              }}
-            />
-          );
-        })
+      {WAVE_OFFSETS.map((wo, wi) =>
+        GRAPH.nodes.map((n, i) => (
+          <motion.circle key={`w${wi}-n${i}`} cx={n.cx} cy={n.cy} r="3.5" fill="none" stroke="currentColor" strokeWidth="1.5"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0,1,1,0], opacity: [0,0.45,0.45,0] }}
+            transition={{ duration: CYCLE*0.7, delay: wo + i*0.16 + 0.2, repeat: Infinity, repeatDelay: CYCLE*0.3, ease:"backOut" }}
+          />
+        ))
       )}
     </svg>
   );
 }
 
-/* ─── dados ──────────────────────────────────────────────────────────── */
+/* ─── ShellAnimation — linhas de terminal aparecendo ────────────────── */
 
-const stats = [
-  { label: "comandos", value: "31" },
-  { label: "problemas", value: "18" },
-  { label: "flags documentadas", value: "120+" },
+const SHELL_LINES = [
+  { text: "Get-ChildItem -Recurse *.ps1", x: 24, y: 48  },
+  { text: "Where-Object { $_.CPU -gt 10 }", x: 24, y: 90  },
+  { text: "Select-Object Name, CPU, Id", x: 24, y: 132 },
+  { text: "Sort-Object -Descending", x: 24, y: 174 },
+  { text: "Invoke-WebRequest $url", x: 24, y: 216 },
+  { text: "ForEach-Object { $_ * 2 }", x: 24, y: 248 },
 ];
+const PROMPT_OFFSETS = [0, 1.8, 3.6, 5.4, 7.2, 9.0];
+const SHELL_CYCLE = 12;
+
+function ShellAnimation() {
+  return (
+    <svg viewBox="0 0 360 280" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
+      {SHELL_LINES.map((line, i) => {
+        const delay = PROMPT_OFFSETS[i % PROMPT_OFFSETS.length];
+        return (
+          <g key={i}>
+            {/* prompt PS> */}
+            <motion.text x={line.x} y={line.y} fontSize="11" fontFamily="monospace" fill="currentColor"
+              initial={{ opacity: 0 }} animate={{ opacity: [0, 0.55, 0.55, 0] }}
+              transition={{ duration: SHELL_CYCLE * 0.75, delay, repeat: Infinity, repeatDelay: SHELL_CYCLE * 0.25, ease: "easeInOut" }}
+            >
+              PS&gt;
+            </motion.text>
+            {/* comando */}
+            <motion.text x={line.x + 36} y={line.y} fontSize="11" fontFamily="monospace" fill="currentColor"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.32, 0.32, 0] }}
+              transition={{ duration: SHELL_CYCLE * 0.75, delay: delay + 0.4, repeat: Infinity, repeatDelay: SHELL_CYCLE * 0.25, ease: "easeInOut" }}
+            >
+              {line.text}
+            </motion.text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ─── dados por layer ────────────────────────────────────────────────── */
+
+export const LAST_LAYER_KEY = "devdocs-last-layer";
+
+const lastPathKeys: Record<string, string> = {
+  git:   GIT_LAST_PATH_KEY,
+  shell: SHELL_LAST_PATH_KEY,
+};
+
+const docStats: Record<string, { value: string; label: string }[]> = {
+  git: [
+    { value: "31",   label: "comandos" },
+    { value: "18",   label: "problemas" },
+    { value: "120+", label: "flags" },
+  ],
+  shell: [
+    { value: "33",   label: "cmdlets" },
+    { value: "15",   label: "problemas" },
+    { value: "9",    label: "anatomias" },
+  ],
+};
+
+const docGuideLinks: Record<string, string> = {
+  git:   "/guide",
+  shell: "/shell/guide",
+};
+
+const docAnimations: Record<string, React.FC> = {
+  git:   GitAnimation,
+  shell: ShellAnimation,
+};
 
 const smallPreviews: Record<string, string[]> = {
+  git:    ["git commit", "git rebase", "git cherry-pick", "git bisect"],
   shell:  ["Get-ChildItem", "Where-Object", "Select-Object", "Invoke-WebRequest"],
   ubuntu: ["sudo apt install", "chmod 755", "grep -r", "systemctl status"],
   win:    ["dir /s /b", "ipconfig /all", "tasklist /fi", "sfc /scannow"],
@@ -132,7 +163,7 @@ const docs = [
   },
   {
     id: "shell", name: "ShellDoc", path: "/shell", icon: Terminal,
-    description: "Cmdlets PowerShell e comandos Windows com pipeline explicado visualmente.",
+    description: "33 cmdlets PowerShell com flags, variações, exemplos e a anatomia de cada sintaxe explicada em português.",
     glow: "0 0 55px rgba(99,102,241,0.2)",
     border: "rgba(99,102,241,0.32)",
     accent: "rgba(99,102,241,0.07)",
@@ -161,101 +192,102 @@ const docs = [
 
 /* ─── FeaturedCard ───────────────────────────────────────────────────── */
 
-function FeaturedCard({ doc }: { doc: typeof docs[0] }) {
+function FeaturedCard({ doc, destination }: { doc: typeof docs[0]; destination: string }) {
   const [hovered, setHovered] = useState(false);
   const Icon = doc.icon;
+  const Animation = docAnimations[doc.id] ?? GitAnimation;
+  const stats = docStats[doc.id] ?? docStats.git;
+  const guideLink = docGuideLinks[doc.id] ?? "/guide";
 
   return (
-    <motion.div
-      initial="rest"
-      whileHover="hover"
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      style={{ "--glow": doc.glow, "--border-h": doc.border, "--accent": doc.accent } as React.CSSProperties}
-      className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[hsl(225,25%,6%)] cursor-pointer
-        hover:border-[var(--border-h)] hover:shadow-[var(--glow)] transition-[border-color,box-shadow] duration-500"
-    >
-      {/* SVG de fundo */}
-      <div className={`absolute inset-0 ${doc.symbolColor} pointer-events-none`}>
-        <GitAnimation />
-      </div>
-
-      {/* máscara gradiente suave — sem divisão dura */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse 100% 80% at 50% 110%, hsl(225,25%,6%) 30%, transparent 80%)" }}
-      />
-      {/* accent no hover */}
+    <Link to={destination}>
       <motion.div
-        className="absolute inset-0 rounded-2xl pointer-events-none"
-        variants={{ rest: { opacity: 0 }, hover: { opacity: 1 } }}
-        transition={{ duration: 0.4 }}
-        style={{ background: `radial-gradient(ellipse 70% 50% at 50% 100%, var(--accent), transparent)` }}
-      />
-
-      <div className="relative z-10 px-8 pt-8 pb-7 flex flex-col gap-4">
-        {/* header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              variants={{ rest: { rotate: 0, scale: 1 }, hover: { rotate: -9, scale: 1.12, transition: { type: "spring", stiffness: 280 } } }}
-            >
-              <Icon className={`h-6 w-6 ${doc.symbolColor}`} />
-            </motion.div>
-            <span className="text-2xl font-bold tracking-tight text-white/90">{doc.name}</span>
-          </div>
-          <span className="text-[10px] font-mono text-white/25 border border-white/10 px-2 py-0.5 rounded-full">
-            disponível
-          </span>
+        initial="rest"
+        whileHover="hover"
+        onHoverStart={() => setHovered(true)}
+        onHoverEnd={() => setHovered(false)}
+        style={{ "--glow": doc.glow, "--border-h": doc.border, "--accent": doc.accent } as React.CSSProperties}
+        className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[hsl(225,25%,6%)] cursor-pointer
+          hover:border-[var(--border-h)] hover:shadow-[var(--glow)] transition-[border-color,box-shadow] duration-500"
+      >
+        {/* animação de fundo específica do layer */}
+        <div className={`absolute inset-0 ${doc.symbolColor} pointer-events-none`}>
+          <Animation />
         </div>
 
-        {/* stats — sempre visíveis */}
-        <div className="flex items-center gap-5">
-          {stats.map((s) => (
-            <div key={s.label} className="flex items-baseline gap-1">
-              <span className={`text-sm font-bold font-mono ${doc.symbolColor}`}>{s.value}</span>
-              <span className="text-[11px] text-white/30">{s.label}</span>
+        {/* máscara gradiente */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 100% 80% at 50% 110%, hsl(225,25%,6%) 30%, transparent 80%)" }}
+        />
+        {/* accent no hover */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          variants={{ rest: { opacity: 0 }, hover: { opacity: 1 } }}
+          transition={{ duration: 0.4 }}
+          style={{ background: `radial-gradient(ellipse 70% 50% at 50% 100%, var(--accent), transparent)` }}
+        />
+
+        <div className="relative z-10 px-8 pt-8 pb-7 flex flex-col gap-4">
+          {/* header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div variants={{ rest: { rotate: 0, scale: 1 }, hover: { rotate: -9, scale: 1.12, transition: { type: "spring", stiffness: 280 } } }}>
+                <Icon className={`h-6 w-6 ${doc.symbolColor}`} />
+              </motion.div>
+              <span className="text-2xl font-bold tracking-tight text-white/90">{doc.name}</span>
             </div>
-          ))}
-        </div>
+            <span className="text-[10px] font-mono text-white/25 border border-white/10 px-2 py-0.5 rounded-full">
+              disponível
+            </span>
+          </div>
 
-        {/* descrição — aparece no hover */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.p
-              initial={{ opacity: 0, y: 8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: 4, height: 0 }}
-              transition={{ duration: 0.22 }}
-              className="text-sm text-white/50 leading-relaxed max-w-lg overflow-hidden"
+          {/* stats */}
+          <div className="flex items-center gap-5">
+            {stats.map((s) => (
+              <div key={s.label} className="flex items-baseline gap-1">
+                <span className={`text-sm font-bold font-mono ${doc.symbolColor}`}>{s.value}</span>
+                <span className="text-[11px] text-white/30">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* descrição no hover */}
+          <AnimatePresence>
+            {hovered && (
+              <motion.p
+                initial={{ opacity: 0, y: 8, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: 4, height: 0 }}
+                transition={{ duration: 0.22 }}
+                className="text-sm text-white/50 leading-relaxed max-w-lg overflow-hidden"
+              >
+                {doc.description}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {/* footer */}
+          <div className="flex items-center justify-between mt-1">
+            <motion.div
+              className="flex items-center gap-1.5 text-xs font-medium"
+              variants={{ rest: { color: "rgba(255,255,255,0.3)" }, hover: { color: "rgba(255,255,255,0.9)" } }}
             >
-              {doc.description}
-            </motion.p>
-          )}
-        </AnimatePresence>
-
-        {/* footer */}
-        <div className="flex items-center justify-between mt-1">
-          <motion.div
-            className="flex items-center gap-1.5 text-xs font-medium"
-            variants={{ rest: { color: "rgba(255,255,255,0.3)" }, hover: { color: "rgba(255,255,255,0.9)" } }}
-          >
-            Começar
-            <motion.span variants={{ rest: { x: 0 }, hover: { x: 5, transition: { type: "spring", stiffness: 380 } } }}>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </motion.span>
-          </motion.div>
-
-          {/* CTA secundário */}
-          <Link
-            to="/guide"
-            onClick={(e) => e.stopPropagation()}
-            className="text-[11px] text-white/25 hover:text-white/60 transition-colors underline underline-offset-2"
-          >
-            novo aqui? → Guia para iniciantes
-          </Link>
+              Começar
+              <motion.span variants={{ rest: { x: 0 }, hover: { x: 5, transition: { type: "spring", stiffness: 380 } } }}>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </motion.span>
+            </motion.div>
+            <Link
+              to={guideLink}
+              onClick={(e) => e.stopPropagation()}
+              className="text-[11px] text-white/25 hover:text-white/60 transition-colors underline underline-offset-2"
+            >
+              novo aqui? → Guia para iniciantes
+            </Link>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -281,7 +313,6 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
         )}
       </div>
 
-      {/* preview de cmdlets — sempre visível */}
       <div className="flex flex-wrap gap-1">
         {previews.map((p) => (
           <span key={p} className="font-mono text-[9px] text-white/25 bg-white/[0.04] px-1.5 py-0.5 rounded">
@@ -290,13 +321,10 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
         ))}
       </div>
 
-      {/* descrição no hover */}
       <AnimatePresence>
         {hovered && (
           <motion.p
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             className="text-[11px] text-white/[0.38] leading-relaxed"
           >
@@ -308,13 +336,13 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
   );
 
   const motionProps = {
-    initial: "rest",
-    whileHover: "hover",
+    initial: "rest", whileHover: "hover",
     onHoverStart: () => setHovered(true),
-    onHoverEnd: () => setHovered(false),
+    onHoverEnd:   () => setHovered(false),
     style: { "--border-h": doc.border } as React.CSSProperties,
     className: `relative overflow-hidden rounded-2xl border border-white/[0.05] bg-[hsl(225,25%,6%)]
-      hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500 ${doc.available ? "opacity-80 hover:opacity-100 cursor-pointer" : "opacity-50 hover:opacity-85"}`,
+      hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500
+      ${doc.available ? "opacity-80 hover:opacity-100 cursor-pointer" : "opacity-50 hover:opacity-85"}`,
   };
 
   if (doc.available) {
@@ -324,7 +352,6 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
       </motion.div>
     );
   }
-
   return <motion.div {...motionProps}>{inner}</motion.div>;
 }
 
@@ -333,14 +360,17 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
 const fadeUp = { hidden: { opacity: 0, y: 22 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.11 } } };
 
-const lastPathKeys: Record<string, string> = {
-  git:   GIT_LAST_PATH_KEY,
-  shell: SHELL_LAST_PATH_KEY,
-};
-
 export default function Hub() {
-  const [featured, ...rest] = docs;
-  const gitLastPath = localStorage.getItem(GIT_LAST_PATH_KEY) ?? featured.path;
+  // determina qual layer foi visitado por último
+  const lastLayer = localStorage.getItem(LAST_LAYER_KEY) ?? "git";
+  const featuredIndex = docs.findIndex((d) => d.id === lastLayer && d.available);
+  const featuredDoc = docs[featuredIndex !== -1 ? featuredIndex : 0];
+  const restDocs = docs.filter((d) => d.id !== featuredDoc.id);
+
+  const getDestination = (doc: typeof docs[0]) => {
+    const key = lastPathKeys[doc.id];
+    return (key && localStorage.getItem(key)) ?? doc.path;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[hsl(225,30%,4%)]">
@@ -373,20 +403,16 @@ export default function Hub() {
             </p>
           </motion.div>
 
-          {/* card principal */}
+          {/* card principal — último layer visitado */}
           <motion.div variants={fadeUp}>
-            <Link to={gitLastPath}>
-              <FeaturedCard doc={featured} />
-            </Link>
+            <FeaturedCard doc={featuredDoc} destination={getDestination(featuredDoc)} />
           </motion.div>
 
-          {/* cards em breve */}
+          {/* demais cards */}
           <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {rest.map((doc) => {
-              const key = lastPathKeys[doc.id];
-              const destination = (key && localStorage.getItem(key)) ?? doc.path;
-              return <SmallCard key={doc.id} doc={doc} destination={destination} />;
-            })}
+            {restDocs.map((doc) => (
+              <SmallCard key={doc.id} doc={doc} destination={getDestination(doc)} />
+            ))}
           </motion.div>
 
         </motion.div>

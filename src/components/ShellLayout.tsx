@@ -19,6 +19,7 @@ export function ShellLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    localStorage.setItem("devdocs-last-layer", "shell");
     if (location.pathname !== "/shell") {
       localStorage.setItem(SHELL_LAST_PATH_KEY, location.pathname);
     }

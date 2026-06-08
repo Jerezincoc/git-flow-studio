@@ -23,8 +23,9 @@ export function Layout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // persiste o último caminho visitado no GitDoc
+  // persiste o último caminho visitado no GitDoc e marca o layer atual
   useEffect(() => {
+    localStorage.setItem("devdocs-last-layer", "git");
     if (location.pathname !== "/git") {
       localStorage.setItem(GIT_LAST_PATH_KEY, location.pathname);
     }
