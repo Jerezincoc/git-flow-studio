@@ -136,7 +136,7 @@ const docs = [
     border: "rgba(99,102,241,0.32)",
     accent: "rgba(99,102,241,0.07)",
     symbolColor: "text-indigo-400",
-    available: false,
+    available: true,
   },
   {
     id: "ubuntu", name: "UbuntuDoc", path: "/ubuntu", icon: UbuntuIcon,
@@ -265,55 +265,66 @@ function SmallCard({ doc }: { doc: typeof docs[0] }) {
   const Icon = doc.icon;
   const previews = smallPreviews[doc.id] ?? [];
 
-  return (
-    <motion.div
-      initial="rest"
-      whileHover="hover"
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      style={{ "--border-h": doc.border } as React.CSSProperties}
-      className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-[hsl(225,25%,6%)]
-        hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500 opacity-50 hover:opacity-85"
-    >
-
-      <div className="relative z-10 p-5 flex flex-col gap-3 min-h-[148px]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon className={`h-3.5 w-3.5 ${doc.symbolColor}`} />
-            <span className="font-semibold text-sm text-white/80">{doc.name}</span>
-          </div>
+  const inner = (
+    <div className="relative z-10 p-5 flex flex-col gap-3 min-h-[148px]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-3.5 w-3.5 ${doc.symbolColor}`} />
+          <span className="font-semibold text-sm text-white/80">{doc.name}</span>
+        </div>
+        {!doc.available && (
           <div className="flex items-center gap-1 text-[9px] text-white/25">
             <Clock className="h-2.5 w-2.5" />
             em breve
           </div>
-        </div>
-
-        {/* preview de cmdlets — sempre visível */}
-        <div className="flex flex-wrap gap-1">
-          {previews.map((p) => (
-            <span key={p} className="font-mono text-[9px] text-white/25 bg-white/[0.04] px-1.5 py-0.5 rounded">
-              {p}
-            </span>
-          ))}
-        </div>
-
-        {/* descrição no hover */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.p
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="text-[11px] text-white/[0.38] leading-relaxed"
-            >
-              {doc.description}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        )}
       </div>
-    </motion.div>
+
+      {/* preview de cmdlets — sempre visível */}
+      <div className="flex flex-wrap gap-1">
+        {previews.map((p) => (
+          <span key={p} className="font-mono text-[9px] text-white/25 bg-white/[0.04] px-1.5 py-0.5 rounded">
+            {p}
+          </span>
+        ))}
+      </div>
+
+      {/* descrição no hover */}
+      <AnimatePresence>
+        {hovered && (
+          <motion.p
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="text-[11px] text-white/[0.38] leading-relaxed"
+          >
+            {doc.description}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
   );
+
+  const motionProps = {
+    initial: "rest",
+    whileHover: "hover",
+    onHoverStart: () => setHovered(true),
+    onHoverEnd: () => setHovered(false),
+    style: { "--border-h": doc.border } as React.CSSProperties,
+    className: `relative overflow-hidden rounded-2xl border border-white/[0.05] bg-[hsl(225,25%,6%)]
+      hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500 ${doc.available ? "opacity-80 hover:opacity-100 cursor-pointer" : "opacity-50 hover:opacity-85"}`,
+  };
+
+  if (doc.available) {
+    return (
+      <motion.div {...motionProps}>
+        <Link to={doc.path} className="block">{inner}</Link>
+      </motion.div>
+    );
+  }
+
+  return <motion.div {...motionProps}>{inner}</motion.div>;
 }
 
 /* ─── Hub ─────────────────────────────────────────────────────────────── */
