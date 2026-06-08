@@ -20,7 +20,9 @@ import ShellHome from "./pages/ShellHome";
 import ShellCommands from "./pages/shell/ShellCommands";
 import ShellCommandDetail from "./pages/shell/ShellCommandDetail";
 import ShellCheatSheet from "./pages/shell/ShellCheatSheet";
-import ShellComingSoon from "./pages/shell/ShellComingSoon";
+import ShellGuide from "./pages/shell/ShellGuide";
+import ShellProblems from "./pages/shell/ShellProblems";
+import ShellProblemDetail from "./pages/shell/ShellProblemDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,8 +57,9 @@ const App = () => (
             <Route path="/shell/commands" element={<ShellCommands />} />
             <Route path="/shell/commands/:id" element={<ShellCommandDetail />} />
             <Route path="/shell/cheatsheet" element={<ShellCheatSheet />} />
-            <Route path="/shell/guide" element={<ShellComingSoon />} />
-            <Route path="/shell/problems" element={<ShellComingSoon />} />
+            <Route path="/shell/guide" element={<ShellGuide />} />
+            <Route path="/shell/problems" element={<ShellProblems />} />
+            <Route path="/shell/problems/:id" element={<ShellProblemDetail />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
