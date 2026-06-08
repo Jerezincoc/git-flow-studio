@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Star, AlertTriangle, Lightbulb } from "lucide-react";
+import { ArrowLeft, Star, AlertTriangle, Lightbulb, BookOpen } from "lucide-react";
 import { getShellCommandById, shellCategoryLabels } from "@/data/shellCommands";
 import { CopyButton } from "@/components/CopyButton";
 import { Button } from "@/components/ui/button";
@@ -83,6 +83,9 @@ export default function ShellCommandDetail() {
                   <TabsTrigger value="flags">Flags</TabsTrigger>
                 )}
                 <TabsTrigger value="exemplos">Exemplos</TabsTrigger>
+                {cmd.syntaxBreakdown && cmd.syntaxBreakdown.length > 0 && (
+                  <TabsTrigger value="anatomia">Anatomia</TabsTrigger>
+                )}
                 {cmd.curiosities && cmd.curiosities.length > 0 && (
                   <TabsTrigger value="curiosidades">Curiosidades</TabsTrigger>
                 )}
@@ -192,6 +195,36 @@ export default function ShellCommandDetail() {
                 ))}
               </div>
             </TabsContent>
+
+            {/* Anatomia */}
+            {cmd.syntaxBreakdown && cmd.syntaxBreakdown.length > 0 && (
+              <TabsContent value="anatomia" className="mt-6">
+                <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Cada parte da sintaxe explicada em português, sem jargão técnico.
+                </p>
+                <div className="space-y-3">
+                  {cmd.syntaxBreakdown.map((item, i) => (
+                    <div key={i} className={`glass-card p-4 ${item.optional ? "border-border/30" : "border-primary/20"}`}>
+                      <div className="flex items-start gap-3 flex-wrap mb-2">
+                        <code className="font-mono text-sm text-primary bg-primary/10 px-2 py-0.5 rounded shrink-0">
+                          {item.part}
+                        </code>
+                        <span className="text-xs font-semibold text-muted-foreground bg-secondary px-2 py-0.5 rounded">
+                          {item.label}
+                        </span>
+                        {item.optional && (
+                          <span className="text-[10px] text-muted-foreground/60 bg-secondary/60 px-1.5 py-0.5 rounded">
+                            opcional
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
 
             {/* Curiosidades */}
             {cmd.curiosities && cmd.curiosities.length > 0 && (

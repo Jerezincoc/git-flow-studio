@@ -328,6 +328,154 @@ export const shellProblems: ShellProblem[] = [
     prevention: "Em scripts de produção, prefira $ErrorActionPreference = 'Stop' no início do script e use try/catch para erros esperados e recuperáveis.",
     relatedCommands: ["Get-Error", "Write-Error", "Throw"],
   },
+  {
+    id: "json-depth-truncated",
+    title: "ConvertTo-Json corta objetos aninhados",
+    symptom: "Ao converter um objeto para JSON, propriedades de objetos aninhados aparecem como a representação textual do tipo .NET (ex: 'System.Object[]') em vez do valor real.",
+    cause: "ConvertTo-Json tem profundidade padrão de 2 níveis. Objetos com mais níveis de aninhamento são truncados e convertidos para .ToString().",
+    category: "pipeline",
+    difficulty: "easy",
+    steps: [
+      {
+        title: "Identifique o problema",
+        code: '$obj = @{ a = @{ b = @{ c = "valor" } } }\n$obj | ConvertTo-Json\n# Resultado: { "a": { "b": "System.Collections.Hashtable" } }',
+        description: "O nível 'c' tem 3 níveis de aninhamento — além do padrão de 2.",
+      },
+      {
+        title: "Use -Depth com valor maior",
+        code: '$obj | ConvertTo-Json -Depth 10\n# Resultado correto: { "a": { "b": { "c": "valor" } } }',
+        description: "-Depth 10 é seguro para a maioria dos objetos. Para objetos muito complexos, aumente conforme necessário.",
+      },
+      {
+        title: "Use -Depth ao salvar em arquivo",
+        code: '$config | ConvertTo-Json -Depth 10 | Set-Content config.json',
+        description: "Sempre especifique -Depth ao trabalhar com configurações ou respostas de API.",
+      },
+    ],
+    prevention: "Adote -Depth 10 como padrão sempre que usar ConvertTo-Json. O custo de performance é mínimo e evita bugs difíceis de detectar.",
+    relatedCommands: ["ConvertTo-Json", "ConvertFrom-Json", "Get-Content"],
+  },
+  {
+    id: "parameter-cannot-bind",
+    title: "Cannot bind argument to parameter — valor nulo inesperado",
+    symptom: "\"Cannot bind argument to parameter 'X' because it is null\" ou \"Cannot process argument because the value of argument 'X' is null.\"",
+    cause: "Um cmdlet recebeu $null onde esperava um valor. Isso ocorre quando uma variável não foi inicializada, um resultado foi vazio, ou uma propriedade não existe no objeto.",
+    category: "errors",
+    difficulty: "medium",
+    steps: [
+      {
+        title: "Identifique qual variável é nula",
+        code: '# Adicione Write-Host antes do comando que falha:\nWrite-Host "Valor: $variavel"\nWrite-Host "Tipo: $($variavel.GetType().Name)"',
+        description: "Se Write-Host não imprime nada ou imprime 'você não pode chamar um método em uma expressão nula', a variável é $null.",
+      },
+      {
+        title: "Verifique por nulo antes de usar",
+        code: 'if ($null -eq $resultado) {\n  Write-Warning "Resultado vazio, abortando"\n  return\n}\n# Continua o processamento',
+        description: "No PowerShell, compare com -eq $null (não $null -eq) para evitar comportamentos inesperados com arrays.",
+      },
+      {
+        title: "Use operador de coalescência nula (PS7+)",
+        code: '$valor = $possivlementeNulo ?? "valor padrão"',
+        description: "O operador ?? retorna o lado direito se o esquerdo for $null. Disponível no PowerShell 7+.",
+      },
+      {
+        title: "Verifique se a propriedade existe no objeto",
+        code: 'if ($obj.PSObject.Properties.Name -contains "propriedade") {\n  $valor = $obj.propriedade\n}',
+        description: "Nem todo objeto tem todas as propriedades. PSObject.Properties.Name lista as propriedades disponíveis.",
+      },
+    ],
+    relatedCommands: ["Get-Member", "Where-Object", "Select-Object"],
+  },
+  {
+    id: "cannot-convert-string-to-datetime",
+    title: "Não consegue converter string para DateTime",
+    symptom: "\"Cannot convert value 'DD/MM/YYYY' to type 'System.DateTime'\" ao tentar comparar ou filtrar por datas.",
+    cause: "O PowerShell usa o formato de data do sistema (geralmente MM/DD/YYYY no Windows em inglês). Strings de data em formatos diferentes precisam ser convertidas explicitamente.",
+    category: "errors",
+    difficulty: "medium",
+    steps: [
+      {
+        title: "Verifique o formato de data do sistema",
+        code: '[System.Globalization.CultureInfo]::CurrentCulture.DateTimeFormat.ShortDatePattern',
+        description: "Mostra o padrão de data esperado pelo sistema. Pode ser MM/dd/yyyy, dd/MM/yyyy, etc.",
+      },
+      {
+        title: "Use Get-Date para converter strings",
+        code: '# Converte string para DateTime\n$data = [DateTime]::ParseExact("25/12/2024", "dd/MM/yyyy", $null)\n\n# Ou use Get-Date\n$data = Get-Date "25/12/2024" -Format "dd/MM/yyyy"',
+        description: "ParseExact permite especificar exatamente o formato da string de entrada.",
+      },
+      {
+        title: "Compare datas corretamente",
+        code: '$ontemDateTime = (Get-Date).AddDays(-1)\nGet-ChildItem | Where-Object { $_.LastWriteTime -gt $ontemDateTime }',
+        description: "Sempre compare usando objetos DateTime, não strings. Get-Date retorna um DateTime.",
+      },
+      {
+        title: "Formate DateTime para string quando necessário",
+        code: 'Get-Date -Format "dd/MM/yyyy HH:mm:ss"\n# Ou\n(Get-Date).ToString("dd/MM/yyyy")',
+        description: "Use -Format para obter a string no formato desejado ao exibir ou salvar.",
+      },
+    ],
+    relatedCommands: ["Get-Date", "Where-Object"],
+  },
+  {
+    id: "remote-execution-error",
+    title: "Erro ao executar comandos em máquinas remotas",
+    symptom: "\"WinRM cannot complete the operation\" ou \"Access is denied\" ao tentar usar Invoke-Command, Enter-PSSession ou outros cmdlets remotos.",
+    cause: "O WinRM (Windows Remote Management) não está configurado, a máquina remota não está acessível, ou as credenciais/permissões estão incorretas.",
+    category: "permissions",
+    difficulty: "hard",
+    steps: [
+      {
+        title: "Verifique se o WinRM está ativo no servidor remoto",
+        code: '# Execute NO computador remoto (ou via acesso físico/RDP):\nGet-Service WinRM\nEnable-PSRemoting -Force',
+        description: "Enable-PSRemoting configura o WinRM, cria as regras de firewall e inicia o serviço. Requer admin no computador remoto.",
+      },
+      {
+        title: "Teste conectividade remota",
+        code: 'Test-WSMan -ComputerName servidor01\n# Se retornar XML, o WinRM está acessível\n# Se falhar, verifique firewall (porta 5985 HTTP ou 5986 HTTPS)',
+        description: "Test-WSMan verifica se o endpoint WinRM está acessível.",
+      },
+      {
+        title: "Execute comando remoto com credenciais",
+        code: '$credencial = Get-Credential\nInvoke-Command -ComputerName servidor01 -Credential $credencial -ScriptBlock {\n  Get-ComputerInfo | Select-Object WindowsVersion\n}',
+        description: "Get-Credential abre um prompt seguro para inserir usuário e senha.",
+      },
+      {
+        title: "Para ambientes de workgroup (sem domínio), configure TrustedHosts",
+        code: '# No computador LOCAL (execute como admin):\nSet-Item WSMan:\\localhost\\Client\\TrustedHosts -Value "servidor01" -Force\n# Ou para todos: -Value "*" (menos seguro)',
+        description: "Em domínios Active Directory, isso não é necessário. Só é necessário em redes workgroup.",
+      },
+    ],
+    prevention: "Em ambientes de domínio, use Enter-PSSession e Invoke-Command livremente — o Kerberos autentica automaticamente. Em workgroup, prefira SSH remoto (PS7+ suporta SSH nativo com -HostName).",
+    relatedCommands: ["Invoke-Command", "Enter-PSSession", "Test-Connection"],
+  },
+  {
+    id: "output-formatting-breaks-pipeline",
+    title: "Format-Table e Format-List quebram o pipeline",
+    symptom: "Após usar Format-Table ou Format-List, comandos subsequentes no pipeline falham ou retornam resultados inesperados. Ou ao tentar salvar em arquivo, o resultado são formatações visuais e não os dados.",
+    cause: "Format-* converte objetos em instruções de formatação para o console — não são mais os objetos originais. Qualquer processamento posterior falha porque os objetos são do tipo 'Microsoft.PowerShell.Commands.Internal.Format.*'.",
+    category: "pipeline",
+    difficulty: "medium",
+    steps: [
+      {
+        title: "Entenda o problema",
+        code: '# Errado: Format-Table quebra o pipeline\nGet-Process | Format-Table Name, CPU | Export-Csv processos.csv\n# Resultado: CSV com dados de formatação, não de processos',
+        description: "Format-* deve sempre ser o último comando no pipeline — nunca no meio.",
+      },
+      {
+        title: "Mova o Format-* para o final",
+        code: '# Certo: processa dados primeiro, formata no final\nGet-Process | Select-Object Name, CPU | Export-Csv processos.csv\n\n# Se quiser ver E salvar:\n$dados = Get-Process | Select-Object Name, CPU\n$dados | Export-Csv processos.csv\n$dados | Format-Table',
+        description: "Use Select-Object para escolher propriedades (pipeline-safe), Format-Table só para exibição final.",
+      },
+      {
+        title: "Use Export-Csv, ConvertTo-Json ou Out-File para salvar",
+        code: '# Para CSV:\nGet-Process | Select-Object Name, CPU | Export-Csv saida.csv -NoTypeInformation\n\n# Para JSON:\nGet-Process | Select-Object Name, CPU | ConvertTo-Json | Set-Content saida.json\n\n# Para texto simples:\nGet-Process | Out-File processos.txt',
+        description: "Esses cmdlets preservam ou exportam os dados sem quebrar o pipeline.",
+      },
+    ],
+    prevention: "Regra de ouro: Format-* só no final do pipeline, para exibição humana. Para tudo que vai para arquivo ou processamento posterior, use Select-Object, Export-Csv, ConvertTo-Json, ou Out-File.",
+    relatedCommands: ["Select-Object", "Export-Csv", "ConvertTo-Json", "Out-File"],
+  },
 ];
 
 export function getShellProblemById(id: string): ShellProblem | undefined {

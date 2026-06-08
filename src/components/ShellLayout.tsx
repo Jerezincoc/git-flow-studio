@@ -3,7 +3,9 @@ import { Terminal, LayoutList, AlertTriangle, BookOpen, Menu, ChevronLeft } from
 import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+export const SHELL_LAST_PATH_KEY = "devdocs-shell-last-path";
 
 const navItems = [
   { label: "Guia", path: "/shell/guide", icon: BookOpen },
@@ -15,6 +17,12 @@ const navItems = [
 export function ShellLayout() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (location.pathname !== "/shell") {
+      localStorage.setItem(SHELL_LAST_PATH_KEY, location.pathname);
+    }
+  }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 

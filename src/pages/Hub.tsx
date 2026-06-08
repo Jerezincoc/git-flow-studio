@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
 import { GIT_LAST_PATH_KEY } from "@/components/Layout";
+import { SHELL_LAST_PATH_KEY } from "@/components/ShellLayout";
 
 function UbuntuIcon({ className }: { className?: string }) {
   return (
@@ -260,7 +261,7 @@ function FeaturedCard({ doc }: { doc: typeof docs[0] }) {
 
 /* ─── SmallCard ──────────────────────────────────────────────────────── */
 
-function SmallCard({ doc }: { doc: typeof docs[0] }) {
+function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: string }) {
   const [hovered, setHovered] = useState(false);
   const Icon = doc.icon;
   const previews = smallPreviews[doc.id] ?? [];
@@ -319,7 +320,7 @@ function SmallCard({ doc }: { doc: typeof docs[0] }) {
   if (doc.available) {
     return (
       <motion.div {...motionProps}>
-        <Link to={doc.path} className="block">{inner}</Link>
+        <Link to={destination} className="block">{inner}</Link>
       </motion.div>
     );
   }
@@ -331,6 +332,11 @@ function SmallCard({ doc }: { doc: typeof docs[0] }) {
 
 const fadeUp = { hidden: { opacity: 0, y: 22 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.11 } } };
+
+const lastPathKeys: Record<string, string> = {
+  git:   GIT_LAST_PATH_KEY,
+  shell: SHELL_LAST_PATH_KEY,
+};
 
 export default function Hub() {
   const [featured, ...rest] = docs;
@@ -376,9 +382,11 @@ export default function Hub() {
 
           {/* cards em breve */}
           <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {rest.map((doc) => (
-              <SmallCard key={doc.id} doc={doc} />
-            ))}
+            {rest.map((doc) => {
+              const key = lastPathKeys[doc.id];
+              const destination = (key && localStorage.getItem(key)) ?? doc.path;
+              return <SmallCard key={doc.id} doc={doc} destination={destination} />;
+            })}
           </motion.div>
 
         </motion.div>

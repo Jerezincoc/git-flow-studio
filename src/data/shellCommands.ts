@@ -15,6 +15,13 @@ export interface ShellExample {
   description: string;
 }
 
+export interface SyntaxPart {
+  part: string;
+  label: string;
+  description: string;
+  optional?: boolean;
+}
+
 export interface ShellCommand {
   id: string;
   name: string;
@@ -35,6 +42,7 @@ export interface ShellCommand {
   deepDive?: string;
   flags?: ShellFlag[];
   curiosities?: string[];
+  syntaxBreakdown?: SyntaxPart[];
 }
 
 export const shellCategoryLabels: Record<string, string> = {
@@ -97,6 +105,14 @@ export const shellCommands: ShellCommand[] = [
       "Get-ChildItem funciona com provedores além do sistema de arquivos — você pode usar 'Get-ChildItem HKLM:\\Software' para listar chaves do Registro do Windows.",
       "O alias 'ls' no PowerShell chama Get-ChildItem, não o binário ls do Unix — por isso o output tem colunas diferentes quando você está no PowerShell vs WSL.",
     ],
+    syntaxBreakdown: [
+      { part: "Get-ChildItem", label: "Cmdlet", description: "O nome do comando. No PowerShell todo comando segue o padrão Verbo-Substantivo: 'Get' = obter/listar, 'ChildItem' = itens filhos (arquivos e pastas dentro de um diretório)." },
+      { part: "[[-Path] <string>]", label: "Parâmetro -Path", description: "O caminho do diretório que você quer listar. Os colchetes duplos [[ ]] indicam que é completamente opcional — se omitido, lista o diretório atual. O <string> significa que espera um texto com o caminho.", optional: true },
+      { part: "[-Filter <string>]", label: "Parâmetro -Filter", description: "Um padrão de filtro para mostrar só certos arquivos. Por exemplo: *.txt mostra só arquivos .txt, log* mostra arquivos que começam com 'log'. O asterisco (*) é um coringa que significa 'qualquer coisa'.", optional: true },
+      { part: "[-Recurse]", label: "Flag -Recurse", description: "Uma flag (chave) que não precisa de valor — é só ligar ou desligar. Quando presente, o comando entra em todas as subpastas também. Sem ela, lista só o diretório imediato.", optional: true },
+      { part: "[-Hidden]", label: "Flag -Hidden", description: "Mostra arquivos e pastas ocultos (aqueles que normalmente ficam invisíveis no Explorer). No Windows, arquivos ocultos têm o atributo 'H' nas propriedades.", optional: true },
+      { part: "[-Force]", label: "Flag -Force", description: "Força a listagem de arquivos ocultos E arquivos de sistema (ainda mais protegidos). Diferente de -Hidden, que só mostra ocultos.", optional: true },
+    ],
   },
   {
     id: "set-location",
@@ -134,6 +150,10 @@ export const shellCommands: ShellCommand[] = [
     curiosities: [
       "Set-Location -  (com hífen) é um dos recursos menos conhecidos — alterna entre o diretório atual e o anterior como o 'cd -' do bash.",
       "Push-Location e Pop-Location funcionam como uma pilha de histórico de diretórios, permitindo voltar para posições anteriores em sequência.",
+    ],
+    syntaxBreakdown: [
+      { part: "Set-Location", label: "Cmdlet", description: "Verbo 'Set' = definir/mudar. 'Location' = localização (diretório atual). Traduzindo literalmente: 'Definir Localização'." },
+      { part: "[[-Path] <string>]", label: "Parâmetro -Path", description: "O caminho para onde você quer ir. Pode ser absoluto (C:\\Users\\João) ou relativo (..\\pasta). O '..' significa 'pasta pai' (um nível acima). O '~' atalha para seu diretório de usuário.", optional: true },
     ],
   },
   {
@@ -416,6 +436,12 @@ export const shellCommands: ShellCommand[] = [
       "Get-Content -Wait não para de rodar sozinho — ele monitora o arquivo indefinidamente. Use Ctrl+C para interromper. É muito útil para debugar aplicações que escrevem logs em tempo real.",
       "Por padrão, Get-Content retorna um array de strings (uma por linha). Com -Raw, retorna uma string única com newlines preservados — importante para expressões regex multilinha.",
     ],
+    syntaxBreakdown: [
+      { part: "Get-Content", label: "Cmdlet", description: "'Get' = obter/ler. 'Content' = conteúdo. Lê o que está dentro de um arquivo e traz para o PowerShell trabalhar." },
+      { part: "[-Path] <string[]>", label: "Parâmetro -Path", description: "O caminho do arquivo a ler. O <string[]> com colchetes após significa que aceita múltiplos arquivos separados por vírgula. Ex: Get-Content a.txt, b.txt lê os dois arquivos." },
+      { part: "[-TotalCount <int>]", label: "Parâmetro -TotalCount", description: "Quantas linhas ler do começo do arquivo. O <int> significa que espera um número inteiro. É equivalente ao comando 'head' do Linux.", optional: true },
+      { part: "[-Tail <int>]", label: "Parâmetro -Tail", description: "Quantas linhas ler do final do arquivo. Equivalente ao 'tail' do Linux. Muito usado para ver as últimas entradas de um log.", optional: true },
+    ],
   },
   {
     id: "set-content",
@@ -579,6 +605,13 @@ export const shellCommands: ShellCommand[] = [
     curiosities: [
       "Propriedades calculadas com @{Name='X'; Expression={...}} transformam o Select-Object em uma ferramenta de projeção poderosa — você pode criar colunas calculadas, converter unidades, formatar valores, tudo inline.",
     ],
+    syntaxBreakdown: [
+      { part: "Select-Object", label: "Cmdlet", description: "'Select' = selecionar/escolher. 'Object' = objeto. Escolhe quais partes (propriedades) de um objeto você quer manter — como escolher colunas de uma tabela." },
+      { part: "[[-Property] <Object[]>]", label: "Parâmetro -Property", description: "Os nomes das propriedades que você quer. Ex: Name, CPU. O <Object[]> significa que aceita múltiplos valores. Você pode escrever só os nomes: Select-Object Name, CPU.", optional: true },
+      { part: "[-First <int>]", label: "Parâmetro -First", description: "Pega apenas os primeiros N resultados. Ex: -First 5 retorna só os 5 primeiros itens. Equivalente ao 'head' do Linux.", optional: true },
+      { part: "[-Last <int>]", label: "Parâmetro -Last", description: "Pega apenas os últimos N resultados. Equivalente ao 'tail' do Linux.", optional: true },
+      { part: "[-Unique]", label: "Flag -Unique", description: "Remove resultados duplicados. Se dois objetos tiverem os mesmos valores nas propriedades selecionadas, apenas um aparece.", optional: true },
+    ],
   },
   {
     id: "where-object",
@@ -618,6 +651,12 @@ export const shellCommands: ShellCommand[] = [
     curiosities: [
       "O alias '?' para Where-Object é um dos mais curtos do PowerShell — Get-Process | ? CPU -gt 10 é um filtro completo em 27 caracteres.",
       "Where-Object filtra objetos já em memória. Para grandes volumes de dados, é mais eficiente usar os parâmetros -Filter dos próprios cmdlets (como Get-ChildItem -Filter) que filtram na fonte.",
+    ],
+    syntaxBreakdown: [
+      { part: "Where-Object", label: "Cmdlet", description: "'Where' = onde/quando (condição). 'Object' = objeto. Filtra a coleção mantendo apenas os objetos que atendem à condição — como um filtro de café que só deixa passar o líquido." },
+      { part: "[-FilterScript] <ScriptBlock>", label: "Bloco de condição { }", description: "As chaves { } definem um bloco de código (ScriptBlock). Tudo dentro é a condição que cada objeto precisa atender para passar. $_ é a variável especial que representa 'o objeto atual que está sendo avaliado'." },
+      { part: "$_", label: "Variável automática $_", description: "Representa o objeto atual no pipeline — o item que está sendo testado agora. Se você tem Get-Process | Where-Object { $_.CPU -gt 10 }, o $_ é cada processo individualmente enquanto Where-Object os percorre." },
+      { part: "-gt 10", label: "Operador de comparação", description: "'-gt' significa 'greater than' (maior que). Outros operadores: -lt (menor que), -eq (igual), -ne (diferente), -ge (maior ou igual), -le (menor ou igual), -like (parecido com wildcard *), -match (expressão regular)." },
     ],
   },
   {
@@ -659,6 +698,12 @@ export const shellCommands: ShellCommand[] = [
     curiosities: [
       "ForEach-Object -Parallel (PowerShell 7+) permite paralelismo real com múltiplas threads. Para tarefas I/O-bound como downloads ou conexões de rede, pode reduzir o tempo total drasticamente.",
       "O alias % é tão curto que pipelines complexos ficam legíveis: Get-Process | ? CPU -gt 10 | % Name — 36 chars para filtrar processos pesados e listar nomes.",
+    ],
+    syntaxBreakdown: [
+      { part: "ForEach-Object", label: "Cmdlet", description: "'ForEach' = para cada. 'Object' = objeto. Pega cada objeto que chega pelo pipeline e executa o bloco de código nele — um por um, em sequência." },
+      { part: "[-Process] <ScriptBlock>", label: "Bloco de ação { }", description: "O código que roda para cada objeto. $_ é o objeto atual. Tudo que você escrever aqui acontece para cada item individualmente." },
+      { part: "$_", label: "Variável automática $_", description: "Dentro do bloco { }, $_ representa o objeto atual que está sendo processado nessa iteração. Se você está iterando sobre arquivos, $_ é o arquivo atual; sobre processos, é o processo atual." },
+      { part: "[-Parallel]", label: "Flag -Parallel (PS7+)", description: "Processa múltiplos objetos ao mesmo tempo em threads separadas, em vez de um por vez. Útil quando cada item demora (download, conexão de rede). Requer PowerShell 7+.", optional: true },
     ],
   },
   {
@@ -1073,6 +1118,334 @@ export const shellCommands: ShellCommand[] = [
     curiosities: [
       "Test-Connection -Quiet é ideal para uso em scripts — retorna $true ou $false sem nenhum output de texto, permitindo usar diretamente em condicionais if/else.",
       "Em redes corporativas, ICMP frequentemente é bloqueado por firewalls. Use Test-NetConnection -Port 443 para testar conectividade real com um serviço específico.",
+    ],
+  },
+
+  /* ─── PIPELINE (adicionais) ──────────────────────────────────────── */
+  {
+    id: "sort-object",
+    name: "Sort-Object",
+    description: "Ordena objetos por uma ou mais propriedades, em ordem crescente ou decrescente.",
+    syntax: "Sort-Object [[-Property] <Object[]>] [-Descending] [-Unique]",
+    category: "pipeline",
+    uses: [
+      "Ordenar arquivos por tamanho, data ou nome",
+      "Ordenar processos por uso de CPU ou memória",
+      "Obter os maiores/menores valores de uma coleção",
+    ],
+    variations: [
+      { command: "Get-ChildItem | Sort-Object Length", description: "Ordena arquivos do menor ao maior" },
+      { command: "Get-ChildItem | Sort-Object Length -Descending", description: "Do maior ao menor" },
+      { command: "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10", description: "Top 10 processos por CPU" },
+      { command: "sort Name", description: "Alias sort disponível" },
+    ],
+    examples: [
+      { code: "Get-ChildItem -Recurse | Sort-Object Length -Descending | Select-Object -First 5 FullName, Length", description: "5 arquivos maiores do diretório" },
+      { code: "Get-Process | Sort-Object WorkingSet -Descending | Select-Object -First 10 Name, @{N='MB';E={[math]::Round($_.WorkingSet/1MB,1)}}", description: "Top 10 processos por memória (em MB)" },
+      { code: "Import-Csv dados.csv | Sort-Object -Property Departamento, Nome | Export-Csv ordenado.csv -NoTypeInformation", description: "Ordena CSV por múltiplas colunas" },
+    ],
+    whenNotToUse: [
+      "Quando você só precisa do maior/menor valor — use Measure-Object -Maximum/-Minimum que é mais eficiente",
+    ],
+    relatedCommands: ["select-object", "where-object", "group-object", "measure-object"],
+    flags: [
+      { flag: "-Property <Object[]>",    description: "Propriedade(s) para ordenar. Pode ser múltiplas: -Property Nome, Idade" },
+      { flag: "-Descending",             description: "Ordem decrescente (padrão é crescente)" },
+      { flag: "-Unique",                 description: "Remove duplicatas após ordenar" },
+      { flag: "-CaseSensitive",          description: "Diferencia maiúsculas de minúsculas na ordenação" },
+      { flag: "-Culture <string>",       description: "Define o idioma/localização para regras de ordenação" },
+    ],
+    curiosities: [
+      "Sort-Object aceita propriedades calculadas com hashtable: Sort-Object @{Expression={$_.Length}; Ascending=$false} — útil quando precisa de lógica customizada na ordenação.",
+      "Para ordenar múltiplas propriedades com direções diferentes (uma crescente, outra decrescente), use hashtables: Sort-Object @{E='Dept';A=$true}, @{E='Salario';D=$true}.",
+    ],
+    syntaxBreakdown: [
+      { part: "Sort-Object", label: "Cmdlet", description: "'Sort' = ordenar. 'Object' = objeto. Recebe os objetos do pipeline e os devolve em ordem." },
+      { part: "[[-Property] <Object[]>]", label: "Parâmetro -Property", description: "Qual propriedade usar como critério de ordenação. Ex: Length para tamanho, Name para nome. Se omitido, ordena o objeto inteiro.", optional: true },
+      { part: "[-Descending]", label: "Flag -Descending", description: "Inverte a ordem: do maior para o menor, do Z para o A. Sem essa flag, é crescente (do menor para o maior, de A para Z).", optional: true },
+      { part: "[-Unique]", label: "Flag -Unique", description: "Após ordenar, remove objetos com valores duplicados na propriedade ordenada.", optional: true },
+    ],
+  },
+  {
+    id: "group-object",
+    name: "Group-Object",
+    description: "Agrupa objetos por uma propriedade e retorna a contagem de cada grupo.",
+    syntax: "Group-Object [[-Property] <Object[]>] [-NoElement]",
+    category: "pipeline",
+    uses: [
+      "Contar quantos arquivos há por extensão",
+      "Agrupar processos por nome ou status",
+      "Gerar relatórios de contagem a partir de dados",
+    ],
+    variations: [
+      { command: "Get-ChildItem | Group-Object Extension", description: "Conta arquivos por extensão" },
+      { command: "Get-Process | Group-Object Name | Sort-Object Count -Descending", description: "Processos mais duplicados" },
+      { command: "Get-EventLog System -Newest 100 | Group-Object EntryType", description: "Eventos por tipo" },
+      { command: "group Extension", description: "Alias group disponível" },
+    ],
+    examples: [
+      { code: "Get-ChildItem -Recurse | Group-Object Extension | Sort-Object Count -Descending | Select-Object -First 10", description: "10 extensões mais comuns" },
+      { code: "Get-Service | Group-Object Status | Select-Object Name, Count", description: "Serviços por status (Running/Stopped)" },
+      { code: "Import-Csv vendas.csv | Group-Object Regiao | Select-Object Name, Count, @{N='Total';E={($_.Group | Measure-Object Valor -Sum).Sum}}", description: "Agrupa vendas por região com total" },
+    ],
+    whenNotToUse: [
+      "Quando precisa só da contagem total — use Measure-Object -Count",
+      "Quando quer somar valores — combine com Measure-Object dentro do grupo",
+    ],
+    relatedCommands: ["sort-object", "measure-object", "select-object"],
+    flags: [
+      { flag: "-Property <Object[]>",   description: "Propriedade para agrupar" },
+      { flag: "-NoElement",             description: "Não inclui os objetos no grupo, só a contagem (mais rápido)" },
+      { flag: "-CaseSensitive",         description: "Diferencia maiúsculas/minúsculas no agrupamento" },
+      { flag: "-AsHashTable",           description: "Retorna um hashtable em vez de objetos GroupInfo" },
+    ],
+    curiosities: [
+      "Group-Object retorna objetos com propriedades Name (valor do grupo), Count (quantidade) e Group (array com os objetos originais). Você pode acessar cada grupo para fazer cálculos adicionais.",
+    ],
+  },
+  {
+    id: "measure-object",
+    name: "Measure-Object",
+    description: "Calcula estatísticas numéricas (soma, média, mínimo, máximo, contagem) de propriedades de objetos.",
+    syntax: "Measure-Object [[-Property] <string[]>] [-Sum] [-Average] [-Minimum] [-Maximum] [-Count]",
+    category: "pipeline",
+    uses: [
+      "Somar tamanhos de arquivos",
+      "Calcular média de uso de CPU ou memória",
+      "Contar objetos no pipeline",
+      "Encontrar valor máximo ou mínimo",
+    ],
+    variations: [
+      { command: "Get-ChildItem | Measure-Object Length -Sum", description: "Tamanho total dos arquivos" },
+      { command: "Get-Process | Measure-Object CPU -Average", description: "Média de CPU" },
+      { command: "Get-Content arquivo.txt | Measure-Object -Line -Word -Character", description: "Conta linhas, palavras e caracteres" },
+      { command: "measure", description: "Alias measure disponível" },
+    ],
+    examples: [
+      { code: "Get-ChildItem -Recurse | Measure-Object -Property Length -Sum | Select-Object @{N='TotalGB';E={[math]::Round($_.Sum/1GB,2)}}", description: "Tamanho total da pasta em GB" },
+      { code: "Get-Process | Measure-Object WorkingSet -Sum -Average -Maximum | Select-Object @{N='TotalMB';E={[math]::Round($_.Sum/1MB)}}", description: "Memória total e média de processos" },
+      { code: "1..100 | Measure-Object -Sum -Average -Minimum -Maximum", description: "Estatísticas completas de 1 a 100" },
+    ],
+    whenNotToUse: [
+      "Para agrupamento antes de medir — combine com Group-Object",
+    ],
+    relatedCommands: ["group-object", "select-object", "sort-object"],
+    flags: [
+      { flag: "-Property <string[]>", description: "Propriedade numérica a calcular" },
+      { flag: "-Sum",                 description: "Calcula a soma" },
+      { flag: "-Average",             description: "Calcula a média" },
+      { flag: "-Minimum",             description: "Encontra o menor valor" },
+      { flag: "-Maximum",             description: "Encontra o maior valor" },
+      { flag: "-Line",                description: "Conta linhas (para strings/texto)" },
+      { flag: "-Word",                description: "Conta palavras (para strings/texto)" },
+      { flag: "-Character",           description: "Conta caracteres (para strings/texto)" },
+    ],
+    curiosities: [
+      "Measure-Object -Line -Word -Character é o equivalente ao comando 'wc' do Linux — conta linhas, palavras e caracteres de um arquivo ou texto.",
+    ],
+  },
+
+  /* ─── SISTEMA (adicionais) ───────────────────────────────────────── */
+  {
+    id: "get-eventlog",
+    name: "Get-EventLog",
+    description: "Lê eventos do Log de Eventos do Windows (Application, System, Security, etc.).",
+    syntax: "Get-EventLog [-LogName] <string> [-Newest <int>] [-EntryType <string[]>] [-Source <string>]",
+    category: "system",
+    uses: [
+      "Diagnosticar erros do sistema",
+      "Verificar eventos de segurança (logins, falhas)",
+      "Monitorar logs de aplicações",
+      "Investigar crashes e problemas de inicialização",
+    ],
+    variations: [
+      { command: "Get-EventLog System -Newest 50", description: "Últimos 50 eventos do log System" },
+      { command: "Get-EventLog Application -EntryType Error -Newest 20", description: "Últimos 20 erros de aplicação" },
+      { command: "Get-EventLog Security -Newest 100 | Where-Object { $_.EventID -eq 4625 }", description: "Tentativas de login falhas (EventID 4625)" },
+      { command: "Get-WinEvent -LogName System -MaxEvents 50", description: "Versão moderna com Get-WinEvent" },
+    ],
+    examples: [
+      { code: "Get-EventLog System -EntryType Error, Warning -Newest 100 | Select-Object TimeGenerated, EntryType, Source, Message | Format-Table -AutoSize", description: "Erros e avisos recentes do sistema" },
+      { code: "Get-EventLog Application -Source '*SQL*' -Newest 50", description: "Eventos de aplicações SQL" },
+      { code: "Get-EventLog System -After (Get-Date).AddHours(-1) | Group-Object EntryType | Select-Object Name, Count", description: "Eventos da última hora agrupados por tipo" },
+    ],
+    whenNotToUse: [
+      "Para logs modernos e de aplicações de terceiros — use Get-WinEvent que é mais poderoso e suporta logs de qualquer provedor",
+      "Get-EventLog só funciona no Windows e está deprecado no PS7+",
+    ],
+    relatedCommands: ["get-winevent", "get-process", "get-service"],
+    flags: [
+      { flag: "-LogName <string>",     description: "Nome do log: Application, System, Security, Setup, ou qualquer log personalizado" },
+      { flag: "-Newest <int>",         description: "Número de eventos mais recentes a retornar" },
+      { flag: "-EntryType <string[]>", description: "Tipo: Error, Warning, Information, SuccessAudit, FailureAudit" },
+      { flag: "-Source <string>",      description: "Filtra por fonte do evento (suporta wildcards)" },
+      { flag: "-EventID <int[]>",      description: "Filtra por ID específico do evento" },
+      { flag: "-After <DateTime>",     description: "Eventos após uma data/hora" },
+      { flag: "-Before <DateTime>",    description: "Eventos antes de uma data/hora" },
+      { flag: "-Message <string>",     description: "Filtra por texto na mensagem (suporta wildcards)" },
+      { flag: "-ComputerName <string>",description: "Lê logs de um computador remoto" },
+    ],
+    curiosities: [
+      "EventID 4625 = login falho, 4624 = login bem-sucedido, 41 = sistema reiniciou inesperadamente (Kernel-Power). Esses IDs são úteis para diagnóstico rápido.",
+      "Get-WinEvent é o substituto moderno de Get-EventLog e funciona com todos os logs do Windows, incluindo os logs de aplicações de terceiros e logs de rastreamento ETW.",
+    ],
+  },
+  {
+    id: "set-executionpolicy",
+    name: "Set-ExecutionPolicy",
+    description: "Define a política de execução de scripts PowerShell no sistema ou para o usuário atual.",
+    syntax: "Set-ExecutionPolicy [-ExecutionPolicy] <ExecutionPolicy> [-Scope <ExecutionPolicyScope>]",
+    category: "system",
+    uses: [
+      "Permitir execução de scripts locais",
+      "Configurar ambiente para automação",
+      "Restringir execução de scripts em servidores de produção",
+    ],
+    variations: [
+      { command: "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser", description: "Permite scripts locais para o usuário atual (sem admin)" },
+      { command: "Set-ExecutionPolicy Restricted", description: "Bloqueia todos os scripts (padrão Windows)" },
+      { command: "Set-ExecutionPolicy Bypass -Scope Process", description: "Libera tudo só para a sessão atual (temporário)" },
+      { command: "Get-ExecutionPolicy -List", description: "Vê a política em todos os escopos" },
+    ],
+    examples: [
+      { code: "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force", description: "Configura para desenvolvimento sem prompt de confirmação" },
+      { code: "powershell -ExecutionPolicy Bypass -File script.ps1", description: "Executa script com bypass temporário sem alterar configuração" },
+      { code: "Get-ExecutionPolicy -List | Format-Table", description: "Mostra políticas de todos os escopos em tabela" },
+    ],
+    whenNotToUse: [
+      "Nunca use Unrestricted ou Bypass como configuração permanente em produção",
+      "Prefira -Scope Process para scripts pontuais — não altera configuração do sistema",
+    ],
+    relatedCommands: ["get-executionpolicy"],
+    flags: [
+      { flag: "-ExecutionPolicy <string>", description: "Política: Restricted, AllSigned, RemoteSigned, Unrestricted, Bypass, Undefined" },
+      { flag: "-Scope <string>",           description: "Escopo: MachinePolicy, UserPolicy, Process, CurrentUser, LocalMachine" },
+      { flag: "-Force",                    description: "Não pede confirmação" },
+      { flag: "-WhatIf",                   description: "Simula a mudança sem aplicar" },
+    ],
+    curiosities: [
+      "ExecutionPolicy não é uma medida de segurança contra ataques — é uma proteção contra execução acidental. Um atacante pode facilmente contorná-la com -ExecutionPolicy Bypass. Seu propósito é evitar que scripts sejam executados por engano.",
+      "RemoteSigned é o melhor balanço para desenvolvimento: scripts locais rodam sem assinatura, mas scripts baixados da internet precisam ser assinados digitalmente por um publisher confiável.",
+    ],
+    syntaxBreakdown: [
+      { part: "Set-ExecutionPolicy", label: "Cmdlet", description: "'Set' = definir/configurar. 'ExecutionPolicy' = política de execução. Configura as regras de segurança que controlam quais scripts podem rodar." },
+      { part: "[-ExecutionPolicy] <ExecutionPolicy>", label: "Política", description: "Qual nível de permissão aplicar. Restricted = nenhum script. AllSigned = todos precisam de assinatura. RemoteSigned = scripts locais livres, baixados precisam de assinatura. Bypass = tudo permitido." },
+      { part: "[-Scope <ExecutionPolicyScope>]", label: "Parâmetro -Scope", description: "Para quem a política se aplica. Process = só essa sessão (temporário, some ao fechar). CurrentUser = só seu usuário (não precisa de admin). LocalMachine = todo o computador (precisa de admin).", optional: true },
+    ],
+  },
+  {
+    id: "invoke-expression",
+    name: "Invoke-Expression",
+    description: "Executa uma string como comando PowerShell. Útil para executar código construído dinamicamente.",
+    syntax: "Invoke-Expression [-Command] <string>",
+    category: "system",
+    uses: [
+      "Executar comandos construídos dinamicamente",
+      "Avaliar strings como código PowerShell",
+    ],
+    variations: [
+      { command: "Invoke-Expression 'Get-Process'", description: "Executa string como comando" },
+      { command: "iex 'Get-Process'", description: "Alias iex — muito usado em scripts de instalação" },
+      { command: "iex (irm 'https://...')", description: "Padrão de instalação: baixa e executa script remoto" },
+    ],
+    examples: [
+      { code: '$cmd = "Get-Process | Select-Object -First 5"\nInvoke-Expression $cmd', description: "Executa comando armazenado em variável" },
+      { code: '$property = "Name"\nGet-Process | Select-Object $property', description: "Seleção dinâmica de propriedade (sem Invoke-Expression)" },
+    ],
+    whenNotToUse: [
+      "Nunca use com input não sanitizado do usuário — risco crítico de injeção de código",
+      "Na maioria dos casos, há alternativas mais seguras (variáveis, ScriptBlocks, parâmetros)",
+    ],
+    relatedCommands: ["invoke-command", "start-process"],
+    flags: [
+      { flag: "-Command <string>", description: "A string a ser executada como código PowerShell", danger: true },
+    ],
+    curiosities: [
+      "O padrão 'iex (irm url)' é usado por instaladores como Chocolatey e Oh My Posh — baixa e executa um script remoto em uma linha. Muito conveniente, mas nunca execute sem verificar a URL e o conteúdo do script.",
+    ],
+  },
+
+  /* ─── ARQUIVOS (adicionais) ──────────────────────────────────────── */
+  {
+    id: "compress-archive",
+    name: "Compress-Archive",
+    description: "Cria arquivos ZIP comprimindo arquivos e pastas.",
+    syntax: "Compress-Archive [-Path] <string[]> [-DestinationPath] <string> [-Update]",
+    category: "files",
+    uses: [
+      "Criar backups de arquivos e pastas",
+      "Preparar distribuição de scripts e projetos",
+      "Compactar logs para economizar espaço",
+    ],
+    variations: [
+      { command: "Compress-Archive -Path C:\\pasta -DestinationPath backup.zip", description: "Comprime pasta inteira" },
+      { command: "Compress-Archive -Path *.log -DestinationPath logs.zip", description: "Comprime todos os .log" },
+      { command: "Compress-Archive -Path arquivo.txt -DestinationPath arquivo.zip -Update", description: "Adiciona ao ZIP existente" },
+      { command: "Expand-Archive -Path arquivo.zip -DestinationPath C:\\destino", description: "Extrai ZIP (cmdlet inverso)" },
+    ],
+    examples: [
+      { code: "Compress-Archive -Path C:\\Projetos\\* -DestinationPath \"backup_$(Get-Date -Format 'yyyyMMdd').zip\"", description: "Backup com data no nome" },
+      { code: "Get-ChildItem *.log | Compress-Archive -DestinationPath logs_antigos.zip\nGet-ChildItem *.log | Remove-Item", description: "Arquiva e deleta logs" },
+    ],
+    whenNotToUse: [
+      "Para arquivos muito grandes — considere ferramentas de compressão dedicadas como 7-Zip que oferecem melhor compressão e mais formatos",
+      "Para extrair formatos que não sejam ZIP — use Expand-Archive com suporte limitado ou ferramentas externas",
+    ],
+    relatedCommands: ["expand-archive", "copy-item", "remove-item"],
+    flags: [
+      { flag: "-Path <string[]>",         description: "Arquivos/pastas a compactar (suporta wildcards)" },
+      { flag: "-DestinationPath <string>", description: "Caminho do arquivo ZIP de saída" },
+      { flag: "-CompressionLevel <string>",description: "Nível de compressão: Optimal, Fastest, NoCompression" },
+      { flag: "-Update",                  description: "Adiciona ao ZIP existente em vez de sobrescrever" },
+      { flag: "-Force",                   description: "Sobrescreve ZIP existente sem confirmação" },
+    ],
+    curiosities: [
+      "Compress-Archive foi introduzido no PowerShell 5.0. Em versões anteriores, era necessário usar .NET diretamente com [System.IO.Compression.ZipFile].",
+    ],
+  },
+
+  /* ─── CONTEÚDO (adicionais) ──────────────────────────────────────── */
+  {
+    id: "convertto-json",
+    name: "ConvertTo-Json / ConvertFrom-Json",
+    description: "Converte objetos PowerShell para JSON e vice-versa. Essencial para trabalhar com APIs e arquivos de configuração.",
+    syntax: "ConvertTo-Json [-InputObject] <Object> [-Depth <int>]\nConvertFrom-Json [-InputObject] <string>",
+    category: "content",
+    uses: [
+      "Serializar objetos para salvar em arquivo ou enviar para API",
+      "Parsear respostas JSON de APIs REST",
+      "Ler arquivos de configuração .json",
+      "Transformar dados entre formatos",
+    ],
+    variations: [
+      { command: "Get-Process | Select-Object Name, CPU | ConvertTo-Json", description: "Converte objetos para JSON" },
+      { command: "Get-Content config.json | ConvertFrom-Json", description: "Lê e parseia arquivo JSON" },
+      { command: "Invoke-RestMethod https://api.exemplo.com/dados", description: "Invoke-RestMethod já faz ConvertFrom-Json automaticamente" },
+    ],
+    examples: [
+      { code: '$config = Get-Content appsettings.json -Raw | ConvertFrom-Json\n$config.ConnectionStrings.Default', description: "Lê valor aninhado de JSON" },
+      { code: '$obj = [PSCustomObject]@{ nome="João"; idade=30; ativo=$true }\n$obj | ConvertTo-Json | Set-Content usuario.json', description: "Cria e salva JSON" },
+      { code: '$json = Invoke-RestMethod "https://jsonplaceholder.typicode.com/users/1"\nWrite-Host "$($json.name) — $($json.email)"', description: "Consome API REST" },
+    ],
+    whenNotToUse: [
+      "Para XML — use ConvertTo-Xml e ConvertFrom-Xml ou Select-Xml",
+      "Para CSV — use Export-Csv e Import-Csv",
+    ],
+    relatedCommands: ["get-content", "invoke-webrequest", "set-content"],
+    flags: [
+      { flag: "-Depth <int>",          description: "Profundidade de serialização de objetos aninhados (padrão: 2)" },
+      { flag: "-Compress",             description: "Remove espaços e indentação do JSON (saída minificada)" },
+      { flag: "-AsHashtable",          description: "ConvertFrom-Json: retorna hashtable em vez de PSCustomObject (PS7.3+)" },
+      { flag: "-EnumsAsStrings",       description: "Serializa enums como strings em vez de números" },
+    ],
+    curiosities: [
+      "O padrão de profundidade -Depth 2 do ConvertTo-Json frequentemente surpreende iniciantes — objetos com mais de 2 níveis de aninhamento aparecem como a representação textual do tipo .NET. Aumente com -Depth 10 para objetos complexos.",
+      "Invoke-RestMethod faz ConvertFrom-Json automaticamente — use-o em vez de Invoke-WebRequest + ConvertFrom-Json para consumir APIs JSON.",
+    ],
+    syntaxBreakdown: [
+      { part: "ConvertTo-Json", label: "Cmdlet (para JSON)", description: "'Convert' = converter. 'To' = para. 'Json' = formato JSON. Pega um objeto do PowerShell (qualquer coisa) e transforma no texto JSON equivalente." },
+      { part: "ConvertFrom-Json", label: "Cmdlet (de JSON)", description: "'From' = de/a partir de. Faz o inverso: pega um texto em formato JSON e cria um objeto PowerShell que você pode manipular com ponto (obj.propriedade)." },
+      { part: "[-Depth <int>]", label: "Parâmetro -Depth", description: "Quantos níveis de aninhamento converter. Se seu objeto tem { a: { b: { c: valor } } }, são 3 níveis. O padrão é 2, o que frequentemente corta dados. Use -Depth 10 para objetos complexos.", optional: true },
     ],
   },
 ];
