@@ -405,14 +405,35 @@ export default function Hub() {
 
           {/* card principal — último layer visitado */}
           <motion.div variants={fadeUp}>
-            <FeaturedCard doc={featuredDoc} destination={getDestination(featuredDoc)} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={featuredDoc.id}
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.97 }}
+                transition={{ duration: 0.32, ease: "easeInOut" }}
+              >
+                <FeaturedCard doc={featuredDoc} destination={getDestination(featuredDoc)} />
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
 
           {/* demais cards */}
           <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {restDocs.map((doc) => (
-              <SmallCard key={doc.id} doc={doc} destination={getDestination(doc)} />
-            ))}
+            <AnimatePresence mode="popLayout">
+              {restDocs.map((doc) => (
+                <motion.div
+                  key={doc.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.28, ease: "easeInOut" }}
+                >
+                  <SmallCard doc={doc} destination={getDestination(doc)} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </motion.div>
 
         </motion.div>
