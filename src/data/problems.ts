@@ -255,6 +255,53 @@ export const problems: GitProblem[] = [
     ],
     expectedResult: "As alterações do stash são recuperadas. Isso só funciona enquanto o garbage collector do Git não rodou (por padrão, objetos ficam acessíveis por 30 dias).",
   },
+  {
+    id: "push-wrong-branch",
+    title: "Fiz push na branch errada",
+    description: "Você enviou commits para a branch errada no remoto e precisa desfazer o push sem perder o trabalho.",
+    emoji: "📤",
+    steps: [
+      { title: "Identifique os commits enviados por engano", command: "git log --oneline origin/branch-errada", description: "Veja quais commits foram para a branch incorreta." },
+      { title: "Copie o hash dos commits que quer mover", command: "git log --oneline -5", description: "Anote os hashes que precisam ir para a branch correta." },
+      { title: "Mude para a branch correta", command: "git checkout branch-correta", description: "Vá para a branch de destino certa." },
+      { title: "Aplique os commits via cherry-pick", command: "git cherry-pick <hash>", description: "Copia cada commit para a branch correta. Repita para cada hash se forem múltiplos." },
+      { title: "Confirme que os commits chegaram", command: "git log --oneline", description: "Verifique se os commits aparecem na branch correta." },
+      { title: "Reverta os commits na branch errada", command: "git revert <hash> --no-edit", description: "Cria um commit de reversão na branch errada sem reescrever o histórico público. Mais seguro que force push." },
+      { title: "Envie a reversão ao remoto", command: "git push origin branch-errada", description: "Publica o revert na branch errada." },
+      { title: "Publique a branch correta", command: "git push origin branch-correta", description: "Envia os commits para onde eles deveriam estar." },
+    ],
+    expectedResult: "Os commits são revertidos na branch errada e aplicados corretamente na branch de destino, sem reescrever histórico público.",
+  },
+  {
+    id: "recover-reset-hard",
+    title: "Perdi commits com git reset --hard",
+    description: "Você executou git reset --hard e perdeu commits que ainda não haviam sido enviados ao remoto.",
+    emoji: "💀",
+    steps: [
+      { title: "Abra o reflog imediatamente", command: "git reflog", description: "O reflog registra todos os movimentos do HEAD, incluindo commits apagados por resets. Procure a entrada com a mensagem do commit perdido." },
+      { title: "Identifique o hash do commit perdido", description: "Anote o hash que aparece à esquerda da entrada no reflog. Ele tem formato como a1b2c3d@{2}." },
+      { title: "Inspecione o commit para confirmar", command: "git show <hash>", description: "Verifique se é mesmo o commit que você perdeu antes de restaurar." },
+      { title: "Restaure criando uma branch no commit perdido", command: "git checkout -b recuperacao/<nome> <hash>", description: "Cria uma nova branch apontando para o commit recuperado. Mais seguro do que resetar direto." },
+      { title: "Ou restaure a branch atual para o commit perdido", command: "git reset --hard <hash>", description: "Move a branch atual de volta para o commit recuperado. Só use se tiver certeza do hash.", },
+    ],
+    expectedResult: "Os commits perdidos são recuperados. O reflog mantém objetos acessíveis por 90 dias por padrão antes do garbage collector removê-los.",
+  },
+  {
+    id: "binary-merge-conflict",
+    title: "Conflito de merge em arquivo binário",
+    description: "Um merge gerou conflito em um arquivo binário (imagem, PDF, lock file) que não pode ser resolvido com edição de texto.",
+    emoji: "🖼️",
+    steps: [
+      { title: "Verifique quais binários estão em conflito", command: "git status", description: "Arquivos binários aparecem como 'both modified' mas o Git não consegue mostrar diff de texto neles." },
+      { title: "Opção A: manter sua versão (branch atual)", command: "git checkout --ours -- caminho/arquivo.png", description: "Descarta a versão que veio do merge e mantém a sua. Use para imagens ou binários onde sua versão é a correta." },
+      { title: "Opção B: aceitar a versão de quem veio do merge", command: "git checkout --theirs -- caminho/arquivo.png", description: "Descarta sua versão e aceita a que veio da outra branch. Use quando a versão deles é a correta." },
+      { title: "Para lock files (package-lock.json, yarn.lock): aceite a versão deles e regenere", command: "git checkout --theirs -- package-lock.json", description: "Lock files devem ser regenerados, não mergeados manualmente." },
+      { title: "Regenere o lock file se necessário", command: "npm install", description: "Reinstale as dependências para gerar um lock file consistente após resolver o conflito." },
+      { title: "Marque o conflito como resolvido", command: "git add caminho/arquivo.png", description: "Adiciona o arquivo resolvido ao stage." },
+      { title: "Finalize o merge", command: "git commit --no-edit", description: "Conclui o merge com a mensagem gerada automaticamente." },
+    ],
+    expectedResult: "O conflito no arquivo binário é resolvido escolhendo explicitamente qual versão manter. Lock files são regenerados para garantir consistência.",
+  },
 ];
 
 export function getProblemById(id: string): GitProblem | undefined {
