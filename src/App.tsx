@@ -41,6 +41,7 @@ import WinScenarios from "./pages/win/WinScenarios";
 import WinCheatSheet from "./pages/win/WinCheatSheet";
 import WinProblems from "./pages/win/WinProblems";
 import WinProblemDetail from "./pages/win/WinProblemDetail";
+import WinConventions from "./pages/win/WinConventions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/win/cheatsheet" element={<WinCheatSheet />} />
             <Route path="/win/problems" element={<WinProblems />} />
             <Route path="/win/problems/:id" element={<WinProblemDetail />} />
+            <Route path="/win/conventions" element={<WinConventions />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

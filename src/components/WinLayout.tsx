@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { AlertTriangle, ChevronLeft, LayoutList, Layers, Menu, MonitorCog } from "lucide-react";
+import { AlertTriangle, BookMarked, ChevronLeft, LayoutList, Layers, Menu, MonitorCog } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,6 +12,7 @@ const navItems = [
   { label: "Cenários",   path: "/win/scenarios",    icon: Layers },
   { label: "Cheat Sheet",path: "/win/cheatsheet",   icon: LayoutList },
   { label: "Problemas",  path: "/win/problems",     icon: AlertTriangle },
+  { label: "Convenções", path: "/win/conventions",  icon: BookMarked },
 ];
 
 export function WinLayout() {
