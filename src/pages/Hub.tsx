@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
 import { GIT_LAST_PATH_KEY } from "@/components/Layout";
 import { SHELL_LAST_PATH_KEY } from "@/components/ShellLayout";
+import { SEO } from "@/components/SEO";
 
 /* ─── Ícone Ubuntu ───────────────────────────────────────────────────── */
 
@@ -342,7 +342,7 @@ function SmallCard({ doc, destination }: { doc: typeof docs[0]; destination: str
     style: { "--border-h": doc.border } as React.CSSProperties,
     className: `relative overflow-hidden rounded-2xl border border-white/[0.05] bg-[hsl(225,25%,6%)]
       hover:border-[var(--border-h)] transition-[border-color,opacity] duration-500
-      ${doc.available ? "opacity-80 hover:opacity-100 cursor-pointer" : "opacity-50 hover:opacity-85"}`,
+      ${doc.available ? "cursor-pointer" : "opacity-50 hover:opacity-85"}`,
   };
 
   if (doc.available) {
@@ -374,10 +374,11 @@ export default function Hub() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[hsl(225,30%,4%)]">
-      <Helmet>
-        <title>DevDocs — Referências visuais para desenvolvedores</title>
-        <meta name="description" content="Hub de documentação visual interativa: GitDoc, ShellDoc, UbuntuDoc e WinDoc." />
-      </Helmet>
+      <SEO
+        title="Hub"
+        description="Hub de documentacao visual interativa do Git Flow Studio: GitDoc, ShellDoc, UbuntuDoc e WinDoc."
+        path="/"
+      />
 
       {/* grid de fundo */}
       <div className="fixed inset-0 pointer-events-none"

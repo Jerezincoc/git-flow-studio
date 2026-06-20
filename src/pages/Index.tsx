@@ -144,7 +144,11 @@ export default function Index() {
 
   return (
     <div className="hero-gradient bg-grid">
-      <SEO path="/" />
+      <SEO
+        title="GitDoc Home"
+        description="Aprenda Git de forma visual e interativa com guia passo a passo, comandos explicados, mapa do fluxo e solucoes para erros comuns."
+        path="/git"
+      />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
