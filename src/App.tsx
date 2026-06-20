@@ -41,6 +41,7 @@ import WinScenarios from "./pages/win/WinScenarios";
 import WinCheatSheet from "./pages/win/WinCheatSheet";
 import WinProblems from "./pages/win/WinProblems";
 import WinProblemDetail from "./pages/win/WinProblemDetail";
+import WinConventions from "./pages/win/WinConventions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
