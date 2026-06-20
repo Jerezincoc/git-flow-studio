@@ -127,6 +127,24 @@
   --glow: 142 70% 36%;
 }
 
+/* WinDoc theme - royal blue Windows palette */
+.dark [data-theme="win"] {
+  --primary: 213 70% 52%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 200 80% 45%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 213 70% 52%;
+  --glow: 213 70% 52%;
+}
+:root [data-theme="win"] {
+  --primary: 213 70% 45%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 200 80% 38%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 213 70% 45%;
+  --glow: 213 70% 45%;
+}
+
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;

@@ -128,6 +128,11 @@ const docStats: Record<string, { value: string; label: string }[]> = {
     { value: "8",    label: "cenários" },
     { value: "6",    label: "categorias" },
   ],
+  win: [
+    { value: "52", label: "comandos" },
+    { value: "10", label: "cenários" },
+    { value: "7",  label: "categorias" },
+  ],
 };
 
 const docGuideLinks: Record<string, string | undefined> = {
@@ -139,6 +144,7 @@ const docAnimations: Record<string, React.FC> = {
   git:   GitAnimation,
   shell: ShellAnimation,
   linux: ShellAnimation,
+  win:   ShellAnimation,
 };
 
 const smallPreviews: Record<string, string[]> = {
@@ -178,12 +184,12 @@ const docs = [
   },
   {
     id: "win", name: "WinDoc", path: "/win", icon: Cpu,
-    description: "CMD, variáveis de ambiente, batch scripts e administração Windows.",
-    glow: "0 0 55px rgba(14,165,233,0.18)",
-    border: "rgba(14,165,233,0.32)",
-    accent: "rgba(14,165,233,0.07)",
-    symbolColor: "text-sky-400",
-    available: false,
+    description: "52 comandos Windows em 7 categorias, com CMD, rede, Registro, scripts, disco, servicos e problemas reais de suporte.",
+    glow: "0 0 55px rgba(37,99,235,0.2)",
+    border: "rgba(37,99,235,0.34)",
+    accent: "rgba(37,99,235,0.08)",
+    symbolColor: "text-blue-500",
+    available: true,
   },
 ];
 
