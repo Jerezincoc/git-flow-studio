@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 import { linuxCommands, linuxCategoryLabels, linuxLevelLabels } from "@/data/linuxCommands";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -116,23 +117,27 @@ export default function LinuxCommands() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: Math.min(i * 0.04, 0.3) }}
-            className="glass-card p-5 h-full hover:border-primary/40 transition-all hover:glow-sm group"
           >
-            <div className="flex items-start justify-between mb-2">
-              <code className="text-primary font-mono font-semibold">{cmd.name}</code>
-              <button onClick={(e) => toggleFav(cmd.id, e)} className="text-muted-foreground hover:text-primary transition-colors">
-                <Star className={`h-4 w-4 ${favorites.includes(cmd.id) ? "fill-primary text-primary" : ""}`} />
-              </button>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">{cmd.description}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">
-                {linuxCategoryLabels[cmd.category]}
-              </span>
-              <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-md text-primary">
-                {linuxLevelLabels[cmd.level]}
-              </span>
-            </div>
+            <Link
+              to={`/linux/commands/${cmd.id}`}
+              className="glass-card p-5 block h-full hover:border-primary/40 transition-all hover:glow-sm group"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <code className="text-primary font-mono font-semibold">{cmd.name}</code>
+                <button onClick={(e) => toggleFav(cmd.id, e)} className="text-muted-foreground hover:text-primary transition-colors">
+                  <Star className={`h-4 w-4 ${favorites.includes(cmd.id) ? "fill-primary text-primary" : ""}`} />
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">{cmd.description}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">
+                  {linuxCategoryLabels[cmd.category]}
+                </span>
+                <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-md text-primary">
+                  {linuxLevelLabels[cmd.level]}
+                </span>
+              </div>
+            </Link>
           </motion.div>
         ))}
       </div>

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Terminal, LayoutList, AlertTriangle, Layers, ArrowRight, Server } from "lucide-react";
+import { Terminal, LayoutList, AlertTriangle, Layers, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 
@@ -28,10 +28,6 @@ export default function LinuxHome() {
       />
       <section className="container px-4 pt-20 pb-16 text-center">
         <motion.div initial="hidden" animate="show" variants={stagger}>
-          <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 mb-4">
-            <Server className="h-4 w-4 text-primary" />
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Linux & Terminal</span>
-          </motion.div>
           <motion.h1
             variants={fadeUp}
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4"
@@ -45,7 +41,7 @@ export default function LinuxHome() {
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
             <Button asChild className="btn-glow">
-              <Link to="/linux/commands">Ver Cmdlets</Link>
+              <Link to="/linux/commands">Ver Comandos</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/linux/scenarios">Ver Cenários</Link>

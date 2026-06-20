@@ -244,8 +244,16 @@ function PlaybookCard({ playbook }: { playbook: Playbook }) {
         </span>
       </button>
 
-      {open && (
-        <div className="border-t border-border/50 px-4 pb-4 pt-3 space-y-4">
+      <AnimatePresence initial={false}>
+        {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -8, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: "auto" }}
+          exit={{ opacity: 0, y: -8, height: 0 }}
+          transition={{ duration: 0.2, height: { duration: 0.3, ease: "easeInOut" } }}
+          className="overflow-hidden border-t border-border/50"
+        >
+        <div className="px-4 pb-4 pt-3 space-y-4">
           <div className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
             <p className="text-xs text-primary">
               <span className="font-semibold">Quando usar:</span> {playbook.whenToUse}
@@ -275,7 +283,9 @@ function PlaybookCard({ playbook }: { playbook: Playbook }) {
             </div>
           </div>
         </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

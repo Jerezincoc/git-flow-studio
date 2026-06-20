@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp, Tag, FlaskConical } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import type { Scenario } from "@/data/scenarios";
@@ -50,8 +51,16 @@ export function ScenarioCard({ scenario, index }: Props) {
       </button>
 
       {/* Corpo expandido */}
-      {open && (
-        <div className="border-t border-border/50 px-5 pb-5 pt-4 space-y-4">
+      <AnimatePresence initial={false}>
+        {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -8, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: "auto" }}
+          exit={{ opacity: 0, y: -8, height: 0 }}
+          transition={{ duration: 0.2, height: { duration: 0.3, ease: "easeInOut" } }}
+          className="overflow-hidden border-t border-border/50"
+        >
+        <div className="px-5 pb-5 pt-4 space-y-4">
           {/* Bloco de comandos */}
           <div className="relative">
             <pre className="bg-black/40 rounded-lg p-4 text-xs font-mono text-green-300 overflow-x-auto leading-relaxed whitespace-pre">
@@ -76,8 +85,16 @@ export function ScenarioCard({ scenario, index }: Props) {
                   : <ChevronDown className="h-3 w-3 ml-0.5" />}
               </button>
 
-              {anatomyOpen && (
-                <div className="mt-3 space-y-2 border-l-2 border-primary/20 pl-4">
+              <AnimatePresence initial={false}>
+                {anatomyOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -8, height: 0 }}
+                  transition={{ duration: 0.2, height: { duration: 0.3, ease: "easeInOut" } }}
+                  className="mt-3 overflow-hidden border-l-2 border-primary/20 pl-4"
+                >
+                  <div className="space-y-2">
                   {scenario.anatomy.map((item, i) => (
                     <div key={i} className="flex items-baseline gap-2 text-xs leading-relaxed">
                       <code className="font-mono text-primary/90 bg-primary/8 px-1.5 py-0.5 rounded shrink-0">
@@ -87,8 +104,10 @@ export function ScenarioCard({ scenario, index }: Props) {
                       <span className="text-foreground/80">{item.explanation}</span>
                     </div>
                   ))}
-                </div>
-              )}
+                  </div>
+                </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -105,7 +124,9 @@ export function ScenarioCard({ scenario, index }: Props) {
             ))}
           </div>
         </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

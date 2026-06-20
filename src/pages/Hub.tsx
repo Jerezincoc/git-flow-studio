@@ -2,9 +2,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
-import { GIT_LAST_PATH_KEY } from "@/components/Layout";
-import { SHELL_LAST_PATH_KEY } from "@/components/ShellLayout";
-import { LINUX_LAST_PATH_KEY } from "@/components/LinuxLayout";
 import { SEO } from "@/components/SEO";
 
 /* ─── Ícone Linux ───────────────────────────────────────────────────── */
@@ -114,12 +111,6 @@ function ShellAnimation() {
 /* ─── dados por layer ────────────────────────────────────────────────── */
 
 export const LAST_LAYER_KEY = "devdocs-last-layer";
-
-const lastPathKeys: Record<string, string> = {
-  git:   GIT_LAST_PATH_KEY,
-  shell: SHELL_LAST_PATH_KEY,
-  linux: LINUX_LAST_PATH_KEY,
-};
 
 const docStats: Record<string, { value: string; label: string }[]> = {
   git: [
@@ -375,11 +366,6 @@ export default function Hub() {
   const featuredDoc = docs[featuredIndex !== -1 ? featuredIndex : 0];
   const restDocs = docs.filter((d) => d.id !== featuredDoc.id);
 
-  const getDestination = (doc: typeof docs[0]) => {
-    const key = lastPathKeys[doc.id];
-    return (key && localStorage.getItem(key)) ?? doc.path;
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-[hsl(225,30%,4%)]">
       <SEO
@@ -422,7 +408,7 @@ export default function Hub() {
                 exit={{ opacity: 0, y: -12, scale: 0.97 }}
                 transition={{ duration: 0.32, ease: "easeInOut" }}
               >
-                <FeaturedCard doc={featuredDoc} destination={getDestination(featuredDoc)} />
+                <FeaturedCard doc={featuredDoc} destination={featuredDoc.path} />
               </motion.div>
             </AnimatePresence>
           </motion.div>
@@ -439,7 +425,7 @@ export default function Hub() {
                   exit={{ opacity: 0, scale: 0.96 }}
                   transition={{ duration: 0.28, ease: "easeInOut" }}
                 >
-                  <SmallCard doc={doc} destination={getDestination(doc)} />
+                  <SmallCard doc={doc} destination={doc.path} />
                 </motion.div>
               ))}
             </AnimatePresence>

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown, Lightbulb, Terminal } from "lucide-react";
@@ -118,8 +118,16 @@ export default function GitMap() {
                 />
               </button>
 
-              {openStep === item.step && (
-                <div className="border-t border-border/50 px-5 py-5">
+              <AnimatePresence initial={false}>
+                {openStep === item.step && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -8, height: 0 }}
+                  transition={{ duration: 0.2, height: { duration: 0.3, ease: "easeInOut" } }}
+                  className="overflow-hidden border-t border-border/50"
+                >
+                <div className="px-5 py-5">
                   <div className="pb-5">
                     <div className="flex items-center gap-2 text-xs font-medium mb-2">
                       <Terminal className="h-3.5 w-3.5 text-primary" />
@@ -152,7 +160,9 @@ export default function GitMap() {
                     {item.problem.label}
                   </Link>
                 </div>
-              )}
+                </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </div>

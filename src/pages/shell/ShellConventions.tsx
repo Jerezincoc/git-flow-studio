@@ -150,7 +150,7 @@ function RuleCard({ rule }: { rule: ConventionRule }) {
           {rule.bad && (
             <div>
               <p className="text-xs text-red-400 font-medium mb-1.5">✗ Evitar</p>
-              <pre className="bg-black/20 border border-red-400/10 rounded-lg p-3 text-xs font-mono text-red-300/80 overflow-x-auto whitespace-pre leading-relaxed opacity-80">
+              <pre className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs font-mono text-red-900 overflow-x-auto whitespace-pre leading-relaxed dark:bg-red-950/40 dark:border-red-800/30 dark:text-red-300/90">
                 {rule.bad}
               </pre>
             </div>

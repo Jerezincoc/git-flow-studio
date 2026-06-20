@@ -79,6 +79,16 @@
   html {
     scroll-behavior: smooth;
   }
+  ::-webkit-scrollbar {
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 2px;
+  }
 }
 
 /* ShellDoc theme — blue PowerShell palette */
