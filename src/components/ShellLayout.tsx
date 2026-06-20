@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { Terminal, LayoutList, AlertTriangle, BookOpen, Menu, ChevronLeft } from "lucide-react";
+import { Terminal, LayoutList, AlertTriangle, BookOpen, Layers, Menu, ChevronLeft } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ export const SHELL_LAST_PATH_KEY = "devdocs-shell-last-path";
 const navItems = [
   { label: "Guia", path: "/shell/guide", icon: BookOpen },
   { label: "Cmdlets", path: "/shell/commands", icon: Terminal },
+  { label: "Cenários", path: "/shell/scenarios", icon: Layers },
   { label: "Cheat Sheet", path: "/shell/cheatsheet", icon: LayoutList },
   { label: "Problemas", path: "/shell/problems", icon: AlertTriangle },
 ];
