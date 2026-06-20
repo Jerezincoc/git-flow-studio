@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "@/components/Layout";
 import { ShellLayout } from "@/components/ShellLayout";
 import { LinuxLayout } from "@/components/LinuxLayout";
+import { WinLayout } from "@/components/WinLayout";
 import Hub from "./pages/Hub";
 import Index from "./pages/Index";
 import Commands from "./pages/Commands";
@@ -33,6 +34,13 @@ import LinuxScenarios from "./pages/linux/LinuxScenarios";
 import LinuxCheatSheet from "./pages/linux/LinuxCheatSheet";
 import LinuxProblems from "./pages/linux/LinuxProblems";
 import LinuxProblemDetail from "./pages/linux/LinuxProblemDetail";
+import WinHome from "./pages/win/WinHome";
+import WinCommands from "./pages/win/WinCommands";
+import WinCommandDetail from "./pages/win/WinCommandDetail";
+import WinScenarios from "./pages/win/WinScenarios";
+import WinCheatSheet from "./pages/win/WinCheatSheet";
+import WinProblems from "./pages/win/WinProblems";
+import WinProblemDetail from "./pages/win/WinProblemDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +91,17 @@ const App = () => (
             <Route path="/linux/cheatsheet" element={<LinuxCheatSheet />} />
             <Route path="/linux/problems" element={<LinuxProblems />} />
             <Route path="/linux/problems/:id" element={<LinuxProblemDetail />} />
+          </Route>
+
+          {/* WinDoc */}
+          <Route element={<WinLayout />}>
+            <Route path="/win" element={<WinHome />} />
+            <Route path="/win/commands" element={<WinCommands />} />
+            <Route path="/win/commands/:id" element={<WinCommandDetail />} />
+            <Route path="/win/scenarios" element={<WinScenarios />} />
+            <Route path="/win/cheatsheet" element={<WinCheatSheet />} />
+            <Route path="/win/problems" element={<WinProblems />} />
+            <Route path="/win/problems/:id" element={<WinProblemDetail />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
