@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowLeft, BookOpen, Lightbulb, Star } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
-import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLinuxCommandById, linuxCategoryLabels, linuxLevelLabels } from "@/data/linuxCommands";
@@ -22,7 +21,7 @@ export default function LinuxCommandDetail() {
   const { id } = useParams<{ id: string }>();
   const cmd = getLinuxCommandById(id ?? "");
   const [favorites, setFavorites] = useLocalStorage<string[]>("linux-doc-favorites", []);
-  const [history, setHistory] = useLocalStorage<string[]>("linux-doc-history", []);
+  const [history, setHistory]     = useLocalStorage<string[]>("linux-doc-history", []);
 
   useEffect(() => {
     if (id) {
@@ -33,7 +32,7 @@ export default function LinuxCommandDetail() {
   if (!cmd) {
     return (
       <div data-theme="linux" className="container px-4 py-20 text-center">
-        <p className="text-muted-foreground">Comando nao encontrado.</p>
+        <p className="text-muted-foreground">Comando não encontrado.</p>
         <Button asChild variant="outline" className="mt-4">
           <Link to="/linux/commands">Voltar</Link>
         </Button>
@@ -45,11 +44,6 @@ export default function LinuxCommandDetail() {
 
   return (
     <div data-theme="linux" className="container px-4 py-10 max-w-3xl">
-      <SEO
-        title={`${cmd.name} - LinuxDoc`}
-        description={`${cmd.description} Veja sintaxe, flags, variacoes e exemplos praticos de ${cmd.name}.`}
-        path={`/linux/commands/${cmd.id}`}
-      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Link
           to="/linux/commands"
@@ -61,7 +55,7 @@ export default function LinuxCommandDetail() {
         <div className="flex items-center gap-3 mb-2">
           <h1 className="text-3xl font-bold font-mono text-primary">{cmd.name}</h1>
           <button
-            onClick={() => setFavorites((prev) => isFav ? prev.filter((f) => f !== cmd.id) : [...prev, cmd.id])}
+            onClick={() => setFavorites((p) => isFav ? p.filter((f) => f !== cmd.id) : [...p, cmd.id])}
             aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
           >
             <Star className={`h-5 w-5 transition-colors ${isFav ? "fill-primary text-primary" : "text-muted-foreground hover:text-primary"}`} />
@@ -90,7 +84,7 @@ export default function LinuxCommandDetail() {
             <div className="overflow-x-auto -mx-1 px-1 pb-1">
               <TabsList className="flex h-auto gap-1 justify-start w-max min-w-full">
                 <TabsTrigger value="geral">Geral</TabsTrigger>
-                <TabsTrigger value="variacoes">Variacoes</TabsTrigger>
+                <TabsTrigger value="variacoes">Variações</TabsTrigger>
                 {cmd.flags && cmd.flags.length > 0 && (
                   <TabsTrigger value="flags">Flags</TabsTrigger>
                 )}
@@ -107,20 +101,20 @@ export default function LinuxCommandDetail() {
             <TabsContent value="geral" className="mt-6 space-y-8">
               <Section title="Usos comuns">
                 <ul className="space-y-1">
-                  {cmd.uses.map((use, i) => (
+                  {cmd.uses.map((u, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-primary mt-1">-</span> {use}
+                      <span className="text-primary mt-1">•</span> {u}
                     </li>
                   ))}
                 </ul>
               </Section>
 
               {cmd.whenNotToUse.length > 0 && (
-                <Section title="Quando nao usar">
+                <Section title="Quando NÃO usar">
                   <ul className="space-y-1">
-                    {cmd.whenNotToUse.map((warning, i) => (
+                    {cmd.whenNotToUse.map((w, i) => (
                       <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="text-destructive mt-1">x</span> {warning}
+                        <span className="text-destructive mt-1">✕</span> {w}
                       </li>
                     ))}
                   </ul>
@@ -129,13 +123,13 @@ export default function LinuxCommandDetail() {
 
               <Section title="Comandos relacionados">
                 <div className="flex flex-wrap gap-2">
-                  {cmd.relatedCommands.map((related) => (
+                  {cmd.relatedCommands.map((r) => (
                     <Link
-                      key={related}
-                      to={`/linux/commands/${related}`}
+                      key={r}
+                      to={`/linux/commands/${r}`}
                       className="font-mono text-sm bg-secondary hover:bg-secondary/80 px-3 py-1.5 rounded-lg text-primary transition-colors"
                     >
-                      {related}
+                      {r}
                     </Link>
                   ))}
                 </div>
@@ -150,13 +144,13 @@ export default function LinuxCommandDetail() {
 
             <TabsContent value="variacoes" className="mt-6">
               <div className="space-y-2">
-                {cmd.variations.map((variation, i) => (
+                {cmd.variations.map((v, i) => (
                   <div key={i} className="glass-card p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <code className="font-mono text-sm text-primary flex-1">{variation.command}</code>
-                      <CopyButton text={variation.command} />
+                      <code className="font-mono text-sm text-primary flex-1">{v.command}</code>
+                      <CopyButton text={v.command} />
                     </div>
-                    <p className="text-xs text-muted-foreground">{variation.description}</p>
+                    <p className="text-xs text-muted-foreground">{v.description}</p>
                   </div>
                 ))}
               </div>
@@ -165,19 +159,19 @@ export default function LinuxCommandDetail() {
             {cmd.flags && cmd.flags.length > 0 && (
               <TabsContent value="flags" className="mt-6">
                 <div className="space-y-2">
-                  {cmd.flags.map((flag, i) => (
-                    <div key={i} className={`glass-card p-3 ${flag.danger ? "border border-destructive/30" : ""}`}>
+                  {cmd.flags.map((f, i) => (
+                    <div key={i} className={`glass-card p-3 ${f.danger ? "border border-destructive/30" : ""}`}>
                       <div className="flex items-start gap-2">
-                        <code className="font-mono text-sm text-primary shrink-0">{flag.flag}</code>
-                        {flag.danger && (
+                        <code className="font-mono text-sm text-primary shrink-0">{f.flag}</code>
+                        {f.danger && (
                           <AlertTriangle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
                         )}
-                        <p className="text-xs text-muted-foreground leading-relaxed">{flag.description}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
                       </div>
-                      {flag.example && (
+                      {f.example && (
                         <div className="mt-2 flex items-center gap-2">
-                          <code className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded flex-1">{flag.example}</code>
-                          <CopyButton text={flag.example} />
+                          <code className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded flex-1">{f.example}</code>
+                          <CopyButton text={f.example} />
                         </div>
                       )}
                     </div>
@@ -188,12 +182,12 @@ export default function LinuxCommandDetail() {
 
             <TabsContent value="exemplos" className="mt-6">
               <div className="space-y-4">
-                {cmd.examples.map((example, i) => (
+                {cmd.examples.map((ex, i) => (
                   <div key={i}>
-                    <p className="text-sm text-muted-foreground mb-1">{example.description}</p>
+                    <p className="text-sm text-muted-foreground mb-1">{ex.description}</p>
                     <div className="flex items-start gap-2">
-                      <pre className="code-block flex-1 text-sm whitespace-pre-wrap overflow-x-auto">{example.code}</pre>
-                      <CopyButton text={example.code} />
+                      <pre className="code-block flex-1 text-sm whitespace-pre-wrap overflow-x-auto">{ex.code}</pre>
+                      <CopyButton text={ex.code} />
                     </div>
                   </div>
                 ))}
@@ -204,7 +198,7 @@ export default function LinuxCommandDetail() {
               <TabsContent value="anatomia" className="mt-6">
                 <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5">
                   <BookOpen className="h-3.5 w-3.5" />
-                  Cada parte da sintaxe explicada de forma direta.
+                  Cada parte da sintaxe explicada em português, sem jargão técnico.
                 </p>
                 <div className="space-y-3">
                   {cmd.syntaxBreakdown.map((item, i) => (
@@ -232,10 +226,10 @@ export default function LinuxCommandDetail() {
             {cmd.curiosities && cmd.curiosities.length > 0 && (
               <TabsContent value="curiosidades" className="mt-6">
                 <div className="space-y-3">
-                  {cmd.curiosities.map((curiosity, i) => (
+                  {cmd.curiosities.map((c, i) => (
                     <div key={i} className="glass-card p-4 flex gap-3">
                       <Lightbulb className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                      <p className="text-sm text-muted-foreground leading-relaxed">{curiosity}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{c}</p>
                     </div>
                   ))}
                 </div>
