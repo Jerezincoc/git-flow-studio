@@ -34,6 +34,7 @@ export interface ShellCommand {
     | "pipeline"
     | "system"
     | "network";
+  level: "básico" | "intermediário" | "avançado";
   uses: string[];
   variations: ShellVariation[];
   examples: ShellExample[];
@@ -44,6 +45,12 @@ export interface ShellCommand {
   curiosities?: string[];
   syntaxBreakdown?: SyntaxPart[];
 }
+
+export const shellLevelLabels: Record<string, string> = {
+  "básico": "Básico",
+  "intermediário": "Intermediário",
+  "avançado": "Avançado",
+};
 
 export const shellCategoryLabels: Record<string, string> = {
   navigation: "Navegação",
@@ -62,6 +69,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lista arquivos e pastas de um diretório. Equivalente ao ls no Linux e dir no CMD.",
     syntax: "Get-ChildItem [[-Path] <string>] [-Filter <string>] [-Recurse] [-Hidden] [-Force]",
     category: "navigation",
+    level: "básico",
     uses: [
       "Listar arquivos de uma pasta",
       "Buscar arquivos por extensão ou padrão",
@@ -120,6 +128,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Muda o diretório de trabalho atual. Equivalente ao cd em todos os shells.",
     syntax: "Set-Location [[-Path] <string>]",
     category: "navigation",
+    level: "básico",
     uses: [
       "Navegar entre diretórios",
       "Voltar ao diretório anterior",
@@ -162,6 +171,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Obtém o objeto que representa um arquivo, pasta, chave de registro ou outro item de um provedor.",
     syntax: "Get-Item [-Path] <string[]>",
     category: "navigation",
+    level: "intermediário",
     uses: [
       "Obter metadados de um arquivo específico",
       "Verificar propriedades de um item",
@@ -200,6 +210,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Copia arquivos ou pastas de um local para outro.",
     syntax: "Copy-Item [-Path] <string[]> [[-Destination] <string>]",
     category: "files",
+    level: "básico",
     uses: [
       "Copiar arquivos para outro diretório",
       "Criar backup de um arquivo",
@@ -241,6 +252,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Move ou renomeia arquivos e pastas.",
     syntax: "Move-Item [-Path] <string[]> [[-Destination] <string>]",
     category: "files",
+    level: "básico",
     uses: [
       "Mover arquivos para outro diretório",
       "Renomear arquivos ou pastas",
@@ -279,6 +291,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Exclui arquivos, pastas ou outros itens.",
     syntax: "Remove-Item [-Path] <string[]> [-Recurse] [-Force]",
     category: "files",
+    level: "básico",
     uses: [
       "Apagar arquivos",
       "Remover pastas com conteúdo",
@@ -322,6 +335,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Cria novos arquivos, pastas, chaves de registro ou outros itens.",
     syntax: "New-Item [-Path] <string> -ItemType <string> [-Value <string>]",
     category: "files",
+    level: "básico",
     uses: [
       "Criar arquivos vazios",
       "Criar estrutura de diretórios",
@@ -361,6 +375,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Renomeia um arquivo, pasta ou outro item.",
     syntax: "Rename-Item [-Path] <string> [-NewName] <string>",
     category: "files",
+    level: "básico",
     uses: [
       "Renomear arquivo ou pasta",
       "Renomear em massa via pipeline",
@@ -400,6 +415,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lê o conteúdo de um arquivo e retorna como array de linhas ou string.",
     syntax: "Get-Content [-Path] <string[]> [-TotalCount <int>] [-Tail <int>]",
     category: "content",
+    level: "básico",
     uses: [
       "Ler conteúdo de arquivos de texto",
       "Monitorar arquivos de log em tempo real",
@@ -449,6 +465,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Escreve ou sobrescreve o conteúdo de um arquivo.",
     syntax: "Set-Content [-Path] <string[]> [-Value] <Object[]>",
     category: "content",
+    level: "básico",
     uses: [
       "Escrever conteúdo em um arquivo (sobrescrevendo)",
       "Criar arquivo com conteúdo",
@@ -487,6 +504,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Adiciona conteúdo ao final de um arquivo sem sobrescrever.",
     syntax: "Add-Content [-Path] <string[]> [-Value] <Object[]>",
     category: "content",
+    level: "básico",
     uses: [
       "Anexar linhas a arquivos de log",
       "Adicionar entradas a arquivos de configuração",
@@ -524,6 +542,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Busca texto ou padrões regex dentro de arquivos ou strings. Equivalente ao grep.",
     syntax: "Select-String [-Pattern] <string[]> [-Path] <string[]>",
     category: "content",
+    level: "intermediário",
     uses: [
       "Buscar texto em arquivos",
       "Filtrar linhas por padrão regex",
@@ -570,6 +589,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Seleciona propriedades específicas de objetos ou limita a quantidade de objetos retornados.",
     syntax: "Select-Object [[-Property] <Object[]>] [-First <int>] [-Last <int>] [-Unique]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Selecionar colunas específicas de um objeto",
       "Limitar número de resultados (head/tail)",
@@ -619,6 +639,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Filtra objetos no pipeline com base em uma condição. Equivalente ao filter/grep para objetos.",
     syntax: "Where-Object [-FilterScript] <ScriptBlock>",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Filtrar processos por nome ou uso de CPU/memória",
       "Filtrar arquivos por tamanho, data ou extensão",
@@ -665,6 +686,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Executa um bloco de código para cada objeto no pipeline.",
     syntax: "ForEach-Object [-Process] <ScriptBlock>",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Transformar cada item no pipeline",
       "Executar ações em cada elemento de uma coleção",
@@ -712,6 +734,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Ordena objetos por uma ou mais propriedades.",
     syntax: "Sort-Object [[-Property] <Object[]>] [-Descending] [-Unique]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Ordenar processos por uso de CPU ou memória",
       "Ordenar arquivos por tamanho ou data",
@@ -750,6 +773,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Calcula propriedades numéricas ou de texto de objetos: count, soma, média, min e max.",
     syntax: "Measure-Object [[-Property] <string[]>] [-Sum] [-Average] [-Minimum] [-Maximum] [-Count]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Contar quantidade de arquivos ou processos",
       "Calcular tamanho total de arquivos",
@@ -792,6 +816,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Agrupa objetos que têm o mesmo valor em uma propriedade especificada.",
     syntax: "Group-Object [[-Property] <Object[]>] [-NoElement] [-AsHashTable]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Agrupar processos por status ou nome",
       "Agrupar arquivos por extensão",
@@ -833,6 +858,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lista processos em execução no sistema local ou remoto.",
     syntax: "Get-Process [[-Name] <string[]>] [-Id <int[]>] [-ComputerName <string[]>]",
     category: "system",
+    level: "básico",
     uses: [
       "Verificar processos em execução",
       "Encontrar o PID de um processo pelo nome",
@@ -875,6 +901,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Encerra processos em execução pelo nome ou PID.",
     syntax: "Stop-Process [[-Name] <string[]>] [-Id <int[]>] [-Force]",
     category: "system",
+    level: "intermediário",
     uses: [
       "Encerrar aplicações travadas",
       "Matar processos por nome ou PID",
@@ -914,6 +941,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lista serviços do Windows e seu status atual.",
     syntax: "Get-Service [[-Name] <string[]>] [-ComputerName <string[]>]",
     category: "system",
+    level: "intermediário",
     uses: [
       "Verificar status de serviços",
       "Listar serviços parados ou em execução",
@@ -953,6 +981,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lista todos os comandos disponíveis no PowerShell: cmdlets, funções, aliases e executáveis.",
     syntax: "Get-Command [[-Name] <string[]>] [-CommandType <CommandTypes>] [-Module <string[]>]",
     category: "system",
+    level: "básico",
     uses: [
       "Descobrir cmdlets disponíveis",
       "Verificar se um comando existe",
@@ -994,6 +1023,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Exibe documentação de cmdlets, funções e conceitos do PowerShell.",
     syntax: "Get-Help [[-Name] <string>] [-Full] [-Examples] [-Online] [-Parameter <string>]",
     category: "system",
+    level: "básico",
     uses: [
       "Ver a documentação de qualquer cmdlet",
       "Aprender a usar parâmetros específicos",
@@ -1037,6 +1067,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Faz requisições HTTP/HTTPS e retorna o conteúdo da resposta com headers, status e links.",
     syntax: "Invoke-WebRequest [-Uri] <Uri> [-Method <string>] [-Body <Object>] [-Headers <IDictionary>]",
     category: "network",
+    level: "avançado",
     uses: [
       "Baixar arquivos da internet",
       "Testar APIs REST",
@@ -1084,6 +1115,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Testa conectividade de rede enviando pacotes ICMP (ping) para um host.",
     syntax: "Test-Connection [-TargetName] <string[]> [-Count <int>] [-Quiet]",
     category: "network",
+    level: "básico",
     uses: [
       "Verificar se um host está acessível",
       "Medir latência de rede",
@@ -1128,6 +1160,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Ordena objetos por uma ou mais propriedades, em ordem crescente ou decrescente.",
     syntax: "Sort-Object [[-Property] <Object[]>] [-Descending] [-Unique]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Ordenar arquivos por tamanho, data ou nome",
       "Ordenar processos por uso de CPU ou memória",
@@ -1172,6 +1205,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Agrupa objetos por uma propriedade e retorna a contagem de cada grupo.",
     syntax: "Group-Object [[-Property] <Object[]>] [-NoElement]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Contar quantos arquivos há por extensão",
       "Agrupar processos por nome ou status",
@@ -1209,6 +1243,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Calcula estatísticas numéricas (soma, média, mínimo, máximo, contagem) de propriedades de objetos.",
     syntax: "Measure-Object [[-Property] <string[]>] [-Sum] [-Average] [-Minimum] [-Maximum] [-Count]",
     category: "pipeline",
+    level: "intermediário",
     uses: [
       "Somar tamanhos de arquivos",
       "Calcular média de uso de CPU ou memória",
@@ -1252,6 +1287,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Lê eventos do Log de Eventos do Windows (Application, System, Security, etc.).",
     syntax: "Get-EventLog [-LogName] <string> [-Newest <int>] [-EntryType <string[]>] [-Source <string>]",
     category: "system",
+    level: "avançado",
     uses: [
       "Diagnosticar erros do sistema",
       "Verificar eventos de segurança (logins, falhas)",
@@ -1296,6 +1332,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Define a política de execução de scripts PowerShell no sistema ou para o usuário atual.",
     syntax: "Set-ExecutionPolicy [-ExecutionPolicy] <ExecutionPolicy> [-Scope <ExecutionPolicyScope>]",
     category: "system",
+    level: "avançado",
     uses: [
       "Permitir execução de scripts locais",
       "Configurar ambiente para automação",
@@ -1339,6 +1376,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Executa uma string como comando PowerShell. Útil para executar código construído dinamicamente.",
     syntax: "Invoke-Expression [-Command] <string>",
     category: "system",
+    level: "avançado",
     uses: [
       "Executar comandos construídos dinamicamente",
       "Avaliar strings como código PowerShell",
@@ -1372,6 +1410,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Cria arquivos ZIP comprimindo arquivos e pastas.",
     syntax: "Compress-Archive [-Path] <string[]> [-DestinationPath] <string> [-Update]",
     category: "files",
+    level: "intermediário",
     uses: [
       "Criar backups de arquivos e pastas",
       "Preparar distribuição de scripts e projetos",
@@ -1411,6 +1450,7 @@ export const shellCommands: ShellCommand[] = [
     description: "Converte objetos PowerShell para JSON e vice-versa. Essencial para trabalhar com APIs e arquivos de configuração.",
     syntax: "ConvertTo-Json [-InputObject] <Object> [-Depth <int>]\nConvertFrom-Json [-InputObject] <string>",
     category: "content",
+    level: "intermediário",
     uses: [
       "Serializar objetos para salvar em arquivo ou enviar para API",
       "Parsear respostas JSON de APIs REST",

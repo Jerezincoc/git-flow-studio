@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
-import { commands, categoryLabels } from "@/data/commands";
+import { commands, categoryLabels, levelLabels } from "@/data/commands";
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -12,13 +12,26 @@ const filterOptions = [
   ...Object.entries(categoryLabels).map(([value, label]) => ({ value, label })),
 ];
 
+const levelOptions = [
+  { value: "all", label: "Todos os níveis" },
+  ...Object.entries(levelLabels).map(([value, label]) => ({ value, label })),
+];
+
 const categories = Object.keys(categoryLabels);
+const levels = Object.keys(levelLabels);
 
 export default function Commands() {
   const [filter, setFilter] = useState<string>("all");
+  const [levelFilter, setLevelFilter] = useState<string>("all");
   const [favorites, setFavorites] = useLocalStorage<string[]>("git-doc-favorites", []);
 
-  const filtered = filter === "all" ? commands : filter === "favorites" ? commands.filter((c) => favorites.includes(c.id)) : commands.filter((c) => c.category === filter);
+  const filtered = commands
+    .filter((c) => {
+      if (filter === "favorites") return favorites.includes(c.id);
+      if (filter !== "all") return c.category === filter;
+      return true;
+    })
+    .filter((c) => levelFilter === "all" || c.level === levelFilter);
 
   const toggleFav = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,8 +47,8 @@ export default function Commands() {
         <p className="text-muted-foreground mb-6">Documentação completa e interativa de cada comando.</p>
       </motion.div>
 
-      {/* Mobile: dropdown */}
-      <div className="sm:hidden mb-6">
+      {/* Mobile: dropdowns */}
+      <div className="sm:hidden mb-6 flex flex-col gap-2">
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -45,31 +58,59 @@ export default function Commands() {
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
+        <select
+          value={levelFilter}
+          onChange={(e) => setLevelFilter(e.target.value)}
+          className="w-full px-3 py-2 rounded-lg text-sm font-medium bg-secondary text-secondary-foreground border border-border focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          {levelOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Desktop: botões */}
-      <div className="hidden sm:flex flex-wrap gap-2 mb-8">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
-        >
-          Todos
-        </button>
-        <button
-          onClick={() => setFilter("favorites")}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${filter === "favorites" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
-        >
-          <Star className="h-3 w-3" /> Favoritos
-        </button>
-        {categories.map((cat) => (
+      <div className="hidden sm:flex flex-col gap-2 mb-8">
+        <div className="flex flex-wrap gap-2">
           <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === cat ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+            onClick={() => setFilter("all")}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
           >
-            {categoryLabels[cat]}
+            Todos
           </button>
-        ))}
+          <button
+            onClick={() => setFilter("favorites")}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${filter === "favorites" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+          >
+            <Star className="h-3 w-3" /> Favoritos
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === cat ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+            >
+              {categoryLabels[cat]}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setLevelFilter("all")}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${levelFilter === "all" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+          >
+            Todos os níveis
+          </button>
+          {levels.map((lvl) => (
+            <button
+              key={lvl}
+              onClick={() => setLevelFilter(lvl)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${levelFilter === lvl ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}
+            >
+              {levelLabels[lvl]}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

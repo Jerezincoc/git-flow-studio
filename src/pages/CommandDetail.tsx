@@ -22,7 +22,7 @@ export default function CommandDetail() {
         return [id, ...filtered].slice(0, 20);
       });
     }
-  }, [id]);
+  }, [id, setHistory]);
 
   if (!cmd) {
     return (

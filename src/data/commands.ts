@@ -20,12 +20,13 @@ export interface GitCommand {
   name: string;
   description: string;
   syntax: string;
-category:
-  | "basics"
-  | "branching"
-  | "remote"
-  | "info"
-  | "undoing";
+  category:
+    | "basics"
+    | "branching"
+    | "remote"
+    | "info"
+    | "undoing";
+  level: "básico" | "intermediário" | "avançado";
   uses: string[];
   variations: CommandVariation[];
   examples: CommandExample[];
@@ -35,6 +36,12 @@ category:
   flags?: GitFlag[];
   curiosities?: string[];
 }
+
+export const levelLabels: Record<string, string> = {
+  "básico": "Básico",
+  "intermediário": "Intermediário",
+  "avançado": "Avançado",
+};
 
 export const categoryLabels: Record<string, string> = {
   basics: "Básicos",
@@ -51,6 +58,7 @@ export const commands: GitCommand[] = [
     description: "Cria um novo repositório Git vazio no diretório atual.",
     syntax: "git init [nome-do-diretório]",
     category: "basics",
+    level: "básico",
     uses: [
       "Iniciar controle de versão em um projeto existente",
       "Criar um novo projeto do zero com Git",
@@ -87,6 +95,7 @@ export const commands: GitCommand[] = [
     description: "Copia um repositório remoto para sua máquina local.",
     syntax: "git clone <url> [diretório]",
     category: "basics",
+    level: "básico",
     uses: [
       "Baixar um projeto do GitHub/GitLab",
       "Criar uma cópia local de um repositório remoto",
@@ -128,6 +137,7 @@ export const commands: GitCommand[] = [
     description: "Adiciona arquivos ao staging area para o próximo commit.",
     syntax: "git add <arquivo(s)>",
     category: "basics",
+    level: "básico",
     uses: [
       "Preparar alterações para commit",
       "Selecionar quais mudanças incluir no próximo commit",
@@ -167,6 +177,7 @@ export const commands: GitCommand[] = [
     description: "Mostra o estado atual do working directory e do staging area: arquivos modificados, novos, deletados e o que está no stage.",
     syntax: "git status [opções]",
     category: "basics",
+    level: "básico",
     uses: [
       "Verificar o que mudou antes de commitar",
       "Ver quais arquivos estão no stage",
@@ -210,6 +221,7 @@ export const commands: GitCommand[] = [
   description: "Registra as alterações adicionadas ao stage como um novo snapshot no histórico do repositório.",
   syntax: "git commit -m \"mensagem\"",
   category: "basics",
+  level: "básico",
 
   uses: [
     "Salvar alterações versionadas no histórico",
@@ -308,6 +320,7 @@ export const commands: GitCommand[] = [
   description: "Envia commits locais para um repositório remoto (ex: origin) atualizando branches e/ou tags.",
   syntax: "git push [remoto] [branch]",
   category: "remote",
+  level: "básico",
 
   uses: [
     "Publicar commits no remoto",
@@ -400,6 +413,7 @@ export const commands: GitCommand[] = [
   description: "Baixa mudanças do remoto e integra na branch atual (equivale a: git fetch + merge, ou fetch + rebase).",
   syntax: "git pull [remoto] [branch]",
   category: "remote",
+  level: "básico",
 
   uses: [
     "Atualizar sua branch local com mudanças do remoto",
@@ -482,6 +496,7 @@ export const commands: GitCommand[] = [
   description: "Integra mudanças de outra branch na branch atual, criando (ou não) um merge commit.",
   syntax: "git merge <branch>",
   category: "branching",
+  level: "intermediário",
 
   uses: [
     "Integrar uma feature na main/develop",
@@ -563,6 +578,7 @@ export const commands: GitCommand[] = [
   description: "Cria, lista, renomeia e remove branches. Uma branch é apenas um ponteiro móvel para um commit.",
   syntax: "git branch [opções] [nome]",
   category: "branching",
+  level: "básico",
 
   uses: [
     "Criar branches de feature, hotfix ou release",
@@ -685,6 +701,7 @@ export const commands: GitCommand[] = [
   description: "Troca de branch de forma clara e segura. É a alternativa moderna ao uso de 'git checkout' para navegação entre branches.",
   syntax: "git switch [opções] <branch>",
   category: "branching",
+  level: "básico",
 
   uses: [
     "Trocar de branch",
@@ -782,6 +799,7 @@ export const commands: GitCommand[] = [
   description: "Exibe o histórico de commits do repositório com diversas opções de visualização e filtro.",
   syntax: "git log [opções]",
   category: "info",
+  level: "básico",
 
   uses: [
     "Visualizar histórico de commits",
@@ -885,6 +903,7 @@ export const commands: GitCommand[] = [
   description: "Move o ponteiro do HEAD para outro commit, podendo alterar o stage e o working directory.",
   syntax: "git reset [--soft | --mixed | --hard] <commit>",
   category: "undoing",
+  level: "avançado",
 
   uses: [
     "Desfazer commits locais",
@@ -965,6 +984,7 @@ export const commands: GitCommand[] = [
   description: "Baixa commits, branches e tags do remoto sem integrar automaticamente na sua branch atual.",
   syntax: "git fetch [remoto] [branch]",
   category: "remote",
+  level: "intermediário",
 
   uses: [
     "Atualizar referências remotas antes de integrar",
@@ -1050,6 +1070,7 @@ export const commands: GitCommand[] = [
   description: "Gerencia conexões com repositórios remotos: adiciona, lista, renomeia, remove e inspeciona.",
   syntax: "git remote [opções]",
   category: "remote",
+  level: "intermediário",
   uses: [
     "Adicionar origem remota a um repositório local",
     "Listar remotos configurados",
@@ -1099,6 +1120,7 @@ export const commands: GitCommand[] = [
   description: "Mostra as diferenças entre arquivos, commits ou branches.",
   syntax: "git diff [opções]",
   category: "info",
+  level: "básico",
   uses: [
     "Revisar mudanças antes de commitar",
     "Comparar branches ou commits"
@@ -1148,6 +1170,7 @@ export const commands: GitCommand[] = [
   description: "Guarda mudanças locais (working tree e/ou stage) temporariamente para voltar depois, sem precisar commitar.",
   syntax: "git stash [push|pop|apply|list|show|drop|clear] ...",
   category: "undoing",
+  level: "intermediário",
 
   uses: [
     "Trocar de branch sem commitar trabalho incompleto",
@@ -1256,6 +1279,7 @@ export const commands: GitCommand[] = [
   description: "Reaplica commits de uma branch sobre outra base, reescrevendo o histórico para manter uma linha linear.",
   syntax: "git rebase <base-branch>",
   category: "branching",
+  level: "avançado",
 
   uses: [
     "Atualizar uma branch de feature com a main",
@@ -1337,6 +1361,7 @@ export const commands: GitCommand[] = [
   description: "Aplica um commit específico em outra branch.",
   syntax: "git cherry-pick <commit>",
   category: "branching",
+  level: "avançado",
   uses: [
     "Levar um fix específico para outra branch",
     "Aplicar apenas um commit isolado"
@@ -1383,6 +1408,7 @@ export const commands: GitCommand[] = [
   description: "Cria um novo commit que desfaz as alterações de um commit anterior.",
   syntax: "git revert <commit>",
   category: "undoing",
+  level: "intermediário",
   uses: [
     "Desfazer commits já publicados com segurança",
     "Manter histórico claro sem reescrever commits"
@@ -1422,6 +1448,7 @@ export const commands: GitCommand[] = [
   description: "Cria e gerencia tags para marcar versões no histórico.",
   syntax: "git tag [nome]",
   category: "info",
+  level: "intermediário",
   uses: [
     "Marcar releases (ex: v1.0.0)",
     "Listar versões do projeto"
@@ -1466,6 +1493,7 @@ export const commands: GitCommand[] = [
   description: "Mostra detalhes completos de um commit, tag ou objeto.",
   syntax: "git show [ref]",
   category: "info",
+  level: "básico",
   uses: [
     "Ver detalhes de um commit específico",
     "Inspecionar alterações de uma tag"
@@ -1499,6 +1527,7 @@ export const commands: GitCommand[] = [
   description: "Mostra o histórico de movimentações do HEAD (útil para recuperar estados perdidos).",
   syntax: "git reflog",
   category: "undoing",
+  level: "avançado",
   uses: [
     "Recuperar commits após reset ou rebase",
     "Encontrar estados anteriores do projeto"
@@ -1533,6 +1562,7 @@ export const commands: GitCommand[] = [
   description: "Mostra quem alterou cada linha de um arquivo e em qual commit.",
   syntax: "git blame <arquivo>",
   category: "info",
+  level: "intermediário",
   uses: [
     "Descobrir quem modificou uma linha específica",
     "Investigar quando uma alteração foi feita"
@@ -1569,6 +1599,7 @@ export const commands: GitCommand[] = [
   description: "Remove arquivos não rastreados (untracked) do diretório.",
   syntax: "git clean -f",
   category: "undoing",
+  level: "intermediário",
   uses: [
     "Remover arquivos não versionados",
     "Limpar arquivos gerados (build, cache)"
@@ -1606,6 +1637,7 @@ export const commands: GitCommand[] = [
   description: "Remove arquivos do repositório e do stage.",
   syntax: "git rm <arquivo>",
   category: "basics",
+  level: "intermediário",
   uses: [
     "Remover arquivos versionados",
     "Apagar arquivos do repositório corretamente"
@@ -1639,6 +1671,7 @@ export const commands: GitCommand[] = [
   description: "Move ou renomeia arquivos rastreados pelo Git.",
   syntax: "git mv <origem> <destino>",
   category: "basics",
+  level: "básico",
   uses: [
     "Renomear arquivos mantendo histórico",
     "Mover arquivos entre pastas"
@@ -1669,6 +1702,7 @@ export const commands: GitCommand[] = [
   description: "Lê e define configurações do Git: identidade, editor, aliases, comportamentos padrão e muito mais.",
   syntax: "git config [--global | --local | --system] <chave> <valor>",
   category: "basics",
+  level: "básico",
   uses: [
     "Configurar nome e e-mail do usuário (obrigatório no primeiro uso)",
     "Definir editor padrão (VS Code, Vim, etc.)",
@@ -1721,6 +1755,7 @@ export const commands: GitCommand[] = [
   description: "Restaura arquivos do stage ou de um commit específico.",
   syntax: "git restore <arquivo>",
   category: "undoing",
+  level: "básico",
   uses: [
     "Desfazer mudanças locais",
     "Remover arquivo do stage"
@@ -1753,6 +1788,7 @@ export const commands: GitCommand[] = [
   description: "Ajuda a encontrar qual commit introduziu um bug usando busca binária.",
   syntax: "git bisect [start|good|bad]",
   category: "info",
+  level: "avançado",
   uses: [
     "Descobrir qual commit quebrou o projeto",
     "Depuração eficiente em históricos grandes"
@@ -1789,6 +1825,7 @@ export const commands: GitCommand[] = [
   description: "Permite ter múltiplas branches abertas ao mesmo tempo em diretórios diferentes.",
   syntax: "git worktree add <caminho> <branch>",
   category: "branching",
+  level: "avançado",
   uses: [
     "Trabalhar em múltiplas branches simultaneamente",
     "Evitar ficar trocando de branch no mesmo diretório"
@@ -1823,6 +1860,7 @@ export const commands: GitCommand[] = [
   description: "Gerencia repositórios dentro de outros repositórios.",
   syntax: "git submodule [add|update|init]",
   category: "remote",
+  level: "avançado",
   uses: [
     "Incluir dependências versionadas",
     "Gerenciar projetos externos dentro do seu repo"

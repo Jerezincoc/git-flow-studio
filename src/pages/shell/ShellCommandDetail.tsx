@@ -27,7 +27,7 @@ export default function ShellCommandDetail() {
     if (id) {
       setHistory((prev) => [id, ...prev.filter((h) => h !== id)].slice(0, 20));
     }
-  }, [id]);
+  }, [id, setHistory]);
 
   if (!cmd) {
     return (
