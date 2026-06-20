@@ -4,18 +4,17 @@ import { Link } from "react-router-dom";
 import { GitBranch, Terminal, ArrowRight, Clock, Cpu } from "lucide-react";
 import { GIT_LAST_PATH_KEY } from "@/components/Layout";
 import { SHELL_LAST_PATH_KEY } from "@/components/ShellLayout";
+import { LINUX_LAST_PATH_KEY } from "@/components/LinuxLayout";
 import { SEO } from "@/components/SEO";
 
-/* ─── Ícone Ubuntu ───────────────────────────────────────────────────── */
+/* ─── Ícone Linux ───────────────────────────────────────────────────── */
 
-function UbuntuIcon({ className }: { className?: string }) {
+function LinuxIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="12" cy="4.5" r="2" fill="currentColor" />
-      <circle cx="19.2" cy="16" r="2" fill="currentColor" />
-      <circle cx="4.8"  cy="16" r="2" fill="currentColor" />
-      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7 9l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 15h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -119,6 +118,7 @@ export const LAST_LAYER_KEY = "devdocs-last-layer";
 const lastPathKeys: Record<string, string> = {
   git:   GIT_LAST_PATH_KEY,
   shell: SHELL_LAST_PATH_KEY,
+  linux: LINUX_LAST_PATH_KEY,
 };
 
 const docStats: Record<string, { value: string; label: string }[]> = {
@@ -132,9 +132,14 @@ const docStats: Record<string, { value: string; label: string }[]> = {
     { value: "15",   label: "problemas" },
     { value: "9",    label: "anatomias" },
   ],
+  linux: [
+    { value: "23",   label: "comandos" },
+    { value: "8",    label: "cenários" },
+    { value: "4",    label: "categorias" },
+  ],
 };
 
-const docGuideLinks: Record<string, string> = {
+const docGuideLinks: Record<string, string | undefined> = {
   git:   "/guide",
   shell: "/shell/guide",
 };
@@ -142,12 +147,13 @@ const docGuideLinks: Record<string, string> = {
 const docAnimations: Record<string, React.FC> = {
   git:   GitAnimation,
   shell: ShellAnimation,
+  linux: ShellAnimation,
 };
 
 const smallPreviews: Record<string, string[]> = {
   git:    ["git commit", "git rebase", "git cherry-pick", "git bisect"],
   shell:  ["Get-ChildItem", "Where-Object", "Select-Object", "Invoke-WebRequest"],
-  ubuntu: ["sudo apt install", "chmod 755", "grep -r", "systemctl status"],
+  linux:  ["find -type f", "chmod 755", "grep -r", "systemctl status"],
   win:    ["dir /s /b", "ipconfig /all", "tasklist /fi", "sfc /scannow"],
 };
 
@@ -171,13 +177,13 @@ const docs = [
     available: true,
   },
   {
-    id: "ubuntu", name: "UbuntuDoc", path: "/ubuntu", icon: UbuntuIcon,
-    description: "Terminal Linux, permissões, processos e scripts Bash num só lugar.",
-    glow: "0 0 55px rgba(249,115,22,0.18)",
-    border: "rgba(249,115,22,0.32)",
-    accent: "rgba(249,115,22,0.07)",
-    symbolColor: "text-orange-400",
-    available: false,
+    id: "linux", name: "LinuxDoc", path: "/linux", icon: LinuxIcon,
+    description: "Comandos Linux, permissões, processos, rede, serviços e cenários práticos de terminal num só lugar.",
+    glow: "0 0 55px rgba(34,197,94,0.18)",
+    border: "rgba(34,197,94,0.32)",
+    accent: "rgba(34,197,94,0.07)",
+    symbolColor: "text-green-400",
+    available: true,
   },
   {
     id: "win", name: "WinDoc", path: "/win", icon: Cpu,
@@ -197,7 +203,7 @@ function FeaturedCard({ doc, destination }: { doc: typeof docs[0]; destination: 
   const Icon = doc.icon;
   const Animation = docAnimations[doc.id] ?? GitAnimation;
   const stats = docStats[doc.id] ?? docStats.git;
-  const guideLink = docGuideLinks[doc.id] ?? "/guide";
+  const guideLink = docGuideLinks[doc.id];
 
   return (
     <Link to={destination}>
@@ -277,13 +283,15 @@ function FeaturedCard({ doc, destination }: { doc: typeof docs[0]; destination: 
                 <ArrowRight className="h-3.5 w-3.5" />
               </motion.span>
             </motion.div>
-            <Link
-              to={guideLink}
-              onClick={(e) => e.stopPropagation()}
-              className="text-[11px] text-white/25 hover:text-white/60 transition-colors underline underline-offset-2"
-            >
-              novo aqui? → Guia para iniciantes
-            </Link>
+            {guideLink && (
+              <Link
+                to={guideLink}
+                onClick={(e) => e.stopPropagation()}
+                className="text-[11px] text-white/25 hover:text-white/60 transition-colors underline underline-offset-2"
+              >
+                novo aqui? → Guia para iniciantes
+              </Link>
+            )}
           </div>
         </div>
       </motion.div>
@@ -376,7 +384,7 @@ export default function Hub() {
     <div className="min-h-screen flex flex-col bg-[hsl(225,30%,4%)]">
       <SEO
         title="Hub"
-        description="Hub de documentacao visual interativa do Git Flow Studio: GitDoc, ShellDoc, UbuntuDoc e WinDoc."
+        description="Hub de documentacao visual interativa do Git Flow Studio: GitDoc, ShellDoc, LinuxDoc e WinDoc."
         path="/"
       />
 

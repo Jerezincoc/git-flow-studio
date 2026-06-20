@@ -99,6 +99,24 @@
   --glow: 210 100% 42%;
 }
 
+/* LinuxDoc theme — green terminal palette */
+.dark [data-theme="linux"] {
+  --primary: 142 70% 45%;
+  --primary-foreground: 225 30% 5%;
+  --accent: 160 70% 38%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 142 70% 45%;
+  --glow: 142 70% 45%;
+}
+:root [data-theme="linux"] {
+  --primary: 142 70% 36%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 160 70% 30%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 142 70% 36%;
+  --glow: 142 70% 36%;
+}
+
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;

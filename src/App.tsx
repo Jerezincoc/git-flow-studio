@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "@/components/Layout";
 import { ShellLayout } from "@/components/ShellLayout";
+import { LinuxLayout } from "@/components/LinuxLayout";
 import Hub from "./pages/Hub";
 import Index from "./pages/Index";
 import Commands from "./pages/Commands";
@@ -24,6 +25,11 @@ import ShellGuide from "./pages/shell/ShellGuide";
 import ShellProblems from "./pages/shell/ShellProblems";
 import ShellProblemDetail from "./pages/shell/ShellProblemDetail";
 import ShellScenarios from "./pages/shell/ShellScenarios";
+import LinuxHome from "./pages/linux/LinuxHome";
+import LinuxCommands from "./pages/linux/LinuxCommands";
+import LinuxScenarios from "./pages/linux/LinuxScenarios";
+import LinuxCheatSheet from "./pages/linux/LinuxCheatSheet";
+import LinuxProblems from "./pages/linux/LinuxProblems";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +68,15 @@ const App = () => (
             <Route path="/shell/problems" element={<ShellProblems />} />
             <Route path="/shell/problems/:id" element={<ShellProblemDetail />} />
             <Route path="/shell/scenarios" element={<ShellScenarios />} />
+          </Route>
+
+          {/* LinuxDoc */}
+          <Route element={<LinuxLayout />}>
+            <Route path="/linux" element={<LinuxHome />} />
+            <Route path="/linux/commands" element={<LinuxCommands />} />
+            <Route path="/linux/scenarios" element={<LinuxScenarios />} />
+            <Route path="/linux/cheatsheet" element={<LinuxCheatSheet />} />
+            <Route path="/linux/problems" element={<LinuxProblems />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
