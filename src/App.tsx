@@ -28,9 +28,11 @@ import ShellScenarios from "./pages/shell/ShellScenarios";
 import ShellConventions from "./pages/shell/ShellConventions";
 import LinuxHome from "./pages/linux/LinuxHome";
 import LinuxCommands from "./pages/linux/LinuxCommands";
+import LinuxCommandDetail from "./pages/linux/LinuxCommandDetail";
 import LinuxScenarios from "./pages/linux/LinuxScenarios";
 import LinuxCheatSheet from "./pages/linux/LinuxCheatSheet";
 import LinuxProblems from "./pages/linux/LinuxProblems";
+import LinuxProblemDetail from "./pages/linux/LinuxProblemDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,9 +78,11 @@ const App = () => (
           <Route element={<LinuxLayout />}>
             <Route path="/linux" element={<LinuxHome />} />
             <Route path="/linux/commands" element={<LinuxCommands />} />
+            <Route path="/linux/commands/:id" element={<LinuxCommandDetail />} />
             <Route path="/linux/scenarios" element={<LinuxScenarios />} />
             <Route path="/linux/cheatsheet" element={<LinuxCheatSheet />} />
             <Route path="/linux/problems" element={<LinuxProblems />} />
+            <Route path="/linux/problems/:id" element={<LinuxProblemDetail />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
