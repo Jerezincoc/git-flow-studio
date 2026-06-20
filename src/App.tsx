@@ -102,6 +102,7 @@ const App = () => (
             <Route path="/win/cheatsheet" element={<WinCheatSheet />} />
             <Route path="/win/problems" element={<WinProblems />} />
             <Route path="/win/problems/:id" element={<WinProblemDetail />} />
+            <Route path="/win/conventions" element={<WinConventions />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

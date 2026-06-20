@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ArrowRight, LayoutList, Layers, MonitorCog } from "lucide-react";
+import { AlertTriangle, ArrowRight, BookMarked, LayoutList, Layers, MonitorCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 
@@ -9,6 +9,7 @@ const features = [
   { icon: Layers,       label: "Cenários",   description: "Rotinas reais de suporte, rede, disco, serviços e automação no Windows", path: "/win/scenarios" },
   { icon: LayoutList,   label: "Cheat Sheet",description: "Referência rápida filtrável por categoria", path: "/win/cheatsheet" },
   { icon: AlertTriangle,label: "Problemas",  description: "Diagnósticos comuns de Windows com passos de correção", path: "/win/problems" },
+  { icon: BookMarked,   label: "Convenções", description: "Boas práticas de batch: %VAR% vs !VAR!, ERRORLEVEL, @echo off e quando usar PowerShell", path: "/win/conventions" },
 ];
 
 const highlights = ["ipconfig", "netstat -ano", "tasklist", "sfc /scannow", "robocopy", "reg query", "sc query", "findstr /s"];
