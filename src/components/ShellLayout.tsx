@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { Terminal, LayoutList, AlertTriangle, BookOpen, Layers, Menu, ChevronLeft } from "lucide-react";
+import { Terminal, LayoutList, AlertTriangle, BookOpen, Layers, Menu, ChevronLeft, BookMarked } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ const navItems = [
   { label: "Cenários", path: "/shell/scenarios", icon: Layers },
   { label: "Cheat Sheet", path: "/shell/cheatsheet", icon: LayoutList },
   { label: "Problemas", path: "/shell/problems", icon: AlertTriangle },
+  { label: "Convenções", path: "/shell/conventions", icon: BookMarked },
 ];
 
 export function ShellLayout() {

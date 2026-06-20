@@ -25,6 +25,7 @@ import ShellGuide from "./pages/shell/ShellGuide";
 import ShellProblems from "./pages/shell/ShellProblems";
 import ShellProblemDetail from "./pages/shell/ShellProblemDetail";
 import ShellScenarios from "./pages/shell/ShellScenarios";
+import ShellConventions from "./pages/shell/ShellConventions";
 import LinuxHome from "./pages/linux/LinuxHome";
 import LinuxCommands from "./pages/linux/LinuxCommands";
 import LinuxScenarios from "./pages/linux/LinuxScenarios";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/shell/problems" element={<ShellProblems />} />
             <Route path="/shell/problems/:id" element={<ShellProblemDetail />} />
             <Route path="/shell/scenarios" element={<ShellScenarios />} />
+            <Route path="/shell/conventions" element={<ShellConventions />} />
           </Route>
 
           {/* LinuxDoc */}

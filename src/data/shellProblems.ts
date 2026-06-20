@@ -476,6 +476,134 @@ export const shellProblems: ShellProblem[] = [
     prevention: "Regra de ouro: Format-* só no final do pipeline, para exibição humana. Para tudo que vai para arquivo ou processamento posterior, use Select-Object, Export-Csv, ConvertTo-Json, ou Out-File.",
     relatedCommands: ["Select-Object", "Export-Csv", "ConvertTo-Json", "Out-File"],
   },
+  {
+    id: "env-var-not-persisting",
+    title: "Variável de ambiente some ao fechar o terminal",
+    symptom: "$env:MINHA_VAR funciona na sessão atual mas some quando o PowerShell é reiniciado. Scripts que dependem dela falham em novas sessões.",
+    cause: "$env: modifica variáveis apenas na sessão atual (escopo de processo). Para persistir, é necessário usar [Environment]::SetEnvironmentVariable com escopo User ou Machine.",
+    category: "execution",
+    difficulty: "easy",
+    steps: [
+      {
+        title: "Entenda a diferença entre sessão e persistência",
+        code: '$env:MINHA_VAR = "valor"\n# Funciona agora, mas some ao fechar o terminal',
+        description: "Atribuir $env: define a variável apenas no processo atual do PowerShell.",
+      },
+      {
+        title: "Persista para o usuário atual",
+        code: '[Environment]::SetEnvironmentVariable("MINHA_VAR", "valor", "User")\n# Requer nova sessão para o efeito aparecer',
+        description: "User persiste para o usuário logado (não requer admin). Machine persiste para todos os usuários (requer admin).",
+      },
+      {
+        title: "Verifique que foi salvo",
+        code: '[Environment]::GetEnvironmentVariable("MINHA_VAR", "User")',
+        description: "Lê o valor salvo no escopo User do Registro. Se retornar o valor, está persistido.",
+      },
+      {
+        title: "Para efeito imediato E persistência",
+        code: '$valor = "meu-valor"\n$env:MINHA_VAR = $valor  # Efeito imediato na sessão atual\n[Environment]::SetEnvironmentVariable("MINHA_VAR", $valor, "User")  # Persiste',
+        description: "Faça os dois: $env: para a sessão atual e SetEnvironmentVariable para novas sessões.",
+      },
+    ],
+    prevention: "Variáveis que precisam estar disponíveis em todos os contextos (CI/CD, serviços, múltiplos usuários) devem ser definidas via GPO, scripts de provisionamento ou ferramentas de configuração como Ansible/DSC.",
+    relatedCommands: ["Get-Item", "Set-Item"],
+  },
+  {
+    id: "file-locked-by-process",
+    title: "Arquivo em uso por outro processo (file locked)",
+    symptom: "\"The process cannot access the file because it is being used by another process.\" ao tentar mover, deletar ou sobrescrever um arquivo.",
+    cause: "Outro processo tem o arquivo aberto com lock exclusivo. Arquivos de log de aplicações em execução, bancos de dados ou documentos abertos são os casos mais comuns.",
+    category: "permissions",
+    difficulty: "medium",
+    steps: [
+      {
+        title: "Identifique qual processo está usando o arquivo",
+        code: '# Requer Sysinternals Handle.exe ou processo alternativo:\n$fileNamePart = "nome-do-arquivo"\nGet-Process | ForEach-Object {\n  try {\n    $_.Modules | Where-Object { $_.FileName -like "*$fileNamePart*" }\n  } catch {}\n}',
+        description: "Tenta identificar o processo via módulos carregados. Para arquivos de dados (não DLLs), use a ferramenta handle.exe do Sysinternals.",
+      },
+      {
+        title: "Use handle.exe do Sysinternals (mais confiável)",
+        code: '# Baixe handle.exe de sysinternals.microsoft.com\n.\\handle.exe "nome-do-arquivo.txt"',
+        description: "handle.exe lista todos os processos com o arquivo aberto, com o PID.",
+      },
+      {
+        title: "Encerre o processo que usa o arquivo",
+        code: 'Stop-Process -Id <PID_encontrado> -Confirm\n# Ou pelo nome:\nStop-Process -Name "nomeApp" -Force',
+        description: "Após identificar o PID, encerre o processo. Use -Confirm para confirmação antes de encerrar.",
+      },
+      {
+        title: "Aguarde ou tente em loop (para logs)",
+        code: '$maxTentativas = 10\nfor ($i = 0; $i -lt $maxTentativas; $i++) {\n  try {\n    Move-Item arquivo.log destino\\ -ErrorAction Stop\n    break\n  } catch {\n    Start-Sleep -Seconds 2\n  }\n}',
+        description: "Para arquivos de log que são liberados periodicamente, tente em loop com espera.",
+      },
+    ],
+    prevention: "Ao escrever scripts que criam/modificam arquivos que outras aplicações podem usar, sempre feche streams explicitamente: use try/finally para garantir $stream.Close() mesmo em caso de erro.",
+    relatedCommands: ["Stop-Process", "Get-Process", "Get-Acl"],
+  },
+  {
+    id: "remote-session-timeout",
+    title: "Sessão remota expira (PSSession timeout)",
+    symptom: "Invoke-Command ou Enter-PSSession falham com \"The pipeline has been stopped\" ou \"The remote session failed\" durante operações longas.",
+    cause: "Sessões remotas têm timeouts configurados no WSMan: IdleTimeoutMs, OperationTimeoutMs. Operações que excedem esses limites são encerradas automaticamente.",
+    category: "permissions",
+    difficulty: "hard",
+    steps: [
+      {
+        title: "Verifique os timeouts configurados",
+        code: 'Get-WSManInstance -ResourceURI Shell -SelectorSet @{Name="Microsoft.PowerShell"}\n# Ou mais simples:\n(Get-PSSessionConfiguration -Name "Microsoft.PowerShell").IdleTimeoutMs',
+        description: "Exibe a configuração atual de timeout da sessão. O padrão é 7200000ms (2 horas de idle).",
+      },
+      {
+        title: "Aumente o timeout da sessão",
+        code: '$opcoes = New-PSSessionOption -IdleTimeout 7200000 -OperationTimeout 600000\n$sessao = New-PSSession -ComputerName servidor01 -SessionOption $opcoes\nInvoke-Command -Session $sessao -ScriptBlock { # operação longa }',
+        description: "New-PSSessionOption define timeouts para a conexão. IdleTimeout em ms (7200000 = 2h). OperationTimeout por comando.",
+      },
+      {
+        title: "Use -AsJob para operações longas",
+        code: '$job = Invoke-Command -ComputerName servidor01 -ScriptBlock {\n  # operação demorada\n  Start-Sleep 300; "concluído"\n} -AsJob\n\n# Continue trabalhando localmente...\nWait-Job $job\nReceive-Job $job',
+        description: "-AsJob executa em background e não sofre timeout de sessão interativa. Você coleta o resultado depois com Receive-Job.",
+      },
+      {
+        title: "Configure timeout no servidor remoto (admin)",
+        code: '# Execute NO servidor remoto como admin:\nSet-Item WSMan:\\localhost\\Shell\\IdleTimeout 7200000\nSet-Item WSMan:\\localhost\\Shell\\MaxIdleTimeoutms 7200000\nRestart-Service WinRM',
+        description: "Aumenta o timeout máximo permitido nas sessões. Requer admin no servidor remoto.",
+      },
+    ],
+    prevention: "Para scripts de manutenção longos (backup, desfrag, migração), prefira Start-Job ou Invoke-Command -AsJob em vez de sessões interativas — jobs continuam mesmo se a conexão cair.",
+    relatedCommands: ["Invoke-Command", "New-PSSession", "Wait-Job"],
+  },
+  {
+    id: "credential-expired-automation",
+    title: "Credenciais expiradas em scripts de automação",
+    symptom: "Script que funcionava para de funcionar com \"Access is denied\" ou \"The user name or password is incorrect\". Geralmente acontece em scripts agendados após troca de senha ou expiração.",
+    cause: "Scripts de automação frequentemente guardam credenciais codificadas ou em arquivos criptografados com DPAPI. Quando a senha expira ou a conta é alterada, essas credenciais ficam inválidas.",
+    category: "permissions",
+    difficulty: "medium",
+    steps: [
+      {
+        title: "Identifique onde a credencial está armazenada",
+        code: '# Locais comuns:\n# 1. Hardcoded no script ($senha = "texto")\n# 2. Arquivo criptografado com ConvertFrom-SecureString\n# 3. Variável de ambiente\n# 4. Windows Credential Manager\nGet-StoredCredential  # Requer módulo CredentialManager',
+        description: "Localize onde a credencial está sendo lida antes de atualizar.",
+      },
+      {
+        title: "Atualize a credencial no Windows Credential Manager",
+        code: 'cmdkey /add:servidor01 /user:DOMAIN\\usuario /pass:NovaSenha\n# Verifique com:\ncmdkey /list | Select-String "servidor01"',
+        description: "cmdkey gerencia credenciais no Credential Manager do Windows — local mais seguro para credenciais de scripts agendados.",
+      },
+      {
+        title: "Melhor prática: use conta de serviço com senha sem expiração",
+        code: '# No AD (requer módulo ActiveDirectory):\nSet-ADUser -Identity "svc-automation" -PasswordNeverExpires $true\n# Verifique:\nGet-ADUser "svc-automation" -Properties PasswordNeverExpires | Select-Object PasswordNeverExpires',
+        description: "Contas de serviço para automação devem ter senha sem expiração e permissões mínimas necessárias (princípio do menor privilégio).",
+      },
+      {
+        title: "Migre para identidades gerenciadas / secrets vault",
+        code: '# Azure: usa identidade gerenciada (sem senha para gerenciar)\nConnect-AzAccount -Identity\n# Ou HashiCorp Vault:\n$secret = vault kv get -field=password secret/meuapp',
+        description: "A solução definitiva para automação em cloud é usar identidades gerenciadas ou vaults de secrets que rotacionam senhas automaticamente.",
+      },
+    ],
+    prevention: "Nunca codifique credenciais em scripts. Use contas de serviço com senhas sem expiração, Windows Credential Manager, ou idealmente secrets vaults com rotação automática.",
+    relatedCommands: ["Get-Credential", "ConvertTo-SecureString", "Invoke-Command"],
+  },
 ];
 
 export function getShellProblemById(id: string): ShellProblem | undefined {

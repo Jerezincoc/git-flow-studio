@@ -33,7 +33,14 @@ export interface ShellCommand {
     | "content"
     | "pipeline"
     | "system"
-    | "network";
+    | "network"
+    | "strings"
+    | "modules"
+    | "environment"
+    | "scheduling"
+    | "security"
+    | "registry"
+    | "remoting";
   level: "básico" | "intermediário" | "avançado";
   uses: string[];
   variations: ShellVariation[];
@@ -53,12 +60,19 @@ export const shellLevelLabels: Record<string, string> = {
 };
 
 export const shellCategoryLabels: Record<string, string> = {
-  navigation: "Navegação",
-  files:      "Arquivos",
-  content:    "Conteúdo",
-  pipeline:   "Pipeline",
-  system:     "Sistema",
-  network:    "Rede",
+  navigation:  "Navegação",
+  files:       "Arquivos",
+  content:     "Conteúdo",
+  pipeline:    "Pipeline",
+  system:      "Sistema",
+  network:     "Rede",
+  strings:     "Strings",
+  modules:     "Módulos",
+  environment: "Ambiente",
+  scheduling:  "Agendamento",
+  security:    "Segurança",
+  registry:    "Registro",
+  remoting:    "Remoting",
 };
 
 export const shellCommands: ShellCommand[] = [
@@ -1486,6 +1500,510 @@ export const shellCommands: ShellCommand[] = [
       { part: "ConvertTo-Json", label: "Cmdlet (para JSON)", description: "'Convert' = converter. 'To' = para. 'Json' = formato JSON. Pega um objeto do PowerShell (qualquer coisa) e transforma no texto JSON equivalente." },
       { part: "ConvertFrom-Json", label: "Cmdlet (de JSON)", description: "'From' = de/a partir de. Faz o inverso: pega um texto em formato JSON e cria um objeto PowerShell que você pode manipular com ponto (obj.propriedade)." },
       { part: "[-Depth <int>]", label: "Parâmetro -Depth", description: "Quantos níveis de aninhamento converter. Se seu objeto tem { a: { b: { c: valor } } }, são 3 níveis. O padrão é 2, o que frequentemente corta dados. Use -Depth 10 para objetos complexos.", optional: true },
+    ],
+  },
+
+  /* ─── STRINGS ────────────────────────────────────────────────────── */
+  {
+    id: "string-split",
+    name: "-split / .Split()",
+    description: "Divide uma string em um array usando um delimitador ou expressão regular.",
+    syntax: '"string" -split "delimitador"\n"string".Split("char")',
+    category: "strings",
+    level: "básico",
+    uses: [
+      "Separar valores de uma linha CSV manual",
+      "Dividir o PATH em entradas individuais",
+      "Parsear saída de comandos externos",
+    ],
+    variations: [
+      { command: '"a,b,c" -split ","', description: "Divide por vírgula → array @('a','b','c')" },
+      { command: '$env:PATH -split ";"', description: "Divide o PATH em entradas individuais" },
+      { command: '"linha1`nlinha2" -split "`n"', description: "Divide por newline" },
+      { command: '"a::b::c" -split "::" -MaxSubstrings 2', description: "Limita a 2 partes" },
+    ],
+    examples: [
+      { code: '$env:PATH -split ";" | Where-Object { $_ -like "*Python*" }', description: "Encontra entradas do Python no PATH" },
+      { code: '(Get-Content hosts.txt) | ForEach-Object { ($_ -split "\\s+")[0] }', description: "Extrai o primeiro campo de cada linha" },
+      { code: '"2024-12-25" -split "-" | ForEach-Object { $_.PadLeft(2,"0") }', description: "Divide data e formata partes" },
+    ],
+    whenNotToUse: [
+      "Para CSVs reais — use Import-Csv que lida com aspas e escapamentos corretamente",
+      "Para parsear estruturas complexas — use expressões regulares com -match ou [regex]",
+    ],
+    relatedCommands: ["string-join", "string-replace", "select-string"],
+    flags: [
+      { flag: "-split <string>",         description: "Operador: divide a string pelo delimitador/regex" },
+      { flag: "-MaxSubstrings <int>",    description: "Limita o número de partes resultantes" },
+      { flag: "-SimpleMatch",            description: "Trata o delimitador como texto literal, não regex" },
+    ],
+    curiosities: [
+      "-split usa regex por padrão — -split '.' divide em cada caractere porque '.' é qualquer caractere em regex. Use -split '\\.': ou -SimpleMatch para ponto literal.",
+    ],
+  },
+  {
+    id: "string-join",
+    name: "-join / [string]::Join()",
+    description: "Une um array de strings em uma única string com um delimitador entre os elementos.",
+    syntax: 'array -join "delimitador"\n[string]::Join("delimitador", array)',
+    category: "strings",
+    level: "básico",
+    uses: [
+      "Construir linhas CSV a partir de arrays",
+      "Unir caminhos ou URLs",
+      "Montar comandos ou queries dinamicamente",
+    ],
+    variations: [
+      { command: '@("a","b","c") -join ","', description: "Junta com vírgula → 'a,b,c'" },
+      { command: '@("C:\\","Users","João") -join "\\"', description: "Monta caminho de arquivo" },
+      { command: '(Get-ChildItem *.ps1).Name -join ", "', description: "Lista nomes de scripts separados por vírgula" },
+      { command: '-join $array', description: "Une sem delimitador (concatenação)" },
+    ],
+    examples: [
+      { code: '$csv = @("Nome","Idade","Cidade")\n$csv -join ";"', description: "Cria cabeçalho CSV" },
+      { code: 'Get-Process | Select-Object -First 5 -ExpandProperty Name | Sort-Object | -join ", "', description: "Lista de nomes em uma linha" },
+      { code: '$partes = "api","v2","users"\n"https://host/" + ($partes -join "/")', description: "Monta URL de API" },
+    ],
+    whenNotToUse: [
+      "Para construir CSV real — use Export-Csv que escapa vírgulas e aspas dentro dos valores",
+    ],
+    relatedCommands: ["string-split", "string-replace"],
+    curiosities: [
+      "-join sem delimitador concatena diretamente: @('a','b','c') -join '' retorna 'abc'. Útil para montar strings de caracteres aleatórios ou hashes.",
+    ],
+  },
+  {
+    id: "string-replace",
+    name: "-replace / .Replace()",
+    description: "Substitui texto em uma string por outro valor. -replace usa regex; .Replace() trata texto literal.",
+    syntax: '"string" -replace "padrão","substituto"\n"string".Replace("antigo","novo")',
+    category: "strings",
+    level: "básico",
+    uses: [
+      "Limpar dados de texto",
+      "Renomear partes de strings",
+      "Sanitizar inputs antes de usar em comandos",
+    ],
+    variations: [
+      { command: '"Hello World" -replace "World","PowerShell"', description: "Substitui palavra" },
+      { command: '"abc123" -replace "\\d+",""', description: "Remove todos os números (regex)" },
+      { command: '"C:\\old\\path" -replace "old","new"', description: "Substitui parte de caminho" },
+      { command: '(Get-Content f.txt) -replace "TODO","DONE" | Set-Content f.txt', description: "Substitui em arquivo" },
+    ],
+    examples: [
+      { code: 'Get-ChildItem *.txt | ForEach-Object {\n  (Get-Content $_.FullName) -replace "v1\\.0","v2.0" | Set-Content $_.FullName\n}', description: "Atualiza versão em múltiplos arquivos" },
+      { code: '"  texto com espaços  ".Trim() -replace "\\s+"," "', description: "Normaliza espaços internos" },
+      { code: '$email -replace "^.*@",""', description: "Extrai domínio de um email" },
+    ],
+    whenNotToUse: [
+      "-replace é case-insensitive por padrão; use -creplace para diferenciar maiúsculas",
+      "Para substituições complexas em arquivos binários — use ferramentas especializadas",
+    ],
+    relatedCommands: ["select-string", "string-split", "set-content"],
+    flags: [
+      { flag: "-replace",  description: "Case-insensitive; usa regex" },
+      { flag: "-creplace", description: "Case-sensitive com regex" },
+      { flag: "-ireplace", description: "Explicitamente case-insensitive (padrão)" },
+    ],
+    curiosities: [
+      "No -replace, grupos de captura regex podem ser referenciados com $1, $2: '2024-12-25' -replace '(\\d{4})-(\\d{2})-(\\d{2})','$3/$2/$1' retorna '25/12/2024'.",
+    ],
+  },
+  {
+    id: "string-format",
+    name: "String Format / Trim / PadLeft",
+    description: "Métodos .NET de manipulação de strings: formatação, remoção de espaços, preenchimento e verificação de conteúdo.",
+    syntax: '"string".Trim()\n"string".PadLeft(n,"char")\n"format {0}" -f valor',
+    category: "strings",
+    level: "intermediário",
+    uses: [
+      "Formatar números com zeros à esquerda",
+      "Remover espaços desnecessários de inputs",
+      "Montar strings com formatação controlada",
+    ],
+    variations: [
+      { command: '"  texto  ".Trim()', description: "Remove espaços no início e fim" },
+      { command: '"42".PadLeft(5,"0")', description: "Resultado: '00042'" },
+      { command: '"{0:N2}" -f 1234567.89', description: "Formata número: '1,234,567.89'" },
+      { command: '"texto".StartsWith("tex")', description: "Retorna $true" },
+      { command: '"texto".ToUpper()', description: "TEXTO" },
+    ],
+    examples: [
+      { code: '1..5 | ForEach-Object { "arquivo_$($_.ToString().PadLeft(3,"0")).txt" }', description: "Gera arquivo_001.txt ... arquivo_005.txt" },
+      { code: '"  input do usuário  ".Trim().ToLower() -replace "\\s+","-"', description: "Sanitiza input para slug de URL" },
+      { code: '"{0,-20} {1,10:N2}" -f "Total de vendas:", 98765.43', description: "Alinha texto e número em tabela" },
+    ],
+    whenNotToUse: [
+      "Para formatação de datas — use Get-Date -Format diretamente",
+    ],
+    relatedCommands: ["string-replace", "string-split"],
+    curiosities: [
+      "O operador -f (format) usa sintaxe .NET: {0:D3} formata inteiro com 3 dígitos; {0:C2} formata como moeda; {0:yyyy-MM-dd} formata DateTime. Muito mais poderoso que string interpolation para output formatado.",
+    ],
+  },
+
+  /* ─── MÓDULOS ────────────────────────────────────────────────────── */
+  {
+    id: "get-module",
+    name: "Get-Module / Import-Module",
+    description: "Lista módulos disponíveis ou importados e carrega módulos na sessão atual.",
+    syntax: "Get-Module [-ListAvailable] [-Name <string[]>]\nImport-Module [-Name] <string[]> [-Force]",
+    category: "modules",
+    level: "intermediário",
+    uses: [
+      "Verificar quais módulos estão carregados",
+      "Importar módulo para usar seus cmdlets",
+      "Recarregar módulo durante desenvolvimento",
+      "Listar todos os módulos instalados",
+    ],
+    variations: [
+      { command: "Get-Module", description: "Módulos carregados na sessão atual" },
+      { command: "Get-Module -ListAvailable", description: "Todos os módulos instalados" },
+      { command: "Get-Module -ListAvailable -Name *SQL*", description: "Módulos de SQL disponíveis" },
+      { command: "Import-Module ActiveDirectory", description: "Importa módulo do AD" },
+      { command: "Import-Module .\\MeuModulo.psm1 -Force", description: "Recarrega módulo local" },
+    ],
+    examples: [
+      { code: "Get-Module -ListAvailable | Select-Object Name, Version | Sort-Object Name", description: "Lista todos os módulos com versão" },
+      { code: "Import-Module PSReadLine -Force\nGet-Command -Module PSReadLine", description: "Importa módulo e lista seus cmdlets" },
+      { code: 'if (-not (Get-Module -ListAvailable -Name Pester)) {\n  Install-Module Pester -Force\n}\nImport-Module Pester', description: "Instala e importa módulo se necessário" },
+    ],
+    whenNotToUse: [
+      "PS 3+ importa módulos automaticamente quando um cmdlet é chamado — Import-Module manual é necessário apenas para módulos não auto-detectados ou para forçar reload",
+    ],
+    relatedCommands: ["install-module", "find-module", "get-command"],
+    flags: [
+      { flag: "-ListAvailable",    description: "Lista módulos instalados, não só os carregados" },
+      { flag: "-Name <string[]>",  description: "Filtra por nome de módulo (suporta wildcards)" },
+      { flag: "-Force",            description: "Reimporta mesmo que já esteja carregado" },
+      { flag: "-PassThru",         description: "Retorna o objeto do módulo importado" },
+      { flag: "-Verbose",          description: "Exibe detalhes durante a importação" },
+    ],
+    curiosities: [
+      "Módulos em PowerShell 7+ podem ser importados de caminhos UNC e URLs de repositórios privados. O módulo PSResourceGet (substituto do PowerShellGet) suporta repositórios NuGet privados.",
+    ],
+  },
+  {
+    id: "install-module",
+    name: "Install-Module / Find-Module",
+    description: "Instala módulos do PowerShell Gallery ou repositórios configurados.",
+    syntax: "Install-Module [-Name] <string[]> [-Scope <string>] [-Force]\nFind-Module [-Name] <string[]>",
+    category: "modules",
+    level: "intermediário",
+    uses: [
+      "Instalar módulos da PowerShell Gallery",
+      "Buscar módulos disponíveis por funcionalidade",
+      "Atualizar módulos existentes",
+    ],
+    variations: [
+      { command: "Install-Module Pester -Scope CurrentUser", description: "Instala sem precisar de admin" },
+      { command: "Install-Module Az -AllowClobber -Force", description: "Instala módulo Azure" },
+      { command: "Find-Module *AWS*", description: "Busca módulos relacionados à AWS" },
+      { command: "Update-Module Pester", description: "Atualiza módulo instalado" },
+      { command: "Uninstall-Module Pester", description: "Remove módulo instalado" },
+    ],
+    examples: [
+      { code: "Find-Module -Tag 'Security' | Select-Object -First 5 Name, Description", description: "Descobre módulos de segurança" },
+      { code: "Install-Module PSReadLine, posh-git, oh-my-posh -Scope CurrentUser -Force", description: "Instala ferramentas de produtividade" },
+      { code: "Get-Module -ListAvailable | Where-Object { $_.Version -lt '2.0' } | Select-Object Name, Version", description: "Módulos com versão antiga" },
+    ],
+    whenNotToUse: [
+      "Em ambientes sem internet — use Save-Module para baixar offline e copiar manualmente",
+      "Para módulos privados — configure um repositório interno com Register-PSRepository",
+    ],
+    relatedCommands: ["get-module", "import-module"],
+    flags: [
+      { flag: "-Name <string[]>",      description: "Nome do módulo" },
+      { flag: "-Scope <string>",       description: "CurrentUser (sem admin) ou AllUsers (requer admin)" },
+      { flag: "-Force",                description: "Instala mesmo que já exista uma versão" },
+      { flag: "-AllowClobber",         description: "Permite sobrescrever comandos existentes com mesmo nome" },
+      { flag: "-RequiredVersion <string>", description: "Instala versão específica" },
+      { flag: "-MinimumVersion <string>",  description: "Versão mínima aceitável" },
+    ],
+    curiosities: [
+      "A PowerShell Gallery (powershellgallery.com) tem mais de 10.000 módulos. Use Find-Module -Tag 'DevOps' ou Find-Module -Tag 'Azure' para descobrir módulos por categoria.",
+    ],
+  },
+
+  /* ─── AMBIENTE ───────────────────────────────────────────────────── */
+  {
+    id: "env-variables",
+    name: "$env: / [Environment]",
+    description: "Acessa, define e persiste variáveis de ambiente do sistema e do usuário.",
+    syntax: '$env:NOME\n$env:NOME = "valor"\n[Environment]::SetEnvironmentVariable("NOME","valor","User")',
+    category: "environment",
+    level: "básico",
+    uses: [
+      "Ler variáveis de ambiente existentes",
+      "Definir variáveis para a sessão atual",
+      "Persistir variáveis permanentemente para o usuário ou sistema",
+    ],
+    variations: [
+      { command: '$env:PATH', description: "Lê a variável PATH" },
+      { command: '$env:USERNAME', description: "Nome do usuário logado" },
+      { command: '$env:MINHA_VAR = "valor"', description: "Define variável (só na sessão atual)" },
+      { command: '[Environment]::GetEnvironmentVariables("User")', description: "Lista todas as variáveis do usuário" },
+    ],
+    examples: [
+      { code: '[Environment]::SetEnvironmentVariable("MINHA_API_KEY", "abc123", "User")\n# Para persistir; requer nova sessão para efeito', description: "Define variável de ambiente permanente" },
+      { code: 'Get-ChildItem env: | Sort-Object Name | Format-Table Name, Value -AutoSize', description: "Lista todas as variáveis de ambiente" },
+      { code: '$env:PATH += ";C:\\MinhaFerramenta\\bin"\n# Adiciona ao PATH da sessão atual', description: "Adiciona diretório ao PATH temporariamente" },
+    ],
+    whenNotToUse: [
+      "$env: altera variáveis apenas na sessão atual. Para persistir, use [Environment]::SetEnvironmentVariable com scope 'User' ou 'Machine'",
+    ],
+    relatedCommands: ["get-item", "set-item"],
+    flags: [],
+    curiosities: [
+      "Get-ChildItem env: lista variáveis como se fosse um diretório — o PowerShell trata o ambiente como um 'drive' chamado env:. Você pode até usar cd env: e navegar nele.",
+      "$env:APPDATA aponta para a pasta de dados de aplicações do usuário (%APPDATA%) — muito útil para encontrar perfis de configuração independente do usuário logado.",
+    ],
+  },
+
+  /* ─── AGENDAMENTO ────────────────────────────────────────────────── */
+  {
+    id: "register-scheduledtask",
+    name: "Register-ScheduledTask",
+    description: "Cria tarefas agendadas no Task Scheduler do Windows via PowerShell.",
+    syntax: "Register-ScheduledTask -TaskName <string> -Action <CimInstance> -Trigger <CimInstance>",
+    category: "scheduling",
+    level: "avançado",
+    uses: [
+      "Agendar scripts para rodar automaticamente",
+      "Criar backups periódicos",
+      "Automatizar tarefas de manutenção",
+      "Executar scripts no login do usuário",
+    ],
+    variations: [
+      { command: "Get-ScheduledTask", description: "Lista todas as tarefas agendadas" },
+      { command: "Get-ScheduledTask -TaskName 'MeuScript' | Start-ScheduledTask", description: "Executa tarefa manualmente" },
+      { command: "Unregister-ScheduledTask -TaskName 'MeuScript' -Confirm:$false", description: "Remove tarefa agendada" },
+      { command: "Get-ScheduledTask | Where-Object State -eq 'Ready' | Measure-Object", description: "Conta tarefas prontas" },
+    ],
+    examples: [
+      { code: '$action  = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-File C:\\scripts\\backup.ps1"\n$trigger = New-ScheduledTaskTrigger -Daily -At "02:00AM"\nRegister-ScheduledTask -TaskName "BackupDiario" -Action $action -Trigger $trigger -RunLevel Highest', description: "Backup diário às 2h com privilégios de admin" },
+      { code: '$trigger = New-ScheduledTaskTrigger -AtLogOn\n$action  = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument "-File C:\\scripts\\startup.ps1"\nRegister-ScheduledTask "InicioSessao" -Action $action -Trigger $trigger', description: "Executa script a cada login" },
+      { code: 'Get-ScheduledTask | Where-Object { $_.LastRunTime -lt (Get-Date).AddDays(-30) } | Select-Object TaskName, LastRunTime', description: "Tarefas que não rodaram em 30 dias" },
+    ],
+    whenNotToUse: [
+      "Para tarefas simples e pontuais — use Start-Job ou Invoke-Command diretamente",
+      "Para workflows complexos com dependências — avalie ferramentas como Jenkins ou Azure DevOps",
+    ],
+    relatedCommands: ["get-scheduledtask", "start-scheduledtask"],
+    flags: [
+      { flag: "-TaskName <string>",   description: "Nome único da tarefa" },
+      { flag: "-Action <CimInstance>",description: "Criado com New-ScheduledTaskAction: define o executável e argumentos" },
+      { flag: "-Trigger <CimInstance>",description: "Criado com New-ScheduledTaskTrigger: define quando disparar" },
+      { flag: "-RunLevel <string>",   description: "Limited (padrão) ou Highest (admin)" },
+      { flag: "-Force",               description: "Sobrescreve tarefa existente com mesmo nome" },
+    ],
+    curiosities: [
+      "Register-ScheduledTask é a forma programática de criar tarefas sem abrir o Task Scheduler GUI. Em servidores sem interface gráfica (Server Core), é a única opção.",
+    ],
+  },
+
+  /* ─── SEGURANÇA ──────────────────────────────────────────────────── */
+  {
+    id: "get-acl",
+    name: "Get-Acl / Set-Acl",
+    description: "Lê e modifica as permissões NTFS (ACL — Access Control List) de arquivos, pastas e outros objetos.",
+    syntax: "Get-Acl [-Path] <string[]>\nSet-Acl [-Path] <string[]> [-AclObject] <ObjectSecurity>",
+    category: "security",
+    level: "avançado",
+    uses: [
+      "Auditar permissões de arquivos e pastas",
+      "Copiar permissões de um objeto para outro",
+      "Adicionar ou remover entradas de controle de acesso",
+      "Verificar quem tem acesso a um recurso",
+    ],
+    variations: [
+      { command: "Get-Acl C:\\pasta | Format-List", description: "Exibe ACL completa de uma pasta" },
+      { command: "(Get-Acl C:\\pasta).Access", description: "Lista entradas de acesso individuais" },
+      { command: "Get-Acl C:\\origem | Set-Acl C:\\destino", description: "Copia ACL de um caminho para outro" },
+    ],
+    examples: [
+      { code: "(Get-Acl C:\\dados).Access | Select-Object IdentityReference, FileSystemRights, AccessControlType | Format-Table -AutoSize", description: "Relatório de permissões de uma pasta" },
+      { code: '$acl = Get-Acl "C:\\pasta"\n$regra = New-Object System.Security.AccessControl.FileSystemAccessRule("DOMAIN\\usuario","FullControl","Allow")\n$acl.SetAccessRule($regra)\nSet-Acl "C:\\pasta" $acl', description: "Concede controle total para um usuário" },
+      { code: 'Get-ChildItem -Recurse C:\\projeto | ForEach-Object {\n  $acl = Get-Acl $_.FullName\n  if ($acl.Owner -ne "BUILTIN\\Administrators") { $_.FullName }\n}', description: "Encontra arquivos com owner não-admin" },
+    ],
+    whenNotToUse: [
+      "Para permissões de compartilhamento de rede (share permissions) — use Get-SmbShare e Set-SmbShare",
+      "Em sistemas Linux/Mac — use chmod/chown; Get-Acl não se aplica",
+    ],
+    relatedCommands: ["get-item", "icacls"],
+    flags: [
+      { flag: "-Path <string[]>",        description: "Caminho do recurso" },
+      { flag: "-AclObject <ObjectSecurity>", description: "Objeto ACL a aplicar (obtido de Get-Acl)" },
+      { flag: "-Exclude <string[]>",     description: "Exclui itens por padrão" },
+    ],
+    curiosities: [
+      "Get-Acl também funciona com chaves de registro: Get-Acl 'HKLM:\\Software\\Microsoft' — você pode auditar e modificar permissões do Registro da mesma forma que arquivos.",
+    ],
+  },
+  {
+    id: "convertto-securestring",
+    name: "ConvertTo-SecureString / Get-Credential",
+    description: "Cria strings seguras (SecureString) e credenciais PSCredential para uso em cmdlets sem expor senhas em texto.",
+    syntax: 'ConvertTo-SecureString "senha" -AsPlainText -Force\nGet-Credential',
+    category: "security",
+    level: "intermediário",
+    uses: [
+      "Armazenar senhas de forma segura em scripts",
+      "Passar credenciais para cmdlets remotos",
+      "Solicitar credenciais ao usuário sem expor em logs",
+    ],
+    variations: [
+      { command: "Get-Credential", description: "Abre prompt gráfico de usuário/senha" },
+      { command: 'Get-Credential -UserName "DOMAIN\\user" -Message "Senha do AD:"', description: "Prompt com usuário pré-preenchido" },
+      { command: '$senha = ConvertTo-SecureString "P@ss" -AsPlainText -Force\n$cred = New-Object PSCredential("user",$senha)', description: "Cria PSCredential programaticamente" },
+      { command: '$cred.GetNetworkCredential().Password', description: "Extrai senha (usar com cuidado)" },
+    ],
+    examples: [
+      { code: '$cred = Get-Credential\nInvoke-Command -ComputerName servidor01 -Credential $cred -ScriptBlock { hostname }', description: "Executa comando remoto com credenciais" },
+      { code: '# Salvar credencial criptografada em arquivo (só funciona no mesmo usuário/máquina)\n$cred.Password | ConvertFrom-SecureString | Set-Content cred.txt\n# Recuperar:\n$senhaStr = Get-Content cred.txt | ConvertTo-SecureString\n$cred = New-Object PSCredential("user", $senhaStr)', description: "Persiste credencial localmente (criptografada por DPAPI)" },
+      { code: 'Connect-MsolService -Credential (Get-Credential)', description: "Autentica no Office 365 interativamente" },
+    ],
+    whenNotToUse: [
+      "-AsPlainText -Force em scripts de produção expõe a senha no código-fonte — prefira ler de variáveis de ambiente ou vaults (Azure Key Vault, HashiCorp Vault)",
+      "ConvertFrom-SecureString usa DPAPI — o arquivo criptografado só funciona no mesmo usuário e máquina onde foi criado",
+    ],
+    relatedCommands: ["invoke-command", "enter-pssession"],
+    flags: [
+      { flag: "-AsPlainText", description: "Converte texto puro para SecureString (use com -Force)" },
+      { flag: "-Force",       description: "Confirma que entende o risco de usar texto puro" },
+    ],
+    curiosities: [
+      "SecureString no PowerShell não é 100% seguro — em memória, o valor pode ser recuperado por ferramentas de dump. O objetivo é evitar que a senha apareça em logs, histórico e outputs acidentalmente.",
+    ],
+  },
+
+  /* ─── REGISTRO ───────────────────────────────────────────────────── */
+  {
+    id: "registry-access",
+    name: "Get-Item / Set-ItemProperty (Registro)",
+    description: "Lê e modifica chaves e valores do Registro do Windows usando os drives HKLM: e HKCU:.",
+    syntax: "Get-Item 'HKLM:\\Software\\caminho'\nSet-ItemProperty -Path 'HKCU:\\...' -Name 'valor' -Value 'dado'",
+    category: "registry",
+    level: "avançado",
+    uses: [
+      "Ler configurações de aplicações no Registro",
+      "Criar ou modificar entradas de configuração",
+      "Verificar programas instalados via Uninstall keys",
+      "Automatizar configurações pós-instalação",
+    ],
+    variations: [
+      { command: "Get-ChildItem HKLM:\\Software", description: "Lista subchaves de Software" },
+      { command: "Get-ItemProperty HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion", description: "Lê valores de uma chave" },
+      { command: "New-ItemProperty -Path 'HKCU:\\Software\\MeuApp' -Name 'Versao' -Value '1.0' -PropertyType String", description: "Cria novo valor no registro" },
+      { command: "Remove-ItemProperty -Path 'HKCU:\\Software\\MeuApp' -Name 'ConfigAntiga'", description: "Remove valor do registro" },
+    ],
+    examples: [
+      { code: 'Get-ChildItem "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" |\n  Get-ItemProperty |\n  Where-Object { $_.DisplayName -like "*Chrome*" } |\n  Select-Object DisplayName, DisplayVersion', description: "Verifica versão do Chrome pelo Registro" },
+      { code: 'Set-ItemProperty -Path "HKCU:\\Software\\MyApp" -Name "Theme" -Value "dark"\nGet-ItemPropertyValue -Path "HKCU:\\Software\\MyApp" -Name "Theme"', description: "Salva e lê preferência no Registro" },
+      { code: '$uninstallPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"\nGet-ChildItem $uninstallPath | Get-ItemProperty |\n  Where-Object { $_.DisplayName } |\n  Select-Object DisplayName, DisplayVersion, Publisher |\n  Sort-Object DisplayName | Export-Csv apps.csv -NoTypeInformation', description: "Exporta lista de programas instalados" },
+    ],
+    whenNotToUse: [
+      "Para configurações de aplicações modernas (UWP) — use Get-AppxPackage e APIs WinRT",
+      "Modificar HKLM: requer privilégios de administrador",
+    ],
+    relatedCommands: ["get-item", "get-acl"],
+    flags: [
+      { flag: "-Path <string>",          description: "Caminho no registro: HKLM:, HKCU:, HKCR:, HKCC:, HKU:" },
+      { flag: "-Name <string>",          description: "Nome do valor do registro" },
+      { flag: "-Value <Object>",         description: "Dado a armazenar" },
+      { flag: "-PropertyType <string>",  description: "Tipo: String, DWord, QWord, Binary, ExpandString, MultiString" },
+      { flag: "-Force",                  description: "Cria subchaves intermediárias se necessário" },
+    ],
+    curiosities: [
+      "O PowerShell expõe o Registro como um sistema de arquivos com drives HKLM: e HKCU:. Você pode usar cd HKLM:\\Software, Get-ChildItem e até Tab-completion para navegar no Registro como se fosse uma pasta.",
+    ],
+  },
+
+  /* ─── REMOTING ───────────────────────────────────────────────────── */
+  {
+    id: "invoke-command",
+    name: "Invoke-Command",
+    description: "Executa comandos em uma ou mais máquinas remotas simultaneamente.",
+    syntax: "Invoke-Command -ComputerName <string[]> -ScriptBlock <ScriptBlock> [-Credential <PSCredential>]",
+    category: "remoting",
+    level: "avançado",
+    uses: [
+      "Executar scripts em múltiplos servidores",
+      "Coletar informações de máquinas remotas",
+      "Automatizar configurações em frota de servidores",
+      "Executar tarefas de manutenção remotamente",
+    ],
+    variations: [
+      { command: "Invoke-Command -ComputerName servidor01 -ScriptBlock { Get-Process }", description: "Executa em servidor remoto" },
+      { command: "Invoke-Command -ComputerName s1,s2,s3 -ScriptBlock { hostname }", description: "Executa em múltiplos servidores" },
+      { command: "Invoke-Command -ComputerName s1 -FilePath C:\\scripts\\configurar.ps1", description: "Executa arquivo de script remoto" },
+      { command: "icm servidor01 { Get-Service }", description: "Alias icm disponível" },
+    ],
+    examples: [
+      { code: '$servidores = "web01","web02","web03"\nInvoke-Command -ComputerName $servidores -ScriptBlock {\n  [PSCustomObject]@{\n    Servidor = $env:COMPUTERNAME\n    CPU_Livre = (Get-Counter "\\Processor(_Total)\\% Idle Time").CounterSamples.CookedValue\n    RAM_Livre_GB = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory/1MB,1)\n  }\n}', description: "Coleta métricas de múltiplos servidores" },
+      { code: 'Invoke-Command -ComputerName servidor01 -ScriptBlock {\n  param($pasta)\n  Get-ChildItem $pasta -Recurse | Measure-Object Length -Sum\n} -ArgumentList "C:\\dados"', description: "Passa argumentos para o ScriptBlock remoto" },
+      { code: 'Invoke-Command -ComputerName db01 -ScriptBlock { Restart-Service -Name "MSSQLSERVER" -Force }\n-Credential (Get-Credential "DOMAIN\\DBAAdmin")', description: "Reinicia serviço remoto com credenciais específicas" },
+    ],
+    whenNotToUse: [
+      "Para sessão interativa — use Enter-PSSession",
+      "Requer WinRM habilitado na máquina remota (Enable-PSRemoting)",
+      "Em redes sem domínio, precisa configurar TrustedHosts",
+    ],
+    relatedCommands: ["enter-pssession", "convertto-securestring"],
+    flags: [
+      { flag: "-ComputerName <string[]>", description: "Máquina(s) remota(s)" },
+      { flag: "-ScriptBlock <ScriptBlock>",description: "Bloco de código a executar remotamente" },
+      { flag: "-FilePath <string>",       description: "Script .ps1 local a executar na máquina remota" },
+      { flag: "-Credential <PSCredential>",description: "Credenciais para autenticação" },
+      { flag: "-ArgumentList <Object[]>", description: "Argumentos passados para o ScriptBlock via param()" },
+      { flag: "-Session <PSSession[]>",   description: "Reutiliza sessão existente (mais eficiente para múltiplos comandos)" },
+      { flag: "-AsJob",                   description: "Executa em background como job" },
+    ],
+    curiosities: [
+      "Invoke-Command executa em múltiplos computadores em paralelo por padrão (ThrottleLimit 32). Para 10 servidores, o tempo total é aproximadamente o tempo de 1 servidor — não 10x.",
+    ],
+  },
+  {
+    id: "enter-pssession",
+    name: "Enter-PSSession / New-PSSession",
+    description: "Abre uma sessão interativa com uma máquina remota ou cria sessões reutilizáveis.",
+    syntax: "Enter-PSSession [-ComputerName] <string> [-Credential <PSCredential>]\nNew-PSSession -ComputerName <string[]>",
+    category: "remoting",
+    level: "avançado",
+    uses: [
+      "Administrar servidor remoto interativamente",
+      "Debugar problemas em máquinas remotas",
+      "Criar sessões persistentes para múltiplos comandos",
+      "Explorar configuração de servidores sem RDP",
+    ],
+    variations: [
+      { command: "Enter-PSSession servidor01", description: "Sessão interativa no servidor" },
+      { command: "Enter-PSSession servidor01 -Credential (Get-Credential)", description: "Com prompt de credenciais" },
+      { command: "$s = New-PSSession -ComputerName web01,web02", description: "Cria sessões persistentes" },
+      { command: "Invoke-Command -Session $s -ScriptBlock { ... }", description: "Reusa sessão existente" },
+      { command: "Exit-PSSession", description: "Encerra sessão interativa" },
+      { command: "Remove-PSSession $s", description: "Fecha sessões criadas com New-PSSession" },
+    ],
+    examples: [
+      { code: '# Sessão interativa — o prompt muda para [servidor01]:\nEnter-PSSession servidor01\n# Agora você está no servidor remoto\nGet-Service | Where-Object Status -eq "Stopped"\nExit-PSSession', description: "Administração interativa remota" },
+      { code: '$sessoes = New-PSSession -ComputerName web01,web02,web03\nInvoke-Command -Session $sessoes -ScriptBlock { iisreset /noforce }\nRemove-PSSession $sessoes', description: "Reinicia IIS em múltiplos servidores via sessão reutilizada" },
+      { code: '# PS7+ suporta SSH como transporte (sem WinRM)\nEnter-PSSession servidor-linux -HostName usuario@192.168.1.50 -SSHTransport', description: "Sessão remota via SSH (PS7+, funciona em Linux/Mac)" },
+    ],
+    whenNotToUse: [
+      "Para execução em lote em muitas máquinas — use Invoke-Command que é mais eficiente",
+      "Enter-PSSession é bloqueante — para automação use Invoke-Command -AsJob",
+    ],
+    relatedCommands: ["invoke-command", "test-wsman"],
+    flags: [
+      { flag: "-ComputerName <string>",   description: "Máquina remota (DNS ou IP)" },
+      { flag: "-Credential <PSCredential>",description: "Credenciais de autenticação" },
+      { flag: "-Port <int>",              description: "Porta WinRM (padrão: 5985 HTTP, 5986 HTTPS)" },
+      { flag: "-UseSSL",                  description: "Usa HTTPS (porta 5986) em vez de HTTP" },
+      { flag: "-HostName <string>",       description: "Para transporte SSH (PS7+)" },
+      { flag: "-SSHTransport",            description: "Usa SSH em vez de WinRM (PS7+)" },
+    ],
+    curiosities: [
+      "PowerShell 7 introduziu suporte a SSH como transporte alternativo ao WinRM — isso permite gerenciar Linux, Mac e Windows usando o mesmo Invoke-Command e Enter-PSSession sem configurar WinRM.",
     ],
   },
 ];

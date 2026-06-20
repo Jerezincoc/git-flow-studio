@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Terminal, BookOpen, LayoutList, AlertTriangle, Layers, ArrowRight, Zap } from "lucide-react";
+import { Terminal, BookOpen, LayoutList, AlertTriangle, Layers, ArrowRight, Zap, BookMarked } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 
@@ -10,6 +10,7 @@ const features = [
   { icon: Layers, label: "Cenários", description: "10 situações do dia a dia com pipelines prontos para copiar e adaptar", path: "/shell/scenarios" },
   { icon: LayoutList, label: "Cheat Sheet", description: "Todos os cmdlets em uma página, filtrável por categoria", path: "/shell/cheatsheet" },
   { icon: AlertTriangle, label: "Problemas", description: "Soluções para os erros e situações mais comuns no PowerShell", path: "/shell/problems" },
+  { icon: BookMarked, label: "Convenções", description: "Boas práticas: Verb-Noun, parâmetros, erros, output e documentação", path: "/shell/conventions" },
 ];
 
 const highlights = [
