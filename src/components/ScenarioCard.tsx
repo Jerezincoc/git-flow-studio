@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Tag } from "lucide-react";
+import { ChevronDown, ChevronUp, Tag, FlaskConical } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import type { Scenario } from "@/data/scenarios";
 import { scenarioDifficultyLabels } from "@/data/scenarios";
@@ -17,10 +17,12 @@ interface Props {
 
 export function ScenarioCard({ scenario, index }: Props) {
   const [open, setOpen] = useState(false);
+  const [anatomyOpen, setAnatomyOpen] = useState(false);
   const codeBlock = scenario.commands.join("\n");
 
   return (
     <div className="glass-card overflow-hidden">
+      {/* Header — sempre visível, clicável para expandir */}
       <button
         className="w-full text-left p-5 flex items-start gap-4 hover:bg-primary/5 transition-colors"
         onClick={() => setOpen((v) => !v)}
@@ -47,6 +49,7 @@ export function ScenarioCard({ scenario, index }: Props) {
         </span>
       </button>
 
+      {/* Corpo expandido */}
       {open && (
         <div className="border-t border-border/50 px-5 pb-5 pt-4 space-y-4">
           {/* Bloco de comandos */}
@@ -58,6 +61,36 @@ export function ScenarioCard({ scenario, index }: Props) {
               <CopyButton text={codeBlock} />
             </div>
           </div>
+
+          {/* Anatomy — toggle separado */}
+          {scenario.anatomy && scenario.anatomy.length > 0 && (
+            <div>
+              <button
+                onClick={() => setAnatomyOpen((v) => !v)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+              >
+                <FlaskConical className="h-3.5 w-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+                <span>Entendendo o comando</span>
+                {anatomyOpen
+                  ? <ChevronUp className="h-3 w-3 ml-0.5" />
+                  : <ChevronDown className="h-3 w-3 ml-0.5" />}
+              </button>
+
+              {anatomyOpen && (
+                <div className="mt-3 space-y-2 border-l-2 border-primary/20 pl-4">
+                  {scenario.anatomy.map((item, i) => (
+                    <div key={i} className="flex items-baseline gap-2 text-xs leading-relaxed">
+                      <code className="font-mono text-primary/90 bg-primary/8 px-1.5 py-0.5 rounded shrink-0">
+                        {item.part}
+                      </code>
+                      <span className="text-muted-foreground shrink-0">→</span>
+                      <span className="text-foreground/80">{item.explanation}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           <div className="flex items-center gap-2 flex-wrap">
