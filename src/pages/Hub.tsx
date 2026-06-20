@@ -124,9 +124,9 @@ const docStats: Record<string, { value: string; label: string }[]> = {
     { value: "9",    label: "anatomias" },
   ],
   linux: [
-    { value: "23",   label: "comandos" },
+    { value: "51",   label: "comandos" },
     { value: "8",    label: "cenários" },
-    { value: "4",    label: "categorias" },
+    { value: "6",    label: "categorias" },
   ],
 };
 
@@ -169,7 +169,7 @@ const docs = [
   },
   {
     id: "linux", name: "LinuxDoc", path: "/linux", icon: LinuxIcon,
-    description: "Comandos Linux, permissões, processos, rede, serviços e cenários práticos de terminal num só lugar.",
+    description: "51 comandos Linux em 6 categorias, com permissões, processos, rede, conteúdo, pipelines e cenários práticos de terminal.",
     glow: "0 0 55px rgba(34,197,94,0.18)",
     border: "rgba(34,197,94,0.32)",
     accent: "rgba(34,197,94,0.07)",
