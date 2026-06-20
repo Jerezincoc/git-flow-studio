@@ -20,7 +20,7 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transi
 
 export default function LinuxHome() {
   return (
-    <div data-theme="linux" className="hero-gradient bg-grid">
+    <div data-theme="linux" className="min-h-screen hero-gradient bg-grid">
       <SEO
         title="LinuxDoc Home"
         description="Referência visual de comandos Linux, cenários práticos de terminal, administração de processos, rede, permissões e arquivos."
